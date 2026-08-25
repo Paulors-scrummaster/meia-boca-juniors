@@ -183,12 +183,15 @@ override and actor are audited. If consolidated, returns `MATCH_LOCKED` until Pr
 **Rules/result**:
 
 - lock a scheduled, non-consolidated match;
-- validate each athlete without inventing lineup-only eligibility rules;
-- create exactly one `match_presences` row for every newly called athlete as `CALLED` and `PENDING`;
+- validate an active Athlete role and reject `INACTIVE`, while not applying lineup-only restrictions
+  to `INJURED` or `SUSPENDED` athletes;
+- create exactly one `match_presences` row for every newly called athlete as `CALLED` and `PENDING`,
+  set `called_at` to the transaction time, and increment `call_revision` on every legitimate re-call;
 - mark removed athletes `NOT_CALLED`, reset their response, and delete obsolete justification rows;
 - preserve unchanged called-athlete responses;
 - append a sanitized audit record for the before/after called set;
-- insert one deduplicated `CALL_UP` event for each newly called athlete in the same transaction.
+- insert one `CALL_UP` event for each new call revision in the same transaction; retries for the same
+  call revision are deduplicated, while a later legitimate re-call creates a new event.
 
 Repeating the same idempotency key returns the prior result without duplicating presence rows, audits,
 events, or deliveries.
@@ -218,8 +221,9 @@ key.
 **Input**: match ID, athlete ID, individual deadline, idempotency key.
 
 **Rules**: general deadline has passed; match has not started; individual deadline is in the future and
-no later than kickoff; athlete is not inactive. Creates/updates the single presence row as `CALLED` and
-`PENDING` and creates a notification event.
+no later than kickoff; the target has an active Athlete role and is not inactive. Creates/updates the
+single presence row as `CALLED` and `PENDING`, refreshes `called_at`, increments `call_revision`, and
+creates an event unique to that call revision.
 
 ### `publish_lineup`
 

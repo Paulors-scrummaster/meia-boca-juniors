@@ -1,6 +1,6 @@
 # Implementation Plan: MVP Oficial do Meia Boca Juniors
 
-**Branch**: `feature/mbj-mvp-core` (intended) | **Date**: 2026-08-25 | **Spec**: [spec.md](spec.md)
+**Branch**: `feature/mbj-mvp-core` (active) | **Date**: 2026-08-25 | **Spec**: [spec.md](spec.md)
 
 **Input**: Feature specification from `/specs/001-mbj-mvp-core/spec.md`
 
@@ -89,15 +89,19 @@ service or deployment unit.
   only where a server-held secret or external network call is required.
 - Authentication identity comes from the validated session. Client-provided user or role identifiers
   are never accepted as authorization evidence.
-- Supabase Auth owns e-mail/password throttling. Edge Functions enforce bounded per-actor and
-  per-operation limits through private database helpers, return `RATE_LIMITED`, and never retain raw IP
-  addresses.
+- Supabase Auth owns e-mail/password throttling, with invite-only sign-up and the initial sign-in/
+  sign-up limit declared in local configuration and verified in each hosted environment. Edge
+  Functions enforce bounded per-actor and per-operation limits through private database helpers,
+  return `RATE_LIMITED`, and never retain raw IP addresses.
 - Realtime subscribes only to the minimal tables/events required by staff attendance views and
   invalidates TanStack queries instead of duplicating server records in local state.
 
 ### Rate-limiting boundary
 
-- Supabase Auth owns the configured limits for e-mail/password authentication.
+- Supabase Auth owns the configured limits for e-mail/password authentication. Local configuration
+  explicitly disables open sign-up and starts `sign_in_sign_ups` at 30 requests per five-minute IP
+  window; staging and production are verified through the Dashboard or Management API without storing
+  credentials in the repository.
 - Application Edge Functions consume private per-actor/per-operation counters before privileged work.
 - Initial limits are 10 invitation-management actions per President/hour, 5 administrative password
   resets per President/hour, 10 invitation-acceptance attempts per authenticated user/15 minutes, and
@@ -110,8 +114,10 @@ service or deployment unit.
 ### Transaction boundaries
 
 - `reschedule_match`: update date/time, reset convocations to PENDING, and create notification events.
-- `set_match_callups`: atomically reconcile the general called-athlete set, initialize new pending
-  presence rows, audit changes, and enqueue one deduplicated event per newly called athlete.
+- `set_match_callups`: atomically reconcile the general called-athlete set, reject inactive athletes
+  or users without an active Athlete role, initialize new pending presence rows, stamp `called_at`,
+  increment `call_revision` on each legitimate call/re-call, audit changes, and enqueue one event per
+  new call revision while deduplicating retries.
 - `respond_to_call`: validate athlete identity, call status, applicable deadline, and reason.
 - `admin_set_presence`: enforce role, consolidation lock, and audit the override.
 - `publish_lineup`: validate every selected athlete and atomically supersede the prior published
@@ -121,7 +127,8 @@ service or deployment unit.
 - `reopen_match_statistics`: President-only reversal of the current statistics revision, invalidation
   of its voting round/awards, and audit recording.
 - `cast_mvp_vote`: enforce voter identity, candidate membership in the published lineup, window, and
-  one-vote/no-self-vote constraints.
+  one-vote-per-valid-round/no-self-vote constraints; invalidated rounds do not consume the vote in a
+  later reconsolidation round.
 - `close_mvp_voting`: close an expired round and assign awards to every top-tied candidate.
 
 ### Offline and PWA boundaries
@@ -216,7 +223,8 @@ tests/
 
 ops/
 └── n8n/
-    └── README.md
+    ├── README.md
+    └── backup-workflow.json
 
 scripts/
 └── backup/
@@ -224,7 +232,9 @@ scripts/
 docs/
 ├── backup-restore.md
 ├── deployment.md
-└── operations.md
+├── operations.md
+├── repository-setup.md
+└── security-controls.md
 
 .github/
 └── workflows/
@@ -236,8 +246,8 @@ four narrowly scoped Edge Functions; it is not a separately deployed custom API 
 
 ## Delivery Strategy
 
-1. Establish repository, tooling, environments, CI, base PWA shell, typed config, adapters, and local
-   Supabase workflow.
+1. Establish the public GitHub repository, protected `main`, tooling, environments, CI, base PWA shell,
+   typed config, adapters, and local Supabase workflow.
 2. Implement authentication, invitations, multi-role authorization, MFA gates, and audit foundation.
 3. Implement roster, athlete lifecycle, private images, and historical preservation.
 4. Implement matches, convocations, presence responses, exceptional deadlines, realtime staff view,
@@ -245,8 +255,10 @@ four narrowly scoped Edge Functions; it is not a separately deployed custom API 
 5. Implement lineup revisions, publication, eligibility, and offline read cache.
 6. Implement results, consolidation/reopening, rankings, voting rounds, and tied awards.
 7. Implement notices, notification outbox/dispatch, reminders, fallbacks, and operational metrics.
-8. Complete accessibility, privacy-safe source-map publication, UptimeRobot monitoring, encrypted R2
-   backup automation/runbook, security review, E2E coverage, staging validation, and production release.
+8. Complete accessibility, privacy-safe source-map publication, hosted Supabase separation and Auth
+   controls, GitHub-connected Cloudflare Pages deployment, UptimeRobot monitoring, imported encrypted
+   R2 backup automation/runbook, security review, E2E coverage, staging validation, and production
+   release.
 
 Each increment keeps earlier user stories independently demonstrable and leaves production data
 isolated from local and preview environments.

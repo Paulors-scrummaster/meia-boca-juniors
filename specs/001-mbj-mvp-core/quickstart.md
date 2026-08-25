@@ -42,8 +42,9 @@ service-role key, database password, real invitation, or production player data 
 Expected baseline:
 
 - the PWA opens through the local URL;
-- the seed creates fictitious President, Coach, multi-role, Athlete, inactive Athlete, matches, and
-  presence states;
+- the foundation seed creates fictitious President, Coach, multi-role, Athlete, and inactive Athlete;
+  the match feature seed extension adds seasons, matches, and presence states only after their
+  migrations exist;
 - public navigation exposes only welcome, login, and invitation acceptance;
 - local mail capture may exist for provider testing, but the MBJ product does not send e-mail in its
   normal invitation or password-recovery flows.
@@ -109,12 +110,16 @@ positive counterpart for the allowed role.
 1. Create a future match and call multiple athletes.
 2. Repeat the same general call-up command and confirm it creates neither duplicate presences nor
    duplicate `CALL_UP` events.
-3. Confirm one and decline another with a reason.
-4. Verify another Athlete sees only the declined status, while owner/Coach/President see the reason.
-5. Advance test time beyond the general deadline and verify athlete writes fail.
-6. Create an exceptional call whose individual deadline ends before kickoff.
-7. Change only the location; responses remain.
-8. Change date/time; all called responses reset to PENDING and old reasons disappear.
+3. Remove one athlete, call that athlete again, and confirm `called_at` advances, `call_revision`
+   increments, and exactly one new `CALL_UP` event exists for the new revision.
+4. Try to call an inactive athlete or a user without an active Athlete role and confirm rejection;
+   verify injured and suspended athletes remain callable but ineligible for the lineup.
+5. Confirm one and decline another with a reason.
+6. Verify another Athlete sees only the declined status, while owner/Coach/President see the reason.
+7. Advance test time beyond the general deadline and verify athlete writes fail.
+8. Create an exceptional call whose individual deadline ends before kickoff.
+9. Change only the location; responses remain.
+10. Change date/time; all called responses reset to PENDING and old reasons disappear.
 
 Expected: the staff view updates without manual reload and every reset/override is atomic and audited.
 
@@ -137,6 +142,8 @@ historical; one notification event exists per publication revision.
    lineup.
 5. Create a top tie and close the round.
 6. Reopen as President, correct the result, and reconsolidate.
+7. Vote again as an eligible Athlete in the new valid round, then confirm a second vote in that same
+   round is rejected.
 
 Expected:
 
@@ -144,7 +151,8 @@ Expected:
 - invalid votes fail;
 - every top-tied candidate receives an award;
 - reopening invalidates the prior consolidation, votes, and awards without deleting history;
-- the new consolidation opens a fresh 24-hour round and rankings use only the current revision.
+- the new consolidation opens a fresh 24-hour round, an invalidated-round vote does not block a new
+  vote, and rankings use only the current revision.
 
 ### 6. Offline privacy and write blocking
 
@@ -201,12 +209,14 @@ On the canonical production domain before inviting players:
 
 Before a critical production migration:
 
-1. Trigger the authenticated n8n pre-migration workflow.
-2. Require a verified response containing backup ID and checksum.
-3. Confirm the set contains roles, schema, data, Storage objects, and manifest, is encrypted locally
+1. Import the sanitized `ops/n8n/backup-workflow.json`, attach credentials only inside n8n, and record
+   its safe workflow ID in `docs/operations.md`.
+2. Trigger the authenticated n8n pre-migration workflow.
+3. Require a verified response containing backup ID and checksum.
+4. Confirm the set contains roles, schema, data, Storage objects, and manifest, is encrypted locally
    with `age`, and exists only as a private object in the `mbj-backups` R2 bucket.
-4. Run migration dry-run, then apply only when the backup gate passes.
-5. Execute smoke reads and the relevant database/E2E tests.
+5. Run migration dry-run, then apply only when the backup gate passes.
+6. Execute smoke reads and the relevant database/E2E tests.
 
 Monthly, restore the newest set into an isolated local/staging target and record duration, table counts,
 Auth continuity, and a sample avatar checksum. A failed backup or restore test blocks destructive

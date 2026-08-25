@@ -19,7 +19,7 @@
     "type": "match",
     "id": "uuid"
   },
-  "deduplicationKey": "match:<id>:schedule:<revision>:call-up:<athlete-id>",
+  "deduplicationKey": "match:<id>:schedule:<revision>:call:<call-revision>:call-up:<athlete-id>",
   "occurredAt": "UTC timestamp",
   "display": {
     "title": "Nova convocação",
@@ -36,9 +36,9 @@ stored only in protected delivery records.
 
 | Kind | Created by | Recipients | Deduplication basis |
 |------|------------|------------|---------------------|
-| `CALL_UP` | General or exceptional call transaction | Newly called athlete | match + schedule revision + athlete |
-| `DEADLINE_24H` | Scheduled reminder scan | Pending called athlete | presence + deadline revision + kind |
-| `DEADLINE_6H` | Scheduled reminder scan | Pending called athlete | presence + deadline revision + kind |
+| `CALL_UP` | General or exceptional call transaction | Newly called athlete | match + schedule revision + athlete + call revision |
+| `DEADLINE_24H` | Scheduled reminder scan | Pending called athlete | presence + schedule revision + call revision + kind |
+| `DEADLINE_6H` | Scheduled reminder scan | Pending called athlete | presence + schedule revision + call revision + kind |
 | `MATCH_CHANGED` | Date/time reschedule transaction | Called athletes | match + schedule revision |
 | `LINEUP_PUBLISHED` | Lineup publication transaction | Active roster | lineup revision |
 | `VOTING_OPENED` | Consolidation transaction | Active Athlete-role users | voting round |
@@ -46,9 +46,11 @@ stored only in protected delivery records.
 
 “24H” and “6H” mean before the applicable confirmation deadline, not before kickoff. Exceptional calls
 use their individual deadline. Supabase Cron runs the reminder scan every 5 minutes. Each reminder is
-eligible from its exact target instant through 10 minutes after that instant; a scan skips reminders
-whose target preceded creation of the call or whose operational window was missed. The deterministic
-key includes the presence, deadline revision, and reminder kind, so overlapping scans remain harmless.
+eligible from its exact target instant through 10 minutes after that instant; a scan compares the
+target with `called_at` and skips reminders whose target preceded the current call revision or whose
+operational window was missed. The deterministic key includes the presence, schedule revision, call
+revision, and reminder kind, so overlapping scans remain harmless while a legitimate re-call can
+receive the reminders applicable to its new deadline window.
 
 ## Dispatch lifecycle
 

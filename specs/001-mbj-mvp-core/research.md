@@ -106,10 +106,11 @@ Storage objects are managed through the Storage API, never direct schema mutatio
 
 **Decision**: Business commands insert minimal `notification_events` in the same database transaction.
 An Edge Function dispatches through a OneSignal adapter and records idempotent per-user deliveries.
-Scheduled 24-hour and 6-hour reminders use a deterministic key containing presence, deadline revision,
-and reminder kind. General call-up reconciliation is a transactional RPC that creates one event per
-newly called athlete. Supabase Cron scans every 5 minutes, and each reminder is eligible only from its
-target instant through 10 minutes after it; missed or pre-call target windows are skipped.
+Scheduled 24-hour and 6-hour reminders use a deterministic key containing presence, schedule revision,
+call revision, and reminder kind. General and exceptional call commands stamp `called_at`, increment
+`call_revision` on every legitimate re-call, and create one event per new call revision. Supabase Cron
+scans every 5 minutes, and each reminder is eligible only from its target instant through 10 minutes
+after it; targets before `called_at` and missed windows are skipped.
 
 **Rationale**: A push outage never rolls back a match or attendance action, while deduplication and
 delivery metrics remain observable without a dedicated queue.
@@ -251,13 +252,14 @@ users. Full distributed tracing is outside scope.
 
 ## 17. Verified external backups
 
-**Decision**: Self-hosted n8n runs weekly and authenticated pre-migration triggers. A fixed allowlisted
-script exports roles/schema/data, separately downloads Storage objects, builds a manifest/checksum,
-packages and encrypts the set locally with `age`, uploads it to the private Cloudflare R2 Standard
-bucket `mbj-backups`, verifies the remote object, then retains the latest four complete sets. Failure
-alerts and monthly isolated restore tests are mandatory. Local CLI is the contingency path. A
-bucket-scoped token is stored only in n8n credentials, and the decryption private key remains outside
-n8n and Git in the owner's recovery custody.
+**Decision**: Self-hosted n8n runs weekly and authenticated pre-migration triggers from a sanitized,
+versioned `ops/n8n/backup-workflow.json`. The imported workflow invokes a fixed allowlisted script that
+exports roles/schema/data, separately downloads Storage objects, builds a manifest/checksum, packages
+and encrypts the set locally with `age`, uploads it to the private Cloudflare R2 Standard bucket
+`mbj-backups`, verifies the remote object, then retains the latest four complete sets. Failure alerts
+and monthly isolated restore tests are mandatory. Local CLI is the contingency path. Credentials and
+instance-specific IDs are attached only after import; a bucket-scoped token is stored only in n8n
+credentials, and the decryption private key remains outside n8n and Git in the owner's recovery custody.
 
 **Rationale**: Supabase recommends off-site CLI exports for Free projects, and database dumps do not
 contain physical Storage objects. Retention only after verification avoids deleting the last good set.
@@ -275,13 +277,18 @@ approved Cloudflare account while remaining within the small-project free allowa
 
 ## 18. Layered rate limiting
 
-**Decision**: Keep login throttling in Supabase Auth and add private fixed-window per-actor counters for
-invitation management, invitation acceptance, administrative password reset, and push-identity token
-issuance. Limits return the stable `RATE_LIMITED` error and supplement rather than replace RBAC/AAL2.
+**Decision**: Keep login throttling in Supabase Auth, explicitly disable open sign-up, and declare the
+initial local `auth.rate_limit.sign_in_sign_ups = 30` five-minute/IP window in `supabase/config.toml`.
+Verify the equivalent non-secret setting in hosted staging and production through the Dashboard or
+Management API. Add private fixed-window per-actor counters for invitation management, invitation
+acceptance, administrative password reset, and push-identity token issuance. Every boundary maps an
+HTTP 429 to the stable Portuguese `RATE_LIMITED` error and supplements rather than replaces RBAC/AAL2.
 Counter keys use technical UUIDs or keyed hashes, never raw IP addresses or e-mails.
 
 **Rationale**: The small authenticated workload does not justify another service, while privileged
 Edge Functions still need explicit abuse bounds and deterministic tests.
+[Supabase Auth rate limits](https://supabase.com/docs/guides/auth/rate-limits),
+[Supabase CLI configuration](https://supabase.com/docs/guides/local-development/cli/config)
 
 **Alternatives considered**: Redis or a dedicated rate-limit SaaS adds infrastructure outside the MVP;
 client-only throttling is bypassable; raw-IP logging expands privacy exposure.

@@ -166,6 +166,8 @@ One call/response record per athlete and match.
 | `athlete_id` | Foreign key to `athletes.id`, `ON DELETE RESTRICT` |
 | `call_status` | Required `call_status` |
 | `presence_status` | Required `presence_status`, defaults to `PENDING` |
+| `called_at` | Nullable UTC timestamp until first call; refreshed whenever the athlete transitions from `NOT_CALLED` to `CALLED` and retained as history if later removed |
+| `call_revision` | Required non-negative integer, defaults to 0 and increments on every transition into `CALLED`; a currently or previously called row has value at least 1 |
 | `is_exceptional_call` | Required boolean, defaults to false |
 | `individual_deadline` | Nullable UTC timestamp; required for an exceptional call and no later than `match_date` |
 | `responded_at` | Nullable UTC timestamp |
@@ -175,10 +177,13 @@ One call/response record per athlete and match.
 Constraints:
 
 - Unique `(match_id, athlete_id)`.
+- `call_revision = 0` requires `called_at IS NULL`; `call_revision > 0` requires `called_at IS NOT NULL`.
 - `DECLINED` requires a related non-blank justification; other statuses have no justification row.
 - An exceptional call requires an individual deadline after its creation and no later than kickoff.
 - Athlete writes use the general deadline unless an active individual exceptional deadline applies.
 - President/Coach changes are allowed until consolidation or after President-only reopening.
+- General and exceptional call commands require an active Athlete role and reject `INACTIVE`; sporting
+  states `INJURED` and `SUSPENDED` remain callable because their restriction applies to lineups.
 
 ### `presence_justifications`
 
@@ -315,6 +320,8 @@ Constraints:
 - Both must be authorized by server identity/rules; the candidate must belong to the published lineup
   used by the round.
 - Inserts are accepted only while the round is `OPEN` and before `closes_at`.
+- Votes in an `INVALIDATED` round remain historical and do not conflict with the unique vote allowed
+  to the same athlete in a later valid round created by reconsolidation.
 
 ### `mvp_awards`
 
@@ -365,6 +372,10 @@ Transactional outbox record created with the business event.
 | `deduplication_key` | Unique deterministic key |
 | `payload` | Minimal JSON data without secrets or unnecessary PII |
 | `created_at` | Required UTC timestamp |
+
+Call-up keys include match, schedule revision, athlete, and `call_revision`; reminder keys include
+presence, schedule revision, `call_revision`, and reminder kind. This deduplicates retries without
+suppressing a legitimate re-call.
 
 ### `notification_deliveries`
 

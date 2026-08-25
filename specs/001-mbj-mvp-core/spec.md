@@ -29,6 +29,9 @@ offline essencial.
 - Q: Quais atletas devem aparecer como candidatos ao Craque do Jogo depois que a partida for
   consolidada? → A: Somente titulares e reservas da escalação oficial vigente e vinculada no instante
   da consolidação.
+- Q: Depois que uma consolidação é invalidada e a partida é reconsolidada, um atleta que votou antes
+  pode votar novamente? → A: Sim. O limite é de um voto por atleta em cada rodada de votação válida;
+  votos de rodadas invalidadas permanecem históricos e não bloqueiam a nova rodada.
 - Q: Até qual momento Presidente ou Técnico podem alterar administrativamente a presença de um
   atleta? → A: Até a consolidação; depois, somente após o Presidente reabrir a partida.
 - Q: Qual escalação define os candidatos ao Craque do Jogo se houver republicação posterior? → A: A
@@ -167,8 +170,8 @@ atletas diferentes e verificando ranking, prazo e resultado da votação.
 2. **Given** um Atleta elegível na janela de votação, **When** abre a lista de candidatos, **Then** vê
    somente titulares e reservas da revisão oficial vinculada à consolidação, exceto seu próprio nome; uma
    tentativa direta de votar em si mesmo ou em outro atleta fora dessa escalação é negada.
-3. **Given** um Atleta que já votou na partida, **When** tenta votar novamente, **Then** o segundo voto
-   é recusado.
+3. **Given** um Atleta que já votou na rodada válida atual, **When** tenta votar novamente nessa mesma
+   rodada, **Then** o segundo voto é recusado.
 4. **Given** dois ou mais atletas empatados com a maior quantidade de votos ao fim da janela, **When**
    o resultado é apurado, **Then** todos os empatados recebem o reconhecimento de Craque do Jogo.
 5. **Given** temporadas com partidas consolidadas, **When** um usuário consulta rankings e histórico,
@@ -177,7 +180,7 @@ atletas diferentes e verificando ranking, prazo e resultado da votação.
 6. **Given** uma partida consolidada com erro identificado, **When** o Presidente a reabre, **Then** as
    contribuições estatísticas anteriores são revertidas, votos e prêmios daquela apuração são
    invalidados e a correção fica registrada; ao reconsolidar, uma nova janela de votação de 24 horas
-   é iniciada.
+   é iniciada e cada Atleta elegível pode emitir um novo voto nessa nova rodada.
 
 ---
 
@@ -244,7 +247,8 @@ novamente essas informações no mesmo dispositivo e usuário.
 - Repetir a ação de consolidação não pode duplicar gols, assistências, presenças ou prêmios.
 - Reabrir uma partida consolidada deve reverter integralmente sua contribuição anterior para os
   rankings e invalidar votos e prêmios antes de permitir nova consolidação.
-- Votos enviados após 24 horas, duplicados, em nome de outro usuário ou no próprio votante são negados.
+- Votos enviados após 24 horas, duplicados na mesma rodada válida, em nome de outro usuário ou no
+  próprio votante são negados; votos de rodada invalidada não bloqueiam voto na rodada sucessora.
 - Voto dirigido a atleta que não integra a revisão de escalação vinculada à consolidação é negado.
 - Empate no topo da votação premia todos os líderes, independentemente da quantidade de empatados.
 - Sem dados previamente carregados, o modo offline informa que o conteúdo ainda não está disponível,
@@ -346,8 +350,9 @@ novamente essas informações no mesmo dispositivo e usuário.
   24 horas.
 - **FR-036**: Somente usuário com papel Atleta MUST votar; Presidente ou Técnico só pode votar se
   também possuir papel Atleta.
-- **FR-037**: Cada Atleta MUST emitir no máximo um voto por partida e MUST ser impedido de votar em si
-  mesmo, inclusive por solicitação direta.
+- **FR-037**: Cada Atleta MUST emitir no máximo um voto por rodada de votação válida e MUST ser
+  impedido de votar em si mesmo, inclusive por solicitação direta. Votos pertencentes a rodadas
+  invalidadas MUST NOT impedir um novo voto na rodada aberta após reconsolidação.
 - **FR-038**: A lista de candidatos MUST conter somente titulares e reservas da revisão de escalação
   oficial vinculada à consolidação vigente e MUST excluir o próprio votante, ainda que outra escalação
   seja publicada posteriormente.
@@ -414,8 +419,8 @@ novamente essas informações no mesmo dispositivo e usuário.
   visuais, sempre sujeita à elegibilidade dos atletas.
 - **Evento Estatístico**: Gol ou assistência oficial atribuído a atleta em partida e considerado nos
   rankings após consolidação.
-- **Voto de Craque do Jogo**: Escolha única de um atleta votante por partida consolidada, dentro da
-  janela permitida e dirigida a outro atleta elegível.
+- **Voto de Craque do Jogo**: Escolha única de um atleta votante por rodada de votação válida, dentro
+  da janela permitida e dirigida a outro atleta elegível.
 - **Aviso**: Comunicado publicado no mural por usuário autorizado, com autoria e data.
 - **Registro de Auditoria**: Evidência imutável de ação administrativa ou crítica, contendo ator,
   momento, ação e recurso afetado.
@@ -455,6 +460,8 @@ novamente essas informações no mesmo dispositivo e usuário.
   a operação real demonstrar necessidade.
 - Para votação, são candidatos somente titulares e reservas da revisão oficial vinculada no instante
   da consolidação da partida.
+- Cada reconsolidação cria uma rodada de votação independente; votos de rodadas invalidadas são
+  preservados como histórico, mas não consomem o voto permitido na nova rodada válida.
 - Alterar data ou horário reinicia presenças; alterar somente adversário, local ou competição não as
   reinicia.
 - A temporada segue o ano informado na partida, e horários oficiais são exibidos para São Paulo.
