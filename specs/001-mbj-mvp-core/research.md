@@ -205,16 +205,20 @@ Global 100% code coverage is rejected in favor of explicit risk coverage.
 ## 14. CI, preview, and compatible database rollout
 
 **Decision**: Create the public GitHub repository with a neutral bootstrap README on `main`; no project
-commit is pushed directly to that branch. Publish the project only as `feature/mbj-mvp-core`, open its
-Pull Request, let GitHub register the CI checks, and configure the `main` ruleset before any project
-merge. The ruleset requires Pull Requests, passing checks, and documented Codex-assisted self-review
-while blocking direct project pushes. GitHub Actions runs frontend quality, database security, then E2E
-jobs. Cloudflare Pages keeps native Git previews and `main` production deployment. Preview uses staging
-data only. Database migrations use a separate workflow, verified pre-migration backup, dry run, and
-forward-compatible expand/contract changes.
+commit is pushed directly to that branch. Because the existing local feature and the remote bootstrap
+begin with unrelated histories, fetch `origin/main` and merge it explicitly into
+`feature/mbj-mvp-core` with unrelated-history reconciliation, preserving both histories and the neutral
+README. Publish only the reconciled feature, open its Pull Request, let GitHub register the CI checks,
+and configure the `main` ruleset before any project merge. The ruleset requires Pull Requests, passing
+checks, and documented Codex-assisted self-review while blocking direct project pushes. GitHub Actions
+runs frontend quality, database security, then E2E jobs. Cloudflare Pages keeps native Git previews and
+`main` production deployment. Preview uses staging data only. Database migrations use a separate
+workflow, verified pre-migration backup, dry run, and forward-compatible expand/contract changes.
 
-**Rationale**: A neutral remote bootstrap allows the first project change to follow the same protected
-Pull Request path required for every later change, avoiding an unprotected project push to `main`.
+**Rationale**: Explicit reconciliation gives the remote bootstrap and local project a common ancestry,
+so GitHub can compare them in the first Pull Request. A neutral remote bootstrap allows the first
+project change to follow the same protected Pull Request path required for every later change, avoiding
+an unprotected project push to `main`.
 Native Pages previews are simple, but Pages publication and database workflows have no strict mutual
 ordering. Backward-compatible migrations keep both old and new PWA bundles working.
 [GitHub Node.js CI](https://docs.github.com/en/actions/tutorials/build-and-test-code/nodejs),
@@ -259,14 +263,20 @@ users. Full distributed tracing is outside scope.
 ## 17. Verified external backups
 
 **Decision**: Self-hosted n8n orchestrates weekly and authenticated manual triggers from a sanitized,
-versioned `ops/n8n/backup-workflow.json`, but does not execute repository scripts itself. It dispatches
-and polls a reusable `.github/workflows/backup.yml` on a pinned Windows runner through a fine-grained
-GitHub credential stored only in n8n Credentials. The runner installs pinned Supabase CLI and `age`
+versioned `ops/n8n/backup-workflow.json`, but does not execute repository scripts itself. For each
+trigger, n8n generates a PII-free UUID `request_id`, dispatches a reusable
+`.github/workflows/backup.yml` on protected `main`, locates the run through its request-derived run
+name, and polls it using a fine-grained GitHub credential stored only in n8n Credentials. The runner
+installs pinned Supabase CLI and `age`
 versions, invokes the fixed allowlisted PowerShell script, exports roles/schema/data, separately
 downloads Storage objects, builds a manifest/checksum, encrypts before upload, uploads to the private
 Cloudflare R2 Standard bucket `mbj-backups`, verifies the remote object, removes plaintext temporary
-artifacts, then retains the latest four complete sets. The production migration workflow invokes the
-same reusable backup workflow directly and blocks until it receives a verified backup ID/checksum.
+artifacts, then retains the latest four complete sets. On manual dispatch it uploads a one-day
+`backup-result.json` artifact containing only contract version, request/run IDs, backup ID, manifest
+checksum, encrypted object key, verification timestamp, and final verified state. n8n downloads and
+validates that result before retention success and heartbeat. Under `workflow_call`, the same values
+are exposed as typed outputs so the production migration workflow can block without scraping logs or
+downloading artifacts.
 Failure alerts and monthly isolated restore tests are mandatory; local CLI remains the contingency
 path. Supabase/R2/age secrets stay in a protected GitHub environment, the n8n credential is scoped only
 to dispatch/read Actions for this repository, workflow exports contain no credential IDs or values,

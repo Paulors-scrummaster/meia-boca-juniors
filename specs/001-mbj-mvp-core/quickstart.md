@@ -211,12 +211,15 @@ Before a critical production migration:
 
 1. Configure the protected GitHub backup environment, run `.github/workflows/backup.yml` manually, and
    confirm the Windows runner installs pinned tools, encrypts before upload, removes plaintext
-   artifacts, and exposes only a safe backup ID/checksum result.
+   artifacts, and publishes a one-day sanitized `backup-result.json` matching
+   [backup-automation.md](contracts/backup-automation.md).
 2. Import the sanitized `ops/n8n/backup-workflow.json`, attach a fine-grained dispatch/read Actions
    credential only inside n8n, and record its safe workflow ID in `docs/operations.md`.
-3. Trigger the authenticated n8n pre-migration workflow and confirm it dispatches and polls the same
-   reusable GitHub workflow without executing PowerShell on the n8n host.
-4. Require a verified response containing backup ID and checksum.
+3. Trigger the authenticated n8n pre-migration workflow and confirm it creates a unique `request_id`,
+   dispatches protected `main`, locates only the matching run, polls it without executing PowerShell on
+   the n8n host, and rejects a mismatched, missing, expired, malformed, or unverified result artifact.
+4. Require a verified response containing the matching request/run IDs, backup ID, manifest checksum,
+   encrypted object key, verification timestamp, and `VERIFIED` state.
 5. Confirm the set contains roles, schema, data, Storage objects, and manifest, is encrypted locally
    with `age`, and exists only as a private object in the `mbj-backups` R2 bucket.
 6. Run migration dry-run, then apply only when the reusable backup gate passes.

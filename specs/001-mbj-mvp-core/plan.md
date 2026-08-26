@@ -55,7 +55,7 @@ season at a time with preserved historical seasons, low concurrency, and a modul
 | Server-Enforced Security | PASS | RLS on every exposed table; privileged password, invitation, rescheduling, consolidation, reopening, and notification commands use server-side functions; service-role credentials never reach the browser. |
 | Domain Integrity and Historical Preservation | PASS | Foreign keys, unique constraints, checks, soft deletion/anonymization, immutable audit records, transactional commands, lineup revisions, and voting rounds preserve consistent history. |
 | MVP Simplicity and Controlled Scope | PASS | One React PWA, one Supabase project per environment, one repository, no ORM or extra queue/cache service, and White-Label configuration limited to build-time identity. |
-| Automated Quality Gates | PASS | The remote starts with a neutral bootstrap `main`; project commits are published only on the feature branch, validated in a Pull Request, and merged after the `main` ruleset requires CI plus documented Codex-assisted self-review. Unit, component, database/RLS, and E2E coverage are assigned by risk. |
+| Automated Quality Gates | PASS | The remote starts with a neutral bootstrap `main`; the existing local feature merges that remote bootstrap history before publication, so project commits remain only on the feature branch and reach `main` through a Pull Request after its ruleset requires CI plus documented Codex-assisted self-review. Unit, component, database/RLS, and E2E coverage are assigned by risk. |
 | Resilience, Privacy, and Operability | PASS | Offline cache uses an explicit allowlist and user/version key; writes are blocked offline; external integrations fail gracefully; logs are sanitized; encrypted backups target private R2 with four verified sets; UptimeRobot monitors the canonical app and backup heartbeat. |
 
 No gate exception or unjustified complexity is required.
@@ -119,9 +119,12 @@ service or deployment unit.
 - A reusable GitHub Actions workflow on a pinned Windows runner executes the allowlisted PowerShell
   backup script with Supabase CLI and `age`, using only GitHub environment secrets, encrypting before
   upload, and deleting plaintext runner artifacts at job completion.
-- n8n dispatches and polls that workflow through a fine-grained repository credential stored only in
-  n8n Credentials. The production migration workflow calls the same reusable backup workflow directly
-  and proceeds only after receiving the verified backup ID and checksum.
+- n8n supplies a PII-free UUID `request_id`, dispatches the workflow on protected `main`, locates the
+  matching run by its request-derived run name, and polls it through a fine-grained repository
+  credential stored only in n8n Credentials. After success, it downloads a one-day sanitized
+  `backup-result.json` artifact and validates its contract, request ID, verified state, backup ID, and
+  manifest checksum before heartbeat or retention success. The production migration workflow calls
+  the same workflow through `workflow_call` and consumes equivalent typed outputs directly.
 - The repository stores workflow definitions and scripts only; Supabase, R2, encryption, webhook, and
   GitHub credentials never appear in workflow exports, logs, artifacts, or committed configuration.
 
@@ -178,6 +181,7 @@ specs/001-mbj-mvp-core/
 ├── data-model.md
 ├── quickstart.md
 ├── contracts/
+│   ├── backup-automation.md
 │   ├── commands.md
 │   ├── events-and-notifications.md
 │   └── offline-cache.md

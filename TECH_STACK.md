@@ -449,7 +449,10 @@
 - **Decisão:** branch por feature/correção e Pull Request antes da `main`, que fica protegida contra
   push direto e exige os checks do GitHub Actions. Na criação do repositório remoto, a `main` terá
   somente um README neutro de bootstrap; o código do projeto será publicado primeiro na branch de
-  feature e chegará à `main` exclusivamente pelo primeiro Pull Request já protegido.
+  feature e chegará à `main` exclusivamente pelo primeiro Pull Request já protegido. Como o
+  repositório local já possui histórico, a branch de feature incorporará explicitamente a `main`
+  remota de bootstrap com merge de históricos não relacionados antes de ser publicada, criando a
+  ancestralidade comum necessária para o primeiro PR sem levar código diretamente à `main`.
 
 > 💡 Motivo: o PR vira ponto de auto-review, revisão do Codex e validação automática.
 
@@ -521,6 +524,13 @@
   fine-grained limitada a disparar e consultar Actions deste repositório. Nenhum valor ou ID de
   credencial aparece no workflow exportado; a chave privada de recuperação fica fora do n8n, GitHub e
   Git. O fluxo deve registrar sucesso/falha, emitir alerta e prever teste de restauração.
+- Para correlacionar cada disparo, o n8n envia um `request_id` UUID sem dados pessoais. O workflow usa
+  esse identificador no nome da execução e publica por apenas 1 dia um artefato sanitizado
+  `backup-result.json`, contendo somente versão do contrato, `request_id`, ID do backup, checksum do
+  manifesto, chave não sensível do objeto criptografado, instante de verificação e estado final. O n8n
+  localiza a execução pelo `request_id`, exige conclusão bem-sucedida, baixa e valida esse artefato e
+  só então confirma o heartbeat. Chamadas reutilizáveis entre workflows recebem os mesmos valores como
+  outputs, sem depender do artefato.
 
 > 💡 Motivo: automação reduz o risco de esquecimento sem exigir o plano Pro. Cadência, retenção,
 > alerta de falha e teste de restauração evitam que exista apenas uma falsa sensação de segurança.
