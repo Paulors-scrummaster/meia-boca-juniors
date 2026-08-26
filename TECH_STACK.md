@@ -447,7 +447,9 @@
 ### Fluxo Git
 
 - **Decisão:** branch por feature/correção e Pull Request antes da `main`, que fica protegida contra
-  push direto e exige os checks do GitHub Actions.
+  push direto e exige os checks do GitHub Actions. Na criação do repositório remoto, a `main` terá
+  somente um README neutro de bootstrap; o código do projeto será publicado primeiro na branch de
+  feature e chegará à `main` exclusivamente pelo primeiro Pull Request já protegido.
 
 > 💡 Motivo: o PR vira ponto de auto-review, revisão do Codex e validação automática.
 
@@ -504,16 +506,21 @@
 ### Backup
 
 - **Decisão:** no Supabase Free, sem backup automático gerenciado. O n8n auto-hospedado será o
-  executor principal dos backups e exportações agendados. Comandos CLI executados localmente ficam
-  documentados como contingência. O Codex poderá criar, executar sob solicitação e verificar esses
-  comandos, mas não será tratado como o agendador permanente do processo.
+  orquestrador principal dos backups e exportações agendados: ele dispara e acompanha um workflow
+  reutilizável do GitHub Actions executado em runner Windows efêmero, sem depender do sistema
+  operacional, das ferramentas ou do acesso ao repositório no host do n8n. O runner instala versões
+  fixadas do Supabase CLI e `age`, executa o script PowerShell permitido e remove artefatos temporários
+  em texto puro ao finalizar. Comandos CLI executados localmente ficam documentados como contingência.
+  O Codex poderá criar, executar sob solicitação e verificar esses comandos, mas não será tratado como
+  o agendador permanente do processo.
 - Executar exportação ao menos semanalmente e antes de migrations ou mudanças importantes. Manter
   as quatro cópias mais recentes no bucket privado Cloudflare R2 Standard `mbj-backups`. Cada conjunto
   será empacotado e criptografado localmente com `age` antes do upload, verificado remotamente por
-  manifesto e SHA-256, e somente então entrará na retenção. O token limitado ao bucket fica no
-  gerenciador de Credentials do n8n, nunca em texto puro no workflow exportado; a chave privada de
-  recuperação fica fora do n8n e do Git. O fluxo deve registrar sucesso/falha, emitir alerta e prever
-  teste de restauração.
+  manifesto e SHA-256, e somente então entrará na retenção. Credenciais do Supabase e o token limitado
+  ao bucket ficam no ambiente protegido do GitHub; o n8n guarda somente uma credencial GitHub
+  fine-grained limitada a disparar e consultar Actions deste repositório. Nenhum valor ou ID de
+  credencial aparece no workflow exportado; a chave privada de recuperação fica fora do n8n, GitHub e
+  Git. O fluxo deve registrar sucesso/falha, emitir alerta e prever teste de restauração.
 
 > 💡 Motivo: automação reduz o risco de esquecimento sem exigir o plano Pro. Cadência, retenção,
 > alerta de falha e teste de restauração evitam que exista apenas uma falsa sensação de segurança.
@@ -783,6 +790,7 @@ cache offline persistido somente para leitura; e métricas operacionais calculad
 identidade visual será parametrizada para permitir futuras implantações White-Label em instâncias
 separadas, sem introduzir multi-tenancy no MVP. Pagamentos, e-mails, analytics comportamental,
 múltiplos idiomas, SaaS e IA ficam fora do escopo. O custo incremental mensal previsto é R$ 0; os
-backups externos serão criptografados e automatizados no n8n auto-hospedado já disponível, retidos em
-bucket privado Cloudflare R2, com rotina CLI documentada como contingência e apoio do Codex para criação
-e verificação. UptimeRobot Free monitorará a URL canônica e o heartbeat semanal do backup.
+backups externos serão criptografados por um runner efêmero do GitHub Actions, orquestrados pelo n8n
+auto-hospedado já disponível e retidos em bucket privado Cloudflare R2, com rotina CLI documentada como
+contingência e apoio do Codex para criação e verificação. UptimeRobot Free monitorará a URL canônica e
+o heartbeat semanal do backup.

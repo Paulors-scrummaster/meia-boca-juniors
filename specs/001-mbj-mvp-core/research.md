@@ -204,13 +204,19 @@ Global 100% code coverage is rejected in favor of explicit risk coverage.
 
 ## 14. CI, preview, and compatible database rollout
 
-**Decision**: GitHub Actions runs frontend quality, database security, then E2E jobs. Cloudflare Pages
-keeps native Git previews and `main` production deployment. Preview uses staging data only. Database
-migrations use a separate workflow, verified pre-migration backup, dry run, and forward-compatible
-expand/contract changes.
+**Decision**: Create the public GitHub repository with a neutral bootstrap README on `main`; no project
+commit is pushed directly to that branch. Publish the project only as `feature/mbj-mvp-core`, open its
+Pull Request, let GitHub register the CI checks, and configure the `main` ruleset before any project
+merge. The ruleset requires Pull Requests, passing checks, and documented Codex-assisted self-review
+while blocking direct project pushes. GitHub Actions runs frontend quality, database security, then E2E
+jobs. Cloudflare Pages keeps native Git previews and `main` production deployment. Preview uses staging
+data only. Database migrations use a separate workflow, verified pre-migration backup, dry run, and
+forward-compatible expand/contract changes.
 
-**Rationale**: Native Pages previews are simple, but Pages publication and database workflows have no
-strict mutual ordering. Backward-compatible migrations keep both old and new PWA bundles working.
+**Rationale**: A neutral remote bootstrap allows the first project change to follow the same protected
+Pull Request path required for every later change, avoiding an unprotected project push to `main`.
+Native Pages previews are simple, but Pages publication and database workflows have no strict mutual
+ordering. Backward-compatible migrations keep both old and new PWA bundles working.
 [GitHub Node.js CI](https://docs.github.com/en/actions/tutorials/build-and-test-code/nodejs),
 [Cloudflare Pages Git integration](https://developers.cloudflare.com/pages/get-started/git-integration/),
 [Supabase migrations](https://supabase.com/docs/guides/deployment/database-migrations)
@@ -252,17 +258,25 @@ users. Full distributed tracing is outside scope.
 
 ## 17. Verified external backups
 
-**Decision**: Self-hosted n8n runs weekly and authenticated pre-migration triggers from a sanitized,
-versioned `ops/n8n/backup-workflow.json`. The imported workflow invokes a fixed allowlisted script that
-exports roles/schema/data, separately downloads Storage objects, builds a manifest/checksum, packages
-and encrypts the set locally with `age`, uploads it to the private Cloudflare R2 Standard bucket
-`mbj-backups`, verifies the remote object, then retains the latest four complete sets. Failure alerts
-and monthly isolated restore tests are mandatory. Local CLI is the contingency path. Credentials and
-instance-specific IDs are attached only after import; a bucket-scoped token is stored only in n8n
-credentials, and the decryption private key remains outside n8n and Git in the owner's recovery custody.
+**Decision**: Self-hosted n8n orchestrates weekly and authenticated manual triggers from a sanitized,
+versioned `ops/n8n/backup-workflow.json`, but does not execute repository scripts itself. It dispatches
+and polls a reusable `.github/workflows/backup.yml` on a pinned Windows runner through a fine-grained
+GitHub credential stored only in n8n Credentials. The runner installs pinned Supabase CLI and `age`
+versions, invokes the fixed allowlisted PowerShell script, exports roles/schema/data, separately
+downloads Storage objects, builds a manifest/checksum, encrypts before upload, uploads to the private
+Cloudflare R2 Standard bucket `mbj-backups`, verifies the remote object, removes plaintext temporary
+artifacts, then retains the latest four complete sets. The production migration workflow invokes the
+same reusable backup workflow directly and blocks until it receives a verified backup ID/checksum.
+Failure alerts and monthly isolated restore tests are mandatory; local CLI remains the contingency
+path. Supabase/R2/age secrets stay in a protected GitHub environment, the n8n credential is scoped only
+to dispatch/read Actions for this repository, workflow exports contain no credential IDs or values,
+and the decryption private key remains outside n8n, GitHub, and Git in the owner's recovery custody.
 
-**Rationale**: Supabase recommends off-site CLI exports for Free projects, and database dumps do not
-contain physical Storage objects. Retention only after verification avoids deleting the last good set.
+**Rationale**: The already-approved GitHub Actions service supplies an ephemeral, reproducible Windows
+execution environment without assuming the operating system, installed tools, filesystem, or Docker
+permissions of the n8n host. Supabase recommends off-site CLI exports for Free projects, and database
+dumps do not contain physical Storage objects. Retention only after verification avoids deleting the
+last good set.
 [Supabase backups](https://supabase.com/docs/guides/platform/backups),
 [Supabase CLI backup/restore](https://supabase.com/docs/guides/platform/migrating-within-supabase/backup-restore),
 [Cloudflare R2 pricing](https://developers.cloudflare.com/r2/pricing/),
@@ -270,10 +284,12 @@ contain physical Storage objects. Retention only after verification avoids delet
 [n8n encryption key](https://docs.n8n.io/hosting/configuration/configuration-examples/encryption-key/),
 [n8n error handling](https://docs.n8n.io/flow-logic/error-handling/)
 
-**Alternatives considered**: Database-only backup loses avatars; repository backups expose personal
-data; manual-only exports are too easy to forget; paid managed backup is unnecessary at MVP scale.
-Google Drive would work through n8n but R2 keeps the workflow S3-compatible and inside the already
-approved Cloudflare account while remaining within the small-project free allowance.
+**Alternatives considered**: Installing PowerShell, Supabase CLI, `age`, and repository mounts inside
+the n8n host couples backup reliability to an unknown deployment environment; mounting the Docker
+socket adds unnecessary privilege. Database-only backup loses avatars; repository backups expose
+personal data; manual-only exports are too easy to forget; paid managed backup is unnecessary at MVP
+scale. Google Drive would work through n8n but R2 keeps the workflow S3-compatible and inside the
+already approved Cloudflare account while remaining within the small-project free allowance.
 
 ## 18. Layered rate limiting
 

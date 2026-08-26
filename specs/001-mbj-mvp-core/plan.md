@@ -55,7 +55,7 @@ season at a time with preserved historical seasons, low concurrency, and a modul
 | Server-Enforced Security | PASS | RLS on every exposed table; privileged password, invitation, rescheduling, consolidation, reopening, and notification commands use server-side functions; service-role credentials never reach the browser. |
 | Domain Integrity and Historical Preservation | PASS | Foreign keys, unique constraints, checks, soft deletion/anonymization, immutable audit records, transactional commands, lineup revisions, and voting rounds preserve consistent history. |
 | MVP Simplicity and Controlled Scope | PASS | One React PWA, one Supabase project per environment, one repository, no ORM or extra queue/cache service, and White-Label configuration limited to build-time identity. |
-| Automated Quality Gates | PASS | Unit, component, database/RLS, and E2E coverage are assigned by risk; CI gates lint, formatting, typecheck, tests, and build before merge. |
+| Automated Quality Gates | PASS | The remote starts with a neutral bootstrap `main`; project commits are published only on the feature branch, validated in a Pull Request, and merged after the `main` ruleset requires CI plus documented Codex-assisted self-review. Unit, component, database/RLS, and E2E coverage are assigned by risk. |
 | Resilience, Privacy, and Operability | PASS | Offline cache uses an explicit allowlist and user/version key; writes are blocked offline; external integrations fail gracefully; logs are sanitized; encrypted backups target private R2 with four verified sets; UptimeRobot monitors the canonical app and backup heartbeat. |
 
 No gate exception or unjustified complexity is required.
@@ -110,6 +110,20 @@ service or deployment unit.
   RBAC/AAL2 and never replaces authorization.
 - Counter subjects are technical UUIDs or keyed hashes; raw IP addresses and personal fields are not
   persisted or logged.
+
+### Backup execution boundary
+
+- The self-hosted n8n instance orchestrates schedules, authenticated manual triggers, polling,
+  heartbeat, retention confirmation, and failure alerts; it does not require PowerShell, Supabase CLI,
+  `age`, or repository access on the n8n host.
+- A reusable GitHub Actions workflow on a pinned Windows runner executes the allowlisted PowerShell
+  backup script with Supabase CLI and `age`, using only GitHub environment secrets, encrypting before
+  upload, and deleting plaintext runner artifacts at job completion.
+- n8n dispatches and polls that workflow through a fine-grained repository credential stored only in
+  n8n Credentials. The production migration workflow calls the same reusable backup workflow directly
+  and proceeds only after receiving the verified backup ID and checksum.
+- The repository stores workflow definitions and scripts only; Supabase, R2, encryption, webhook, and
+  GitHub credentials never appear in workflow exports, logs, artifacts, or committed configuration.
 
 ### Transaction boundaries
 
@@ -238,6 +252,9 @@ docs/
 
 .github/
 └── workflows/
+    ├── backup.yml
+    ├── ci.yml
+    └── database-release.yml
 ```
 
 **Structure Decision**: Use a single feature-oriented React application plus the standard Supabase

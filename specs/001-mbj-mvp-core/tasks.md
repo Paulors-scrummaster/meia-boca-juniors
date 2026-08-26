@@ -20,7 +20,7 @@
 
 - [ ] T001 Verify the existing Git repository is clean and the active branch is `feature/mbj-mvp-core`, recording the check in `docs/repository-setup.md`
 - [ ] T002 Create repository-safe ignore rules for secrets, dumps, generated output, and local Supabase state in `.gitignore`
-- [ ] T003 Create the public GitHub repository, add `origin`, publish `main` and `feature/mbj-mvp-core`, and record the non-secret repository URL and verification evidence in `docs/repository-setup.md`
+- [ ] T003 Create the public GitHub repository with a neutral bootstrap README on `main`, add and fetch `origin` without pushing project commits to `main`, and record the non-secret repository URL plus bootstrap evidence in `docs/repository-setup.md`
 - [ ] T004 Initialize the Vite React TypeScript application and commit the dependency manifest in `package.json`
 - [ ] T005 [P] Define local-only public configuration placeholders without secrets in `.env.example`
 - [ ] T006 [P] Configure strict TypeScript and import aliases in `tsconfig.json` and `tsconfig.app.json`
@@ -64,7 +64,7 @@
 - [ ] T035 Create the responsive mobile-first authenticated shell and navigation driven by effective roles in `src/app/layouts/AuthenticatedLayout.tsx`
 - [ ] T036 Seed only fictitious President, Coach, multi-role, Athlete, and inactive Athlete records supported by Foundation migrations in `supabase/seed.sql`
 - [ ] T037 Add GitHub Actions gates for format, lint, typecheck, unit tests, Supabase lint/tests, generated-type drift, build, and Playwright artifacts in `.github/workflows/ci.yml`
-- [ ] T038 Configure a GitHub `main` ruleset requiring Pull Requests and passing CI checks, block direct pushes, and record the ruleset ID plus verification evidence in `docs/repository-setup.md`
+- [ ] T038 Publish only `feature/mbj-mvp-core`, open its Pull Request against the neutral bootstrap `main`, let CI register its checks, then configure a `main` ruleset requiring Pull Requests, passing CI, and documented Codex-assisted self-review while blocking direct project pushes, recording the PR/ruleset evidence in `docs/repository-setup.md`
 
 **Checkpoint**: The application shell starts locally, security helpers and RLS tests pass, and CI can validate an empty authenticated feature route.
 
@@ -93,7 +93,7 @@
 - [ ] T048 [US1] Implement create, resend, and revoke operations using Auth Admin link generation, approved per-President limits, and no product e-mail in `supabase/functions/athlete-invitations/index.ts`
 - [ ] T049 [US1] Implement single-use invitation acceptance and atomic athlete/profile/role linkage in `supabase/functions/athlete-invitations/accept.ts`
 - [ ] T050 [US1] Implement President+AAL2 temporary-password reset, forced-change flag, session handling, sanitized audit, and five-per-hour actor limit in `supabase/functions/admin-reset-password/index.ts`
-- [ ] T051 [US1] Implement typed auth, invitation, MFA enrollment/challenge, role, logout, and password-change service calls in `src/features/auth/api/auth.service.ts`
+- [ ] T051 [US1] Implement typed auth, invitation, MFA enrollment/challenge, role, logout, and password-change service calls, explicitly mapping Supabase Auth HTTP 429 responses to the stable Portuguese `RATE_LIMITED` application error without provider details in `src/features/auth/api/auth.service.ts`
 - [ ] T052 [P] [US1] Implement e-mail/password login and public welcome screens in `src/features/auth/pages/LoginPage.tsx` and `src/features/auth/pages/WelcomePage.tsx`
 - [ ] T053 [P] [US1] Implement invitation validation, confirmed athlete identity, and account activation UI in `src/features/auth/pages/AcceptInvitationPage.tsx`
 - [ ] T054 [P] [US1] Implement forced temporary-password replacement UI with React Hook Form and Zod in `src/features/auth/pages/ChangePasswordPage.tsx`
@@ -315,16 +315,17 @@
 - [ ] T165 Provision separate hosted Supabase staging and production projects, configure invite-only Auth and sign-in throttling, populate only environment secret stores, and record safe project identifiers plus tested 429 evidence in `docs/deployment.md` and `docs/security-controls.md`
 - [ ] T166 Create the Cloudflare Pages project connected to the public GitHub repository, configure isolated preview/production variables, attach `meiabocajuniors.dbidigital.com.br`, redirect the `pages.dev` alias, and record validation evidence in `docs/deployment.md`
 - [ ] T167 Implement an allowlisted backup script for database roles/schema/data, private Storage objects, manifest, SHA-256, local `age` encryption, private R2 upload/verification, and exit codes in `scripts/backup/export-supabase.ps1`
-- [ ] T168 Document the authenticated weekly/pre-migration n8n workflow, private `mbj-backups` R2 credentials, four verified-set retention, UptimeRobot heartbeat, failure alert, and local contingency in `ops/n8n/README.md`
-- [ ] T169 Create the sanitized importable weekly/pre-migration n8n workflow with credential placeholders, backup execution, checksum gate, four-set retention, heartbeat, and error branch in `ops/n8n/backup-workflow.json`
-- [ ] T170 Import and configure `ops/n8n/backup-workflow.json` in the self-hosted n8n, run scheduled and pre-migration success/failure tests, and record the safe workflow ID and evidence in `docs/operations.md`
-- [ ] T171 Add a production migration workflow that blocks on verified pre-migration backup, performs dry-run/apply, and runs smoke validation in `.github/workflows/database-release.yml`
-- [ ] T172 [P] Document isolated monthly restore verification, Auth continuity limits, row counts, and avatar checksum evidence in `docs/backup-restore.md`
-- [ ] T173 Configure a five-minute UptimeRobot HTTP/keyword monitor for the canonical production URL and record the tested owner alert in `docs/operations.md`
-- [ ] T174 Configure the weekly n8n backup heartbeat monitor and record success/failure tests in `docs/operations.md`
-- [ ] T175 [P] Add repository contribution, branch, PR self-review, Definition of Done, and secret/data prohibitions in `CONTRIBUTING.md`
-- [ ] T176 Run and record the full role/RLS/privacy/security review checklist against every exposed table, view, RPC, function, log, cache, and deployment secret in `specs/001-mbj-mvp-core/checklists/security-review.md`
-- [ ] T177 Execute every command and acceptance scenario from the validation guide and record results or linked defects in `specs/001-mbj-mvp-core/checklists/quickstart-validation.md`
+- [ ] T168 Add a manually dispatchable and reusable pinned-Windows backup runner that installs pinned Supabase CLI and `age`, invokes the allowlisted script with protected environment secrets, returns only backup ID/checksum, and always removes plaintext artifacts in `.github/workflows/backup.yml`
+- [ ] T169 Document the n8n-to-GitHub Actions runner boundary, fine-grained dispatch/read credential, protected backup environment, private `mbj-backups` R2 access, four verified-set retention, UptimeRobot heartbeat, failure alert, and local contingency in `ops/n8n/README.md`
+- [ ] T170 Create the sanitized importable weekly/pre-migration n8n workflow that dispatches and polls `.github/workflows/backup.yml`, verifies its safe result, confirms retention, sends heartbeat, and follows an alerting error branch without embedded credentials in `ops/n8n/backup-workflow.json`
+- [ ] T171 Import and configure `ops/n8n/backup-workflow.json` with a fine-grained GitHub Actions credential in the self-hosted n8n, run scheduled/manual success, timeout, and failure tests, and record the safe workflow ID and evidence in `docs/operations.md`
+- [ ] T172 Add a production migration workflow that directly calls the reusable verified backup workflow, blocks on its backup ID/checksum, performs dry-run/apply, and runs smoke validation in `.github/workflows/database-release.yml`
+- [ ] T173 [P] Document isolated monthly restore verification, Auth continuity limits, row counts, and avatar checksum evidence in `docs/backup-restore.md`
+- [ ] T174 Configure a five-minute UptimeRobot HTTP/keyword monitor for the canonical production URL and record the tested owner alert in `docs/operations.md`
+- [ ] T175 Configure the weekly n8n backup heartbeat monitor and record success/failure tests in `docs/operations.md`
+- [ ] T176 [P] Add repository contribution, branch, PR self-review, Definition of Done, and secret/data prohibitions in `CONTRIBUTING.md`
+- [ ] T177 Run and record the full role/RLS/privacy/security review checklist against every exposed table, view, RPC, function, log, cache, and deployment secret in `specs/001-mbj-mvp-core/checklists/security-review.md`
+- [ ] T178 Execute every command and acceptance scenario from the validation guide and record results or linked defects in `specs/001-mbj-mvp-core/checklists/quickstart-validation.md`
 
 ---
 

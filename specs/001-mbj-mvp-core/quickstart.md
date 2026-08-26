@@ -209,14 +209,18 @@ On the canonical production domain before inviting players:
 
 Before a critical production migration:
 
-1. Import the sanitized `ops/n8n/backup-workflow.json`, attach credentials only inside n8n, and record
-   its safe workflow ID in `docs/operations.md`.
-2. Trigger the authenticated n8n pre-migration workflow.
-3. Require a verified response containing backup ID and checksum.
-4. Confirm the set contains roles, schema, data, Storage objects, and manifest, is encrypted locally
+1. Configure the protected GitHub backup environment, run `.github/workflows/backup.yml` manually, and
+   confirm the Windows runner installs pinned tools, encrypts before upload, removes plaintext
+   artifacts, and exposes only a safe backup ID/checksum result.
+2. Import the sanitized `ops/n8n/backup-workflow.json`, attach a fine-grained dispatch/read Actions
+   credential only inside n8n, and record its safe workflow ID in `docs/operations.md`.
+3. Trigger the authenticated n8n pre-migration workflow and confirm it dispatches and polls the same
+   reusable GitHub workflow without executing PowerShell on the n8n host.
+4. Require a verified response containing backup ID and checksum.
+5. Confirm the set contains roles, schema, data, Storage objects, and manifest, is encrypted locally
    with `age`, and exists only as a private object in the `mbj-backups` R2 bucket.
-5. Run migration dry-run, then apply only when the backup gate passes.
-6. Execute smoke reads and the relevant database/E2E tests.
+6. Run migration dry-run, then apply only when the reusable backup gate passes.
+7. Execute smoke reads and the relevant database/E2E tests.
 
 Monthly, restore the newest set into an isolated local/staging target and record duration, table counts,
 Auth continuity, and a sample avatar checksum. A failed backup or restore test blocks destructive
