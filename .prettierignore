@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+coverage/
+playwright-report/
+test-results/
+package-lock.json
+*.min.js
+.agents/
+.specify/
+specs/
+TECH_STACK.md
+README.md

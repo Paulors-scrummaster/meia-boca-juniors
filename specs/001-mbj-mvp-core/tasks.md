@@ -18,23 +18,23 @@
 
 **Purpose**: Verify and publish the public repository, then establish the React PWA, development tooling, and local Supabase workspace.
 
-- [ ] T001 Verify the existing Git repository is clean and the active branch is `feature/mbj-mvp-core`, recording the check in `docs/repository-setup.md`
-- [ ] T002 Create repository-safe ignore rules for secrets, dumps, generated output, and local Supabase state in `.gitignore`
-- [ ] T003 Create the public GitHub repository with a neutral bootstrap README on `main`, add/fetch `origin`, run `git merge --no-ff --allow-unrelated-histories origin/main` on the existing `feature/mbj-mvp-core` while preserving both histories, and record the non-secret repository URL plus graph verification in `docs/repository-setup.md`
-- [ ] T004 Initialize the Vite React TypeScript application and commit the dependency manifest in `package.json`
-- [ ] T005 [P] Define local-only public configuration placeholders without secrets in `.env.example`
-- [ ] T006 [P] Configure strict TypeScript and import aliases in `tsconfig.json` and `tsconfig.app.json`
-- [ ] T007 [P] Configure Vite, React, and the production build in `vite.config.ts`
-- [ ] T008 [P] Configure ESLint and Prettier quality rules in `eslint.config.js` and `.prettierrc.json`
-- [ ] T009 Install and configure Tailwind CSS plus semantic shadcn/ui tokens in `src/index.css` and `components.json`
-- [ ] T010 Create the application entry point and provider composition boundary in `src/main.tsx` and `src/app/App.tsx`
-- [ ] T011 [P] Implement validated public environment parsing in `src/config/env.ts`
-- [ ] T012 [P] Implement the typed MBJ White-Label identity, institutional text, links, logos, semantic theme allowlist, and approved formation mirror in `src/config/club.config.ts`
-- [ ] T013 [P] Add initial brand assets, favicon, and PWA icons in `public/brand/logo.svg`, `public/favicon.svg`, and `public/pwa-192x192.png`
-- [ ] T014 Configure the local Supabase project, disable open sign-up, set `auth.rate_limit.sign_in_sign_ups = 30`, and define the fictitious seed entry point in `supabase/config.toml` and `supabase/seed.sql`
-- [ ] T015 [P] Configure Vitest, Testing Library, and shared browser mocks in `vitest.config.ts` and `src/test/setup.ts`
-- [ ] T016 [P] Configure Playwright projects for desktop and mobile Chromium in `playwright.config.ts`
-- [ ] T017 Add reproducible format, lint, typecheck, unit, database, E2E, build, and database-type scripts in `package.json`
+- [X] T001 Verify the existing Git repository is clean and the active branch is `feature/mbj-mvp-core`, recording the check in `docs/repository-setup.md`
+- [X] T002 Create repository-safe ignore rules for secrets, dumps, generated output, and local Supabase state in `.gitignore`
+- [X] T003 Create the public GitHub repository with a neutral bootstrap README on `main`, add/fetch `origin`, run `git merge --no-ff --allow-unrelated-histories origin/main` on the existing `feature/mbj-mvp-core` while preserving both histories, and record the non-secret repository URL plus graph verification in `docs/repository-setup.md`
+- [X] T004 Initialize the Vite React TypeScript application and commit the dependency manifest in `package.json`
+- [X] T005 [P] Define local-only public configuration placeholders without secrets in `.env.example`
+- [X] T006 [P] Configure strict TypeScript and import aliases in `tsconfig.json` and `tsconfig.app.json`
+- [X] T007 [P] Configure Vite, React, and the production build in `vite.config.ts`
+- [X] T008 [P] Configure ESLint and Prettier quality rules in `eslint.config.js` and `.prettierrc.json`
+- [X] T009 Install and configure Tailwind CSS plus semantic shadcn/ui tokens in `src/index.css` and `components.json`
+- [X] T010 Create the application entry point and provider composition boundary in `src/main.tsx` and `src/app/App.tsx`
+- [X] T011 [P] Implement validated public environment parsing in `src/config/env.ts`
+- [X] T012 [P] Implement the typed MBJ White-Label identity, institutional text, links, logos, semantic theme allowlist, and approved formation mirror in `src/config/club.config.ts`
+- [X] T013 [P] Add initial brand assets, favicon, and PWA icons in `public/brand/logo.svg`, `public/favicon.svg`, and `public/pwa-192x192.png`
+- [X] T014 Configure the local Supabase project, disable open sign-up, set `auth.rate_limit.sign_in_sign_ups = 30`, and define the fictitious seed entry point in `supabase/config.toml` and `supabase/seed.sql`
+- [X] T015 [P] Configure Vitest, Testing Library, and shared browser mocks in `vitest.config.ts` and `src/test/setup.ts`
+- [X] T016 [P] Configure Playwright projects for desktop and mobile Chromium in `playwright.config.ts`
+- [X] T017 Add reproducible format, lint, typecheck, unit, database, E2E, build, and database-type scripts in `package.json`
 
 ---
 

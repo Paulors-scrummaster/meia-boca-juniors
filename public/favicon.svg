@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#071a33"/>
+  <path fill="none" stroke="#e2ad2f" stroke-width="4" d="M32 7 54 15v17c0 13-8 22-22 27C18 54 10 45 10 32V15Z"/>
+  <text x="32" y="37" fill="#f4cf73" font-family="Arial, sans-serif" font-size="16" font-weight="900" text-anchor="middle">MBJ</text>
+</svg>

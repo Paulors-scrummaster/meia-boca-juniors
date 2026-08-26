@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" role="img" aria-labelledby="title description">
+  <title id="title">Escudo do Meia Boca Juniors</title>
+  <desc id="description">Escudo azul-escuro e dourado com as letras MBJ.</desc>
+  <path fill="#071a33" stroke="#e2ad2f" stroke-width="8" d="M96 8 170 34v58c0 43-27 75-74 92-47-17-74-49-74-92V34Z"/>
+  <path fill="none" stroke="#e2ad2f" stroke-width="5" d="M96 25 151 45v45c0 32-18 56-55 73-37-17-55-41-55-73V45Z"/>
+  <text x="96" y="103" fill="#f4cf73" font-family="Arial, sans-serif" font-size="43" font-weight="900" text-anchor="middle">MBJ</text>
+  <circle cx="96" cy="126" r="11" fill="#f4cf73"/>
+  <path fill="#071a33" d="m96 116 3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1Z"/>
+</svg>
