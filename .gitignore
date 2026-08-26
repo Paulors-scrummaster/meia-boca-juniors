@@ -1,0 +1,42 @@
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+.vite/
+
+# Test artifacts
+playwright-report/
+test-results/
+blob-report/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.age
+
+# Database exports and backups
+*.dump
+*.backup
+backups/
+exports/
+
+# Local Supabase state
+.supabase/
+supabase/.branches/
+supabase/.temp/
+
+# Logs and local tooling state
+*.log
+.codex/
+.idea/
+.vscode/
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+Desktop.ini
