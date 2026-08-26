@@ -183,7 +183,7 @@ Expected:
 Expected: every business operation succeeds, in-app pending information remains correct, delivery
 states record safe errors, and retries do not duplicate a recipient notification.
 
-## PWA and preview validation
+## Pre-merge PWA and preview validation
 
 On a Cloudflare preview connected only to staging:
 
@@ -193,6 +193,12 @@ On a Cloudflare preview connected only to staging:
 - confirm API/Auth responses are excluded from Service Worker Cache Storage;
 - validate keyboard, focus, contrast, screen-reader labels, and touch targets;
 - confirm preview/staging contains no production identity or player data.
+
+Merge the implementation Pull Request only after the local, staging, preview, security, and CI checks
+pass. Do not run production migrations from that Pull Request. Then create
+`chore/mbj-production-activation` from updated `main` before continuing below.
+
+## Post-merge production activation
 
 On the canonical production domain before inviting players:
 
@@ -205,25 +211,30 @@ On the canonical production domain before inviting players:
 - verify the UptimeRobot HTTP/keyword monitor reports the canonical URL healthy and delivers a tested
   outage alert to the project owner.
 
-## Backup and migration gate
+## Post-merge backup and migration gate
 
 Before a critical production migration:
 
-1. Configure the protected GitHub backup environment, run `.github/workflows/backup.yml` manually, and
+1. Confirm `.github/workflows/backup.yml` and `.github/workflows/database-release.yml` exist on protected
+   `main`, while sanitized evidence changes are recorded on `chore/mbj-production-activation`.
+2. Configure the protected GitHub backup environment, run `.github/workflows/backup.yml` manually, and
    confirm the Windows runner installs pinned tools, encrypts before upload, removes plaintext
    artifacts, and publishes a one-day sanitized `backup-result.json` matching
    [backup-automation.md](contracts/backup-automation.md).
-2. Import the sanitized `ops/n8n/backup-workflow.json`, attach a fine-grained dispatch/read Actions
+3. Import the sanitized `ops/n8n/backup-workflow.json`, attach a fine-grained dispatch/read Actions
    credential only inside n8n, and record its safe workflow ID in `docs/operations.md`.
-3. Trigger the authenticated n8n pre-migration workflow and confirm it creates a unique `request_id`,
+4. Trigger the authenticated n8n pre-migration workflow and confirm it creates a unique `request_id`,
    dispatches protected `main`, locates only the matching run, polls it without executing PowerShell on
    the n8n host, and rejects a mismatched, missing, expired, malformed, or unverified result artifact.
-4. Require a verified response containing the matching request/run IDs, backup ID, manifest checksum,
+5. Require a verified response containing the matching request/run IDs, backup ID, manifest checksum,
    encrypted object key, verification timestamp, and `VERIFIED` state.
-5. Confirm the set contains roles, schema, data, Storage objects, and manifest, is encrypted locally
+6. Confirm the set contains roles, schema, data, Storage objects, and manifest, is encrypted locally
    with `age`, and exists only as a private object in the `mbj-backups` R2 bucket.
-6. Run migration dry-run, then apply only when the reusable backup gate passes.
-7. Execute smoke reads and the relevant database/E2E tests.
+7. Run migration dry-run, then apply only when the reusable backup gate passes.
+8. Execute smoke reads and the relevant database/E2E tests.
+
+Commit only sanitized evidence, open the production-activation Pull Request, require CI and
+Codex-assisted self-review, and merge it before inviting players.
 
 Monthly, restore the newest set into an isolated local/staging target and record duration, table counts,
 Auth continuity, and a sample avatar checksum. A failed backup or restore test blocks destructive

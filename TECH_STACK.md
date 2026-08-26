@@ -467,6 +467,12 @@
 - **Decisão:** GitHub Actions executa `npm ci`, lint, typecheck, testes e build em todo Pull Request.
   O Cloudflare Pages, conectado ao GitHub, cria um preview por PR e publica a `main` em produção.
   Migrations e Edge Functions do Supabase são publicadas por workflow separado após merge na `main`.
+- A primeira liberação ocorre em duas etapas. O PR `feature/mbj-mvp-core` entrega aplicação, migrations
+  e workflows, valida apenas ambiente local/staging/preview e é mesclado sem executar migrations de
+  produção. Depois do merge, criar `chore/mbj-production-activation` a partir da `main`: nessa branch
+  serão registradas as evidências da ativação do n8n, domínio canônico, monitoramento, backup real,
+  migration de produção e smoke tests. Essa branch encerra em um segundo PR operacional com CI e
+  auto-review antes do convite dos jogadores.
 
 > 💡 Motivo: separa validação, preview e produção, mantendo todo o fluxo rastreável no GitHub.
 

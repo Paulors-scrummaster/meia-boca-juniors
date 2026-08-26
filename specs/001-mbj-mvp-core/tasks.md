@@ -299,9 +299,9 @@
 
 ---
 
-## Phase 10: Polish & Cross-Cutting Concerns
+## Phase 10: Pre-Merge Hardening & Release Definitions
 
-**Purpose**: Complete accessibility, privacy-conscious observability, deployment, backup/recovery, security review, and release validation across all selected stories.
+**Purpose**: Complete code, workflow definitions, security review, and local/staging/preview validation before the implementation Pull Request is merged, without changing production data.
 
 - [ ] T156 [P] Implement the Sentry adapter with PII disabled, no Replay, low sampling, release tags, and `beforeSend` scrubbing in `src/shared/adapters/monitoring/sentry.ts`
 - [ ] T157 [P] Add safe request-local Sentry capture and flush helpers for Edge Functions in `supabase/functions/_shared/monitoring.ts`
@@ -313,19 +313,32 @@
 - [ ] T163 [P] Define Cloudflare security headers and document SPA fallback/canonical-domain redirect requirements in `public/_headers` and `docs/deployment.md`
 - [ ] T164 Document production, staging, preview, custom-domain, Supabase secret, OneSignal worker, and Pages validation steps in `docs/deployment.md`
 - [ ] T165 Provision separate hosted Supabase staging and production projects, configure invite-only Auth and sign-in throttling, populate only environment secret stores, and record safe project identifiers plus tested 429 evidence in `docs/deployment.md` and `docs/security-controls.md`
-- [ ] T166 Create the Cloudflare Pages project connected to the public GitHub repository, configure isolated preview/production variables, attach `meiabocajuniors.dbidigital.com.br`, redirect the `pages.dev` alias, and record validation evidence in `docs/deployment.md`
+- [ ] T166 Create the Cloudflare Pages project connected to GitHub, configure staging-only preview variables, validate the feature Pull Request preview, and document deferred production-domain steps in `docs/deployment.md`
 - [ ] T167 Implement an allowlisted backup script for database roles/schema/data, private Storage objects, manifest, SHA-256, local `age` encryption, private R2 upload/verification, and exit codes in `scripts/backup/export-supabase.ps1`
 - [ ] T168 Add a protected-`main`, manually dispatchable and reusable pinned-Windows backup runner conforming to `specs/001-mbj-mvp-core/contracts/backup-automation.md`, with PII-free `request_id` input/run name, pinned Supabase CLI and `age`, typed outputs, one-day sanitized result artifact, and unconditional plaintext cleanup in `.github/workflows/backup.yml`
 - [ ] T169 Document the n8n-to-GitHub Actions runner boundary, fine-grained dispatch/read credential, protected backup environment, private `mbj-backups` R2 access, four verified-set retention, UptimeRobot heartbeat, failure alert, and local contingency in `ops/n8n/README.md`
 - [ ] T170 Create the sanitized importable weekly/pre-migration n8n workflow conforming to `specs/001-mbj-mvp-core/contracts/backup-automation.md`, generating a UUID `request_id`, dispatching protected `main`, correlating and polling only the matching run, validating the one-day result artifact, and alerting on every fail-closed condition in `ops/n8n/backup-workflow.json`
-- [ ] T171 Import and configure `ops/n8n/backup-workflow.json` with a fine-grained GitHub Actions credential in the self-hosted n8n, run success, timeout, ambiguous-run, missing/expired artifact, mismatched request, malformed result, unverified result, and execution-failure tests, and record safe workflow/evidence IDs in `docs/operations.md`
-- [ ] T172 Add a production migration workflow that directly calls the reusable verified backup workflow, blocks on its backup ID/checksum, performs dry-run/apply, and runs smoke validation in `.github/workflows/database-release.yml`
-- [ ] T173 [P] Document isolated monthly restore verification, Auth continuity limits, row counts, and avatar checksum evidence in `docs/backup-restore.md`
-- [ ] T174 Configure a five-minute UptimeRobot HTTP/keyword monitor for the canonical production URL and record the tested owner alert in `docs/operations.md`
-- [ ] T175 Configure the weekly n8n backup heartbeat monitor and record success/failure tests in `docs/operations.md`
-- [ ] T176 [P] Add repository contribution, branch, PR self-review, Definition of Done, and secret/data prohibitions in `CONTRIBUTING.md`
-- [ ] T177 Run and record the full role/RLS/privacy/security review checklist against every exposed table, view, RPC, function, log, cache, and deployment secret in `specs/001-mbj-mvp-core/checklists/security-review.md`
-- [ ] T178 Execute every command and acceptance scenario from the validation guide and record results or linked defects in `specs/001-mbj-mvp-core/checklists/quickstart-validation.md`
+- [ ] T171 Add a production migration workflow that directly calls the reusable verified backup workflow, blocks on its backup ID/checksum, performs dry-run/apply, and runs smoke validation in `.github/workflows/database-release.yml`
+- [ ] T172 [P] Document isolated monthly restore verification, Auth continuity limits, row counts, and avatar checksum evidence in `docs/backup-restore.md`
+- [ ] T173 [P] Add repository contribution, two-stage release, branch, PR self-review, Definition of Done, and secret/data prohibitions in `CONTRIBUTING.md`
+- [ ] T174 Run and record the full role/RLS/privacy/security review checklist against every exposed table, view, RPC, function, log, cache, and deployment secret in `specs/001-mbj-mvp-core/checklists/security-review.md`
+- [ ] T175 Execute the local, staging, feature-preview, and non-production acceptance scenarios from the validation guide and record results or linked defects in `specs/001-mbj-mvp-core/checklists/pre-release-validation.md`
+- [ ] T176 After CI, preview, security review, and Codex-assisted self-review pass, merge the implementation Pull Request into protected `main` without running production migrations; then create and publish `chore/mbj-production-activation` from updated `main` and record the implementation merge SHA in `docs/release-activation.md`
+
+**Checkpoint**: Application code and workflow definitions exist on protected `main`; production data remains unchanged and the active branch is `chore/mbj-production-activation`.
+
+---
+
+## Phase 11: Post-Merge Production Activation
+
+**Purpose**: Activate services whose workflows must already exist on the default branch, apply the backup-gated production release, and commit sanitized operational evidence through a second Pull Request.
+
+- [ ] T177 Import and configure `ops/n8n/backup-workflow.json` with a fine-grained GitHub Actions credential in the self-hosted n8n, run success, timeout, ambiguous-run, missing/expired artifact, mismatched request, malformed result, unverified result, and execution-failure tests against the workflow on `main`, and record safe workflow/evidence IDs in `docs/operations.md`
+- [ ] T178 Configure Cloudflare Pages production variables, attach `meiabocajuniors.dbidigital.com.br`, redirect the `pages.dev` alias, verify the production PWA/worker/canonical-origin behavior from `main`, and record evidence in `docs/deployment.md`
+- [ ] T179 Trigger and verify the production n8n backup, then execute `.github/workflows/database-release.yml` from `main`, require its backup ID/checksum gate, apply production migrations/Edge Functions, run smoke checks, and record sanitized release evidence in `docs/release-activation.md`
+- [ ] T180 Configure UptimeRobot HTTP/keyword and backup-heartbeat monitors, test both success and alert paths, and record safe evidence in `docs/operations.md`
+- [ ] T181 Execute the production-only acceptance scenarios from the validation guide and record results or linked defects in `specs/001-mbj-mvp-core/checklists/production-activation-validation.md`
+- [ ] T182 Open the `chore/mbj-production-activation` Pull Request, record its URL in `docs/release-activation.md`, commit that final evidence update, require passing CI and Codex-assisted self-review, and merge the operational PR into protected `main`
 
 ---
 
@@ -342,7 +355,8 @@
 - **US5 (Phase 7)**: Depends on US3 and US4 because consolidation/voting reference the match and published lineup.
 - **US6 (Phase 8)**: Notice publication can start after US1; event integrations finish after US3–US5 expose all producers.
 - **US7 (Phase 9)**: Depends on US3 and US4 for the two allowlisted read contracts; write guarding integrates with US5/US6 when selected.
-- **Polish (Phase 10)**: Applies after all stories selected for a release; backup/deployment foundations may be prepared earlier.
+- **Pre-Merge Hardening (Phase 10)**: Applies after all selected stories; ends by merging the implementation PR without production migration and creating `chore/mbj-production-activation` from updated `main`.
+- **Production Activation (Phase 11)**: Depends on Phase 10's merge because GitHub-dispatched backup/release workflows must already exist on the default branch; ends with a second protected operational PR.
 
 ### User Story Dependency Graph
 
@@ -352,7 +366,8 @@ Setup -> Foundation -> US1 -> US2 -> US3 -> US4 -> US5
                        +-----------> US6 <-+
                                      |
                              US3 + US4 -> US7
-All selected stories ---------------------> Polish/Release
+All selected stories -> Pre-Merge Hardening -> implementation PR merge
+implementation PR merge -> Production Activation -> operational PR merge
 ```
 
 ### Within Each User Story
@@ -370,7 +385,8 @@ All selected stories ---------------------> Polish/Release
 - For each story, pgTAP/RLS, component, and Playwright test files marked `[P]` can be authored concurrently before implementation.
 - US6 notice UI/schema work may proceed alongside US4/US5, with event-producer integration completed after those commands exist.
 - US7 DTO/persistence/UI test work may proceed alongside US5/US6 once US3 and US4 read contracts are stable.
-- Sentry, accessibility, performance, deployment docs, and restore docs marked `[P]` can proceed in parallel during Polish.
+- Sentry, accessibility, performance, deployment docs, and restore docs marked `[P]` can proceed in parallel during Pre-Merge Hardening.
+- Production Activation tasks are deliberately sequential because they depend on workflows already merged to `main` and produce evidence for the operational Pull Request.
 
 ## Parallel Examples by User Story
 
@@ -444,7 +460,9 @@ T149 DTOs | T153 offline indicator
 2. Add US5 for statistics and engagement.
 3. Add US6 for notices and resilient push delivery.
 4. Add US7 for the approved read-only offline experience.
-5. Run Phase 10 for every production candidate and never bypass backup, RLS, privacy, CI, or accessibility gates.
+5. Run Phase 10, merge the implementation Pull Request without production migration, then complete
+   Phase 11 on `chore/mbj-production-activation`; never bypass backup, RLS, privacy, CI, accessibility,
+   or either protected Pull Request gate.
 
 ## Notes
 

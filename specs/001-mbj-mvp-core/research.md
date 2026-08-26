@@ -215,12 +215,22 @@ runs frontend quality, database security, then E2E jobs. Cloudflare Pages keeps 
 `main` production deployment. Preview uses staging data only. Database migrations use a separate
 workflow, verified pre-migration backup, dry run, and forward-compatible expand/contract changes.
 
+The first implementation Pull Request validates local, staging, and the Cloudflare feature preview,
+then merges code and workflow definitions into protected `main` without applying production migrations.
+Only after the default branch contains those workflows does a new `chore/mbj-production-activation`
+branch configure/test n8n, canonical production deployment, the real backup gate, migrations, and
+external monitors. Sanitized evidence is committed on that branch and reviewed in a second Pull Request
+before players are invited.
+
 **Rationale**: Explicit reconciliation gives the remote bootstrap and local project a common ancestry,
 so GitHub can compare them in the first Pull Request. A neutral remote bootstrap allows the first
 project change to follow the same protected Pull Request path required for every later change, avoiding
 an unprotected project push to `main`.
 Native Pages previews are simple, but Pages publication and database workflows have no strict mutual
 ordering. Backward-compatible migrations keep both old and new PWA bundles working.
+The two-stage release avoids claiming pre-merge validation for workflows that GitHub can dispatch only
+after their definitions exist on the default branch, while keeping the production migration blocked
+behind a verified backup.
 [GitHub Node.js CI](https://docs.github.com/en/actions/tutorials/build-and-test-code/nodejs),
 [Cloudflare Pages Git integration](https://developers.cloudflare.com/pages/get-started/git-integration/),
 [Supabase migrations](https://supabase.com/docs/guides/deployment/database-migrations)

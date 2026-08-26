@@ -55,7 +55,7 @@ season at a time with preserved historical seasons, low concurrency, and a modul
 | Server-Enforced Security | PASS | RLS on every exposed table; privileged password, invitation, rescheduling, consolidation, reopening, and notification commands use server-side functions; service-role credentials never reach the browser. |
 | Domain Integrity and Historical Preservation | PASS | Foreign keys, unique constraints, checks, soft deletion/anonymization, immutable audit records, transactional commands, lineup revisions, and voting rounds preserve consistent history. |
 | MVP Simplicity and Controlled Scope | PASS | One React PWA, one Supabase project per environment, one repository, no ORM or extra queue/cache service, and White-Label configuration limited to build-time identity. |
-| Automated Quality Gates | PASS | The remote starts with a neutral bootstrap `main`; the existing local feature merges that remote bootstrap history before publication, so project commits remain only on the feature branch and reach `main` through a Pull Request after its ruleset requires CI plus documented Codex-assisted self-review. Unit, component, database/RLS, and E2E coverage are assigned by risk. |
+| Automated Quality Gates | PASS | The remote starts with a neutral bootstrap `main`; the existing local feature merges that remote bootstrap history before publication, so project commits reach `main` through a CI/self-reviewed implementation PR. Production activation evidence is then committed and reviewed through a second protected operational PR. Unit, component, database/RLS, and E2E coverage are assigned by risk. |
 | Resilience, Privacy, and Operability | PASS | Offline cache uses an explicit allowlist and user/version key; writes are blocked offline; external integrations fail gracefully; logs are sanitized; encrypted backups target private R2 with four verified sets; UptimeRobot monitors the canonical app and backup heartbeat. |
 
 No gate exception or unjustified complexity is required.
@@ -127,6 +127,21 @@ service or deployment unit.
   the same workflow through `workflow_call` and consumes equivalent typed outputs directly.
 - The repository stores workflow definitions and scripts only; Supabase, R2, encryption, webhook, and
   GitHub credentials never appear in workflow exports, logs, artifacts, or committed configuration.
+
+### Two-stage release boundary
+
+- The implementation Pull Request contains application code, migrations, reusable workflows, and
+  local/staging/preview evidence. It MUST NOT apply production migrations or claim production/n8n
+  activation before merge.
+- After that Pull Request passes CI, preview, security review, and Codex-assisted self-review, merge it
+  into protected `main` without running the production database workflow. This makes the dispatchable
+  workflows available on the default branch.
+- Create `chore/mbj-production-activation` from the updated `main`. From this branch, configure and test
+  n8n against the workflow on `main`, complete canonical Cloudflare production setup, run and verify the
+  production backup, apply migrations only through the gated release workflow, configure external
+  monitors, and commit sanitized evidence.
+- The activation branch finishes through a second protected Pull Request. Players are invited only
+  after production smoke tests and that operational evidence review pass.
 
 ### Transaction boundaries
 
@@ -276,10 +291,12 @@ four narrowly scoped Edge Functions; it is not a separately deployed custom API 
 5. Implement lineup revisions, publication, eligibility, and offline read cache.
 6. Implement results, consolidation/reopening, rankings, voting rounds, and tied awards.
 7. Implement notices, notification outbox/dispatch, reminders, fallbacks, and operational metrics.
-8. Complete accessibility, privacy-safe source-map publication, hosted Supabase separation and Auth
-   controls, GitHub-connected Cloudflare Pages deployment, UptimeRobot monitoring, imported encrypted
-   R2 backup automation/runbook, security review, E2E coverage, staging validation, and production
-   release.
+8. Complete accessibility, privacy-safe source-map publication, hosted environment preparation,
+   backup/release workflow definitions, security review, E2E coverage, and local/staging/preview
+   validation; merge the implementation Pull Request without applying production migrations.
+9. Create the production-activation branch from updated `main`, activate and test n8n plus Cloudflare,
+   complete a verified backup, apply the gated production migration, configure external monitors,
+   record production evidence, and merge the operational Pull Request before inviting players.
 
 Each increment keeps earlier user stories independently demonstrable and leaves production data
 isolated from local and preview environments.
