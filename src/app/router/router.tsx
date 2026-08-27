@@ -17,6 +17,9 @@ import { ChangePasswordPage } from '@/features/auth/pages/ChangePasswordPage';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { MfaPage } from '@/features/auth/pages/MfaPage';
 import { WelcomePage } from '@/features/auth/pages/WelcomePage';
+import { AthleteProfilePage } from '@/features/roster/pages/AthleteProfilePage';
+import { RosterPage } from '@/features/roster/pages/RosterPage';
+import { CreateAthletePage, EditAthletePage } from '@/features/roster/pages/RosterManagementPage';
 import { EmptyState, ErrorState } from '@/shared/components/feedback';
 import type { Database } from '@/shared/types/database.generated';
 
@@ -67,6 +70,16 @@ function RoleHomeRedirect() {
   return <Navigate replace to={defaultRouteForRoles(roles)} />;
 }
 
+function RosterRoutePage() {
+  const { isAal2, roles } = useAuth();
+  return <RosterPage canManage={isAal2 && roles.includes('PRESIDENT')} />;
+}
+
+function AthleteProfileRoutePage() {
+  const { isAal2, roles } = useAuth();
+  return <AthleteProfilePage canManage={isAal2 && roles.includes('PRESIDENT')} />;
+}
+
 export const appRoutes: RouteObject[] = [
   {
     element: <PublicLayout />,
@@ -115,6 +128,8 @@ export const appRoutes: RouteObject[] = [
             element: <AuthenticatedLayout />,
             children: [
               { index: true, element: <RoleHomeRedirect /> },
+              { path: 'roster', element: <RosterRoutePage /> },
+              { path: 'roster/:athleteId', element: <AthleteProfileRoutePage /> },
               {
                 path: 'athlete',
                 element: <RoleRouteGuard allowedRoles={['ATHLETE']} />,
@@ -154,7 +169,11 @@ export const appRoutes: RouteObject[] = [
                 children: [
                   {
                     element: <Aal2RouteGuard />,
-                    children: [{ path: 'admin', element: <RoleAdministrationPage /> }],
+                    children: [
+                      { path: 'admin', element: <RoleAdministrationPage /> },
+                      { path: 'admin/roster/new', element: <CreateAthletePage /> },
+                      { path: 'admin/roster/:athleteId/edit', element: <EditAthletePage /> },
+                    ],
                   },
                 ],
               },

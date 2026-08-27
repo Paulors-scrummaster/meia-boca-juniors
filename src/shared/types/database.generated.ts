@@ -348,6 +348,29 @@ export type Database = {
         Args: { invitation_uuid: string; request_trace_id: string }
         Returns: Json
       }
+      anonymize_athlete: {
+        Args: { athlete_uuid: string; request_trace_id: string }
+        Returns: {
+          anonymized_at: string | null
+          created_at: string
+          full_name: string
+          id: string
+          inactivated_at: string | null
+          photo_path: string | null
+          primary_position: string
+          shirt_name: string
+          shirt_number: number
+          status: Database["public"]["Enums"]["athlete_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "athletes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       complete_admin_password_reset: {
         Args: {
           actor_user_id: string
@@ -373,6 +396,37 @@ export type Database = {
           remaining: number
           resets_at: string
         }[]
+      }
+      create_athlete: {
+        Args: {
+          full_name_input: string
+          photo_path_input: string
+          primary_position_input: string
+          request_trace_id: string
+          shirt_name_input: string
+          shirt_number_input: number
+          status_input: Database["public"]["Enums"]["athlete_status"]
+        }
+        Returns: {
+          anonymized_at: string | null
+          created_at: string
+          full_name: string
+          id: string
+          inactivated_at: string | null
+          photo_path: string | null
+          primary_position: string
+          shirt_name: string
+          shirt_number: number
+          status: Database["public"]["Enums"]["athlete_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "athletes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       create_identity_invite: {
         Args: {
@@ -403,6 +457,34 @@ export type Database = {
         }
         Returns: Json
       }
+      set_athlete_status: {
+        Args: {
+          athlete_uuid: string
+          replacement_shirt_number: number
+          request_trace_id: string
+          target_status: Database["public"]["Enums"]["athlete_status"]
+        }
+        Returns: {
+          anonymized_at: string | null
+          created_at: string
+          full_name: string
+          id: string
+          inactivated_at: string | null
+          photo_path: string | null
+          primary_position: string
+          shirt_name: string
+          shirt_number: number
+          status: Database["public"]["Enums"]["athlete_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "athletes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       set_user_role: {
         Args: {
           request_trace_id: string
@@ -411,6 +493,37 @@ export type Database = {
           target_user_id: string
         }
         Returns: Json
+      }
+      update_athlete: {
+        Args: {
+          athlete_uuid: string
+          full_name_input: string
+          photo_path_input: string
+          primary_position_input: string
+          request_trace_id: string
+          shirt_name_input: string
+          shirt_number_input: number
+        }
+        Returns: {
+          anonymized_at: string | null
+          created_at: string
+          full_name: string
+          id: string
+          inactivated_at: string | null
+          photo_path: string | null
+          primary_position: string
+          shirt_name: string
+          shirt_number: number
+          status: Database["public"]["Enums"]["athlete_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        SetofOptions: {
+          from: "*"
+          to: "athletes"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {

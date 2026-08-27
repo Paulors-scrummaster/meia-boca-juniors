@@ -113,23 +113,23 @@
 
 ### Tests for User Story 2
 
-- [ ] T058 [P] [US2] Add pgTAP tests for athlete states, partial shirt-number uniqueness, inactivation timestamps, anonymization, and historical foreign keys in `supabase/tests/constraints/003_roster.test.sql`
-- [ ] T059 [P] [US2] Add RLS tests for roster reads, President-only mutations, private avatar objects, and preservation of Coach/President roles on athlete inactivation in `supabase/tests/rls/003_roster_rls.test.sql`
-- [ ] T060 [P] [US2] Add unit and component tests for initials, image validation/optimization, roster filters, and athlete forms in `src/features/roster/roster.test.tsx`
-- [ ] T061 [P] [US2] Add the create/edit/inactivate/history/number-reuse browser journey in `tests/e2e/roster-management.spec.ts`
+- [x] T058 [P] [US2] Add pgTAP tests for athlete states, partial shirt-number uniqueness, inactivation timestamps, anonymization, and historical foreign keys in `supabase/tests/constraints/003_roster.test.sql`
+- [x] T059 [P] [US2] Add RLS tests for roster reads, President-only mutations, private avatar objects, and preservation of Coach/President roles on athlete inactivation in `supabase/tests/rls/003_roster_rls.test.sql`
+- [x] T060 [P] [US2] Add unit and component tests for initials, image validation/optimization, roster filters, and athlete forms in `src/features/roster/roster.test.tsx`
+- [x] T061 [P] [US2] Add the create/edit/inactivate/history/number-reuse browser journey in `tests/e2e/roster-management.spec.ts`
 
 ### Implementation for User Story 2
 
-- [ ] T062 [US2] Complete athlete length/lifecycle constraints, private `athlete-avatars` bucket policies, and audited President mutations in `supabase/migrations/20260825000500_roster.sql`
-- [ ] T063 [US2] Implement atomic athlete inactivation/anonymization that releases the number and removes only the Athlete role in `supabase/migrations/20260825000600_roster_lifecycle_functions.sql`
-- [ ] T064 [US2] Regenerate and verify Supabase bindings after roster migrations in `src/shared/types/database.generated.ts`
-- [ ] T065 [P] [US2] Implement client-side image validation, crop/resize, WebP optimization, and 1 MB/1024px limits in `src/features/roster/lib/optimize-avatar.ts`
-- [ ] T066 [P] [US2] Implement deterministic initials and club-themed avatar fallback in `src/features/roster/components/AthleteAvatar.tsx`
-- [ ] T067 [US2] Implement typed roster queries, private signed-avatar access, and President mutations in `src/features/roster/api/roster.service.ts` and `src/features/roster/queries/roster.queries.ts`
-- [ ] T068 [P] [US2] Implement the accessible roster list and status presentation in `src/features/roster/pages/RosterPage.tsx`
-- [ ] T069 [P] [US2] Implement the sporting profile and preserved history view in `src/features/roster/pages/AthleteProfilePage.tsx`
-- [ ] T070 [US2] Implement President create/edit/status/anonymization forms with React Hook Form and Zod in `src/features/roster/components/AthleteForm.tsx`
-- [ ] T071 [US2] Register roster list, detail, and President management routes in `src/app/router/router.tsx`
+- [x] T062 [US2] Complete athlete length/lifecycle constraints, private `athlete-avatars` bucket policies, and audited President mutations in `supabase/migrations/20260825000500_roster.sql`
+- [x] T063 [US2] Implement atomic athlete inactivation/anonymization that releases the number and removes only the Athlete role in `supabase/migrations/20260825000600_roster_lifecycle_functions.sql`
+- [x] T064 [US2] Regenerate and verify Supabase bindings after roster migrations in `src/shared/types/database.generated.ts`
+- [x] T065 [P] [US2] Implement client-side image validation, crop/resize, WebP optimization, and 1 MB/1024px limits in `src/features/roster/lib/optimize-avatar.ts`
+- [x] T066 [P] [US2] Implement deterministic initials and club-themed avatar fallback in `src/features/roster/components/AthleteAvatar.tsx`
+- [x] T067 [US2] Implement typed roster queries, private signed-avatar access, and President mutations in `src/features/roster/api/roster.service.ts` and `src/features/roster/queries/roster.queries.ts`
+- [x] T068 [P] [US2] Implement the accessible roster list and status presentation in `src/features/roster/pages/RosterPage.tsx`
+- [x] T069 [P] [US2] Implement the sporting profile and preserved history view in `src/features/roster/pages/AthleteProfilePage.tsx`
+- [x] T070 [US2] Implement President create/edit/status/anonymization forms with React Hook Form and Zod in `src/features/roster/components/AthleteForm.tsx`
+- [x] T071 [US2] Register roster list, detail, and President management routes in `src/app/router/router.tsx`
 
 **Checkpoint**: User Story 2 preserves sporting history, never exposes public avatar URLs, and keeps non-Athlete roles intact during inactivation.
 

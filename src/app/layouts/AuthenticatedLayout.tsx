@@ -10,7 +10,10 @@ interface NavigationItem {
 
 export function AuthenticatedLayout() {
   const { roles } = useAuth();
-  const items: NavigationItem[] = [{ label: 'Início', to: '/app' }];
+  const items: NavigationItem[] = [
+    { label: 'Início', to: '/app' },
+    { label: 'Elenco', to: '/app/roster' },
+  ];
 
   if (roles.includes('ATHLETE')) {
     items.push({ label: 'Área do atleta', to: '/app/athlete' });

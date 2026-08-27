@@ -72,3 +72,9 @@ body {
   outline: 3px solid hsl(var(--ring));
   outline-offset: 3px;
 }
+
+@layer components {
+  .form-input {
+    @apply mt-2 min-h-12 w-full rounded-xl border bg-background px-4 font-normal text-foreground;
+  }
+}
