@@ -182,23 +182,23 @@
 
 ### Tests for User Story 4
 
-- [ ] T095 [P] [US4] Add pgTAP tests for allowed formations, lineup revisions, one current publication, assignments, coordinates, reserve ordering, and immutable published records in `supabase/tests/constraints/005_lineups.test.sql`
-- [ ] T096 [P] [US4] Add RLS and RPC tests for draft visibility, staff publication, athlete eligibility, supersession, AAL2, and event deduplication in `supabase/tests/rpc/002_publish_lineup.test.sql`
-- [ ] T097 [P] [US4] Add unit/component tests for formation validation, accessible tactical representation, eligibility messages, and current-version rendering in `src/features/lineups/lineups.test.tsx`
-- [ ] T098 [P] [US4] Add the create/reject/publish/republish/view browser journey in `tests/e2e/lineup-publication.spec.ts`
+- [X] T095 [P] [US4] Add pgTAP tests for allowed formations, lineup revisions, one current publication, assignments, coordinates, reserve ordering, and immutable published records in `supabase/tests/constraints/005_lineups.test.sql`
+- [X] T096 [P] [US4] Add RLS and RPC tests for draft visibility, staff publication, athlete eligibility, supersession, AAL2, and event deduplication in `supabase/tests/rpc/002_publish_lineup.test.sql`
+- [X] T097 [P] [US4] Add unit/component tests for formation validation, accessible tactical representation, eligibility messages, and current-version rendering in `src/features/lineups/lineups.test.tsx`
+- [X] T098 [P] [US4] Add the create/reject/publish/republish/view browser journey in `tests/e2e/lineup-publication.spec.ts`
 
 ### Implementation for User Story 4
 
-- [ ] T099 [US4] Create seeded `allowed_formations`, `lineups`, and `lineup_players` with version, assignment, position, immutable-publication, and RLS constraints in `supabase/migrations/20260825001300_lineups.sql`
-- [ ] T100 [US4] Implement `publish_lineup` with row locks, eligibility validation, atomic supersession, audit, idempotency, and outbox event in `supabase/migrations/20260825001400_publish_lineup.sql`
-- [ ] T101 [US4] Create the minimum-field invoker-safe `published_lineup_view` in `supabase/migrations/20260825001500_published_lineup_view.sql`
-- [ ] T102 [US4] Regenerate and verify Supabase bindings after lineup migrations in `src/shared/types/database.generated.ts`
-- [ ] T103 [P] [US4] Implement typed draft/current-lineup queries and save/publish commands in `src/features/lineups/api/lineups.service.ts` and `src/features/lineups/queries/lineups.queries.ts`
-- [ ] T104 [P] [US4] Implement accessible formation selection and eligibility feedback in `src/features/lineups/components/FormationSelector.tsx`
-- [ ] T105 [US4] Implement mobile pointer and keyboard-capable starter positioning plus ordered reserves in `src/features/lineups/components/LineupEditor.tsx`
-- [ ] T106 [P] [US4] Implement the read-only official tactical field with a semantic list alternative for assistive technology in `src/features/lineups/components/PublishedLineup.tsx`
-- [ ] T107 [US4] Implement online-guarded draft/edit/publish and athlete-view pages in `src/features/lineups/pages/LineupEditorPage.tsx` and `src/features/lineups/pages/PublishedLineupPage.tsx`
-- [ ] T108 [US4] Register staff editor and authenticated official-lineup routes in `src/app/router/router.tsx`
+- [X] T099 [US4] Create seeded `allowed_formations`, `lineups`, and `lineup_players` with version, assignment, position, immutable-publication, and RLS constraints in `supabase/migrations/20260825001300_lineups.sql`
+- [X] T100 [US4] Implement `publish_lineup` with row locks, eligibility validation, atomic supersession, audit, idempotency, and outbox event in `supabase/migrations/20260825001400_publish_lineup.sql`
+- [X] T101 [US4] Create the minimum-field invoker-safe `published_lineup_view` in `supabase/migrations/20260825001500_published_lineup_view.sql`
+- [X] T102 [US4] Regenerate and verify Supabase bindings after lineup migrations in `src/shared/types/database.generated.ts`
+- [X] T103 [P] [US4] Implement typed draft/current-lineup queries and save/publish commands in `src/features/lineups/api/lineups.service.ts` and `src/features/lineups/queries/lineups.queries.ts`
+- [X] T104 [P] [US4] Implement accessible formation selection and eligibility feedback in `src/features/lineups/components/FormationSelector.tsx`
+- [X] T105 [US4] Implement mobile pointer and keyboard-capable starter positioning plus ordered reserves in `src/features/lineups/components/LineupEditor.tsx`
+- [X] T106 [P] [US4] Implement the read-only official tactical field with a semantic list alternative for assistive technology in `src/features/lineups/components/PublishedLineup.tsx`
+- [X] T107 [US4] Implement online-guarded draft/edit/publish and athlete-view pages in `src/features/lineups/pages/LineupEditorPage.tsx` and `src/features/lineups/pages/PublishedLineupPage.tsx`
+- [X] T108 [US4] Register staff editor and authenticated official-lineup routes in `src/app/router/router.tsx`
 
 **Checkpoint**: User Story 4 is publishable without notifications enabled; the current official lineup remains authoritative in the app.
 

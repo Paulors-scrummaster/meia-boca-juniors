@@ -34,6 +34,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      allowed_formations: {
+        Row: {
+          code: string
+          display_order: number
+          is_active: boolean
+        }
+        Insert: {
+          code: string
+          display_order: number
+          is_active?: boolean
+        }
+        Update: {
+          code?: string
+          display_order?: number
+          is_active?: boolean
+        }
+        Relationships: []
+      }
       athlete_invites: {
         Row: {
           athlete_id: string
@@ -183,6 +201,130 @@ export type Database = {
           {
             foreignKeyName: "audit_logs_actor_user_id_fkey"
             columns: ["actor_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lineup_players: {
+        Row: {
+          assignment: Database["public"]["Enums"]["lineup_assignment"]
+          athlete_id: string
+          display_order: number
+          lineup_id: string
+          position_x: number | null
+          position_y: number | null
+          tactical_position: string | null
+        }
+        Insert: {
+          assignment: Database["public"]["Enums"]["lineup_assignment"]
+          athlete_id: string
+          display_order?: number
+          lineup_id: string
+          position_x?: number | null
+          position_y?: number | null
+          tactical_position?: string | null
+        }
+        Update: {
+          assignment?: Database["public"]["Enums"]["lineup_assignment"]
+          athlete_id?: string
+          display_order?: number
+          lineup_id?: string
+          position_x?: number | null
+          position_y?: number | null
+          tactical_position?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lineup_players_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineup_players_lineup_id_fkey"
+            columns: ["lineup_id"]
+            isOneToOne: false
+            referencedRelation: "lineups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineup_players_lineup_id_fkey"
+            columns: ["lineup_id"]
+            isOneToOne: false
+            referencedRelation: "published_lineup_view"
+            referencedColumns: ["lineup_id"]
+          },
+        ]
+      }
+      lineups: {
+        Row: {
+          created_at: string
+          created_by: string
+          formation_code: string
+          id: string
+          match_id: string
+          published_at: string | null
+          published_by: string | null
+          revision: number
+          status: Database["public"]["Enums"]["lineup_status"]
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          formation_code: string
+          id?: string
+          match_id: string
+          published_at?: string | null
+          published_by?: string | null
+          revision: number
+          status?: Database["public"]["Enums"]["lineup_status"]
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          formation_code?: string
+          id?: string
+          match_id?: string
+          published_at?: string | null
+          published_by?: string | null
+          revision?: number
+          status?: Database["public"]["Enums"]["lineup_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lineups_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineups_formation_code_fkey"
+            columns: ["formation_code"]
+            isOneToOne: false
+            referencedRelation: "allowed_formations"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "lineups_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineups_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "next_match_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineups_published_by_fkey"
+            columns: ["published_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -600,6 +742,53 @@ export type Database = {
           },
         ]
       }
+      published_lineup_view: {
+        Row: {
+          assignment: Database["public"]["Enums"]["lineup_assignment"] | null
+          athlete_id: string | null
+          display_order: number | null
+          formation_code: string | null
+          lineup_id: string | null
+          match_id: string | null
+          position_x: number | null
+          position_y: number | null
+          published_at: string | null
+          revision: number | null
+          shirt_name: string | null
+          shirt_number: number | null
+          tactical_position: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lineup_players_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineups_formation_code_fkey"
+            columns: ["formation_code"]
+            isOneToOne: false
+            referencedRelation: "allowed_formations"
+            referencedColumns: ["code"]
+          },
+          {
+            foreignKeyName: "lineups_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineups_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "next_match_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       roster_presence_view: {
         Row: {
           athlete_id: string | null
@@ -806,6 +995,14 @@ export type Database = {
           match_date_input: string
           opponent_name_input: string
           season_uuid: string
+        }
+        Returns: Json
+      }
+      publish_lineup: {
+        Args: {
+          command_idempotency_key: string
+          draft_lineup_uuid: string
+          match_uuid: string
         }
         Returns: Json
       }

@@ -24,6 +24,8 @@ import { createMatchesService, matchKeys } from '@/features/matches/api/matches.
 import { MatchForm } from '@/features/matches/components/MatchForm';
 import { MatchDetailPage } from '@/features/matches/pages/MatchDetailPage';
 import { MatchesPage } from '@/features/matches/pages/MatchesPage';
+import { LineupEditorPage } from '@/features/lineups/pages/LineupEditorPage';
+import { PublishedLineupPage } from '@/features/lineups/pages/PublishedLineupPage';
 import { AthleteProfilePage } from '@/features/roster/pages/AthleteProfilePage';
 import { RosterPage } from '@/features/roster/pages/RosterPage';
 import { CreateAthletePage, EditAthletePage } from '@/features/roster/pages/RosterManagementPage';
@@ -121,6 +123,16 @@ function StaffAttendanceRoutePage() {
   return <AttendanceDashboardPage matchId={matchId} />;
 }
 
+function PublishedLineupRoutePage() {
+  const { matchId = '' } = useParams();
+  return <PublishedLineupPage matchId={matchId} />;
+}
+
+function LineupEditorRoutePage() {
+  const { matchId = '' } = useParams();
+  return <LineupEditorPage matchId={matchId} />;
+}
+
 function NewMatchRoutePage() {
   return <MatchForm />;
 }
@@ -195,6 +207,7 @@ export const appRoutes: RouteObject[] = [
               { path: 'roster/:athleteId', element: <AthleteProfileRoutePage /> },
               { path: 'matches', element: <MatchesRoutePage /> },
               { path: 'matches/:matchId', element: <MatchDetailRoutePage /> },
+              { path: 'matches/:matchId/lineup', element: <PublishedLineupRoutePage /> },
               {
                 path: 'athlete',
                 element: <RoleRouteGuard allowedRoles={['ATHLETE']} />,
@@ -231,6 +244,10 @@ export const appRoutes: RouteObject[] = [
                       {
                         path: 'staff/matches/:matchId/attendance',
                         element: <StaffAttendanceRoutePage />,
+                      },
+                      {
+                        path: 'staff/matches/:matchId/lineup',
+                        element: <LineupEditorRoutePage />,
                       },
                     ],
                   },

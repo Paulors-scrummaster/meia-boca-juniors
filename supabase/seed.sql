@@ -144,3 +144,44 @@ values (
   '10000000-0000-4000-8000-000000000004'
 )
 on conflict (presence_id) do nothing;
+
+insert into public.lineups (id, match_id, revision, formation_code, created_by)
+values
+  (
+    '40000000-0000-4000-8000-000000000101',
+    '30000000-0000-4000-8000-000000000101',
+    1,
+    '4-3-3',
+    '10000000-0000-4000-8000-000000000002'
+  ),
+  (
+    '40000000-0000-4000-8000-000000000102',
+    '30000000-0000-4000-8000-000000000101',
+    2,
+    '4-2-3-1',
+    '10000000-0000-4000-8000-000000000002'
+  )
+on conflict (id) do nothing;
+
+insert into public.lineup_players (
+  lineup_id, athlete_id, assignment, tactical_position, position_x, position_y, display_order
+)
+values
+  (
+    '40000000-0000-4000-8000-000000000101',
+    '20000000-0000-4000-8000-000000000003',
+    'STARTER', 'MEI', 50, 48, 0
+  ),
+  (
+    '40000000-0000-4000-8000-000000000102',
+    '20000000-0000-4000-8000-000000000003',
+    'STARTER', 'MEI', 50, 48, 0
+  )
+on conflict (lineup_id, athlete_id) do nothing;
+
+update public.lineups
+set status = 'PUBLISHED',
+    published_by = '10000000-0000-4000-8000-000000000002',
+    published_at = '2026-08-28T18:00:00Z'
+where id = '40000000-0000-4000-8000-000000000101'
+  and status = 'DRAFT';
