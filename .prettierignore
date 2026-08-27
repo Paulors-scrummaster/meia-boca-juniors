@@ -5,6 +5,7 @@ coverage/
 playwright-report/
 test-results/
 package-lock.json
+src/shared/types/database.generated.ts
 *.min.js
 .agents/
 .specify/

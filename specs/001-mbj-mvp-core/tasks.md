@@ -44,15 +44,15 @@
 
 **⚠️ CRITICAL**: No user story implementation starts until this phase passes its database and frontend checks.
 
-- [ ] T018 Create domain enums, `profiles`, additive `user_roles`, the core `athletes` identity table, and immutable `audit_logs` with explicit constraints and foreign-key behavior in `supabase/migrations/20260825000100_foundation.sql`
-- [ ] T019 Create private authorization, AAL2, safe audit, and fixed-window rate-limit helpers with pinned search paths and no raw-IP storage in `supabase/migrations/20260825000200_authorization_helpers.sql`
-- [ ] T020 Create the generic idempotent notification outbox tables needed by transactional commands in `supabase/migrations/20260825000300_notification_outbox.sql`
-- [ ] T021 [P] Add pgTAP constraint tests for profiles, core athletes, additive roles, rate counters, audit immutability, and notification deduplication in `supabase/tests/constraints/001_foundation.test.sql`
-- [ ] T022 [P] Add positive and negative RLS tests for active accounts, role union, AAL2 checks, private rate counters, audit denial, and outbox privacy in `supabase/tests/rls/001_foundation_rls.test.sql`
-- [ ] T023 Generate the foundational database bindings and create the repeatable drift-check command in `src/shared/types/database.generated.ts` and `scripts/generate-database-types.ps1`
-- [ ] T024 Implement the browser-safe Supabase client adapter with no service-role path in `src/shared/adapters/supabase/client.ts`
-- [ ] T025 [P] Define stable Portuguese application errors, field errors, and trace-ID mapping in `src/shared/lib/app-error.ts`
-- [ ] T026 [P] Define centralized typed status labels and São Paulo date/time formatting helpers in `src/shared/lib/domain-labels.ts` and `src/shared/lib/date-time.ts`
+- [x] T018 Create domain enums, `profiles`, additive `user_roles`, the core `athletes` identity table, and immutable `audit_logs` with explicit constraints and foreign-key behavior in `supabase/migrations/20260825000100_foundation.sql`
+- [x] T019 Create private authorization, AAL2, safe audit, and fixed-window rate-limit helpers with pinned search paths and no raw-IP storage in `supabase/migrations/20260825000200_authorization_helpers.sql`
+- [x] T020 Create the generic idempotent notification outbox tables needed by transactional commands in `supabase/migrations/20260825000300_notification_outbox.sql`
+- [x] T021 [P] Add pgTAP constraint tests for profiles, core athletes, additive roles, rate counters, audit immutability, and notification deduplication in `supabase/tests/constraints/001_foundation.test.sql`
+- [x] T022 [P] Add positive and negative RLS tests for active accounts, role union, AAL2 checks, private rate counters, audit denial, and outbox privacy in `supabase/tests/rls/001_foundation_rls.test.sql`
+- [x] T023 Generate the foundational database bindings and create the repeatable drift-check command in `src/shared/types/database.generated.ts` and `scripts/generate-database-types.ps1`
+- [x] T024 Implement the browser-safe Supabase client adapter with no service-role path in `src/shared/adapters/supabase/client.ts`
+- [x] T025 [P] Define stable Portuguese application errors, field errors, and trace-ID mapping in `src/shared/lib/app-error.ts`
+- [x] T026 [P] Define centralized typed status labels and São Paulo date/time formatting helpers in `src/shared/lib/domain-labels.ts` and `src/shared/lib/date-time.ts`
 - [ ] T027 Configure the TanStack Query client, retry policy, and server-state provider in `src/app/providers/QueryProvider.tsx`
 - [ ] T028 Implement authenticated-session resolution and account-change boundaries in `src/app/providers/AuthProvider.tsx`
 - [ ] T029 Implement public, authenticated, role-protected, and AAL2-protected route guards in `src/app/router/guards.tsx`
