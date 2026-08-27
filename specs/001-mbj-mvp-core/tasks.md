@@ -143,32 +143,32 @@
 
 ### Tests for User Story 3
 
-- [ ] T072 [P] [US3] Add pgTAP tests for seasons, match deadlines, unique presence rows, `called_at`/positive call revisions, exceptional deadlines, refusal reasons, states, and historical delete behavior in `supabase/tests/constraints/004_matches_attendance.test.sql`
-- [ ] T073 [P] [US3] Add RLS tests for own answers, protected justification visibility, staff rights, consolidation locks, cancelled matches, and direct-request deadline denial in `supabase/tests/rls/004_attendance_rls.test.sql`
-- [ ] T074 [P] [US3] Add RPC tests for active-role/inactive call denial, injured/suspended calls, call/re-call revisioning, retry event deduplication, reminder eligibility by `called_at`, idempotent response, override, exceptional call, rescheduling, and concurrent writes in `supabase/tests/rpc/001_attendance_commands.test.sql`
-- [ ] T075 [P] [US3] Add unit/component tests for deadline rendering, refusal validation, offline-independent UI denial, and staff state updates in `src/features/attendance/attendance.test.tsx`
-- [ ] T076 [P] [US3] Add the match, attendance, reason privacy, exceptional call, realtime, cancellation, and rescheduling journey in `tests/e2e/matches-attendance.spec.ts`
+- [X] T072 [P] [US3] Add pgTAP tests for seasons, match deadlines, unique presence rows, `called_at`/positive call revisions, exceptional deadlines, refusal reasons, states, and historical delete behavior in `supabase/tests/constraints/004_matches_attendance.test.sql`
+- [X] T073 [P] [US3] Add RLS tests for own answers, protected justification visibility, staff rights, consolidation locks, cancelled matches, and direct-request deadline denial in `supabase/tests/rls/004_attendance_rls.test.sql`
+- [X] T074 [P] [US3] Add RPC tests for active-role/inactive call denial, injured/suspended calls, call/re-call revisioning, retry event deduplication, reminder eligibility by `called_at`, idempotent response, override, exceptional call, rescheduling, and concurrent writes in `supabase/tests/rpc/001_attendance_commands.test.sql`
+- [X] T075 [P] [US3] Add unit/component tests for deadline rendering, refusal validation, offline-independent UI denial, and staff state updates in `src/features/attendance/attendance.test.tsx`
+- [X] T076 [P] [US3] Add the match, attendance, reason privacy, exceptional call, realtime, cancellation, and rescheduling journey in `tests/e2e/matches-attendance.spec.ts`
 
 ### Implementation for User Story 3
 
-- [ ] T077 [US3] Create `seasons`, `matches`, versioned `match_presences` with `called_at` and `call_revision`, and protected `presence_justifications` with constraints and RLS in `supabase/migrations/20260825000700_matches_attendance.sql`
-- [ ] T078 [US3] Implement `respond_to_call` with caller identity, applicable deadline, reason privacy, idempotency, and atomic status transition in `supabase/migrations/20260825000800_respond_to_call.sql`
-- [ ] T079 [US3] Implement `admin_set_presence` with AAL2, consolidation lock, explanation, and sanitized audit in `supabase/migrations/20260825000900_admin_set_presence.sql`
-- [ ] T080 [US3] Implement `reschedule_match` and cancel/reactivate commands with row locks, schedule revisions, conditional reset, reason cleanup, and outbox events in `supabase/migrations/20260825001000_match_lifecycle_commands.sql`
-- [ ] T081 [US3] Implement `create_exceptional_call` with deadline, active Athlete role, inactive-state denial, call timestamp/revision, and revision-aware event enforcement in `supabase/migrations/20260825001100_exceptional_calls.sql`
-- [ ] T082 [US3] Implement transactional `set_match_callups` with active-role/inactive validation, call timestamp/revision, idempotency, audit, reconciliation, and revision-aware deduplicated `CALL_UP` events in `supabase/migrations/20260825001150_set_match_callups.sql`
-- [ ] T083 [US3] Create minimal-invoker `next_match_view`, roster-visible presence projection, protected `staff_attendance_view`, and Realtime publication allowlist in `supabase/migrations/20260825001200_attendance_views_realtime.sql`
-- [ ] T084 [US3] Regenerate and verify Supabase bindings after match and attendance migrations in `src/shared/types/database.generated.ts`
-- [ ] T085 [US3] Extend `supabase/seed.sql` with fictitious season, match, call-revision, and presence records only after match/attendance migrations and regenerated types exist
-- [ ] T086 [P] [US3] Implement centralized match and attendance query keys plus typed reads/commands in `src/features/matches/api/matches.service.ts` and `src/features/attendance/api/attendance.service.ts`
-- [ ] T087 [P] [US3] Implement match list, history, status, and detail screens in `src/features/matches/pages/MatchesPage.tsx` and `src/features/matches/pages/MatchDetailPage.tsx`
-- [ ] T088 [US3] Implement staff match create/edit/cancel/reactivate and call-up forms with São Paulo time validation in `src/features/matches/components/MatchForm.tsx` and `src/features/attendance/components/CallUpManager.tsx`
-- [ ] T089 [P] [US3] Implement athlete confirmation panel with authoritative deadline states and the foundational online-action guard in `src/features/attendance/components/PresenceResponsePanel.tsx`
-- [ ] T090 [P] [US3] Implement UI-only Zustand state for the refusal modal in `src/features/attendance/stores/refusal-modal.store.ts`
-- [ ] T091 [US3] Implement the required refusal-reason modal with React Hook Form and Zod, keeping server data out of Zustand in `src/features/attendance/components/RefusalReasonModal.tsx`
-- [ ] T092 [P] [US3] Implement the staff attendance dashboard with protected-reason access, guarded writes, and administrative overrides in `src/features/attendance/pages/AttendanceDashboardPage.tsx`
-- [ ] T093 [US3] Implement scoped Supabase Realtime subscriptions that only invalidate TanStack queries and unsubscribe on disposal/logout in `src/features/attendance/hooks/use-attendance-realtime.ts`
-- [ ] T094 [US3] Register match, athlete attendance, and staff attendance routes with role/AAL2 guards in `src/app/router/router.tsx`
+- [X] T077 [US3] Create `seasons`, `matches`, versioned `match_presences` with `called_at` and `call_revision`, and protected `presence_justifications` with constraints and RLS in `supabase/migrations/20260825000700_matches_attendance.sql`
+- [X] T078 [US3] Implement `respond_to_call` with caller identity, applicable deadline, reason privacy, idempotency, and atomic status transition in `supabase/migrations/20260825000800_respond_to_call.sql`
+- [X] T079 [US3] Implement `admin_set_presence` with AAL2, consolidation lock, explanation, and sanitized audit in `supabase/migrations/20260825000900_admin_set_presence.sql`
+- [X] T080 [US3] Implement `reschedule_match` and cancel/reactivate commands with row locks, schedule revisions, conditional reset, reason cleanup, and outbox events in `supabase/migrations/20260825001000_match_lifecycle_commands.sql`
+- [X] T081 [US3] Implement `create_exceptional_call` with deadline, active Athlete role, inactive-state denial, call timestamp/revision, and revision-aware event enforcement in `supabase/migrations/20260825001100_exceptional_calls.sql`
+- [X] T082 [US3] Implement transactional `set_match_callups` with active-role/inactive validation, call timestamp/revision, idempotency, audit, reconciliation, and revision-aware deduplicated `CALL_UP` events in `supabase/migrations/20260825001150_set_match_callups.sql`
+- [X] T083 [US3] Create minimal-invoker `next_match_view`, roster-visible presence projection, protected `staff_attendance_view`, and Realtime publication allowlist in `supabase/migrations/20260825001200_attendance_views_realtime.sql`
+- [X] T084 [US3] Regenerate and verify Supabase bindings after match and attendance migrations in `src/shared/types/database.generated.ts`
+- [X] T085 [US3] Extend `supabase/seed.sql` with fictitious season, match, call-revision, and presence records only after match/attendance migrations and regenerated types exist
+- [X] T086 [P] [US3] Implement centralized match and attendance query keys plus typed reads/commands in `src/features/matches/api/matches.service.ts` and `src/features/attendance/api/attendance.service.ts`
+- [X] T087 [P] [US3] Implement match list, history, status, and detail screens in `src/features/matches/pages/MatchesPage.tsx` and `src/features/matches/pages/MatchDetailPage.tsx`
+- [X] T088 [US3] Implement staff match create/edit/cancel/reactivate and call-up forms with São Paulo time validation in `src/features/matches/components/MatchForm.tsx` and `src/features/attendance/components/CallUpManager.tsx`
+- [X] T089 [P] [US3] Implement athlete confirmation panel with authoritative deadline states and the foundational online-action guard in `src/features/attendance/components/PresenceResponsePanel.tsx`
+- [X] T090 [P] [US3] Implement UI-only Zustand state for the refusal modal in `src/features/attendance/stores/refusal-modal.store.ts`
+- [X] T091 [US3] Implement the required refusal-reason modal with React Hook Form and Zod, keeping server data out of Zustand in `src/features/attendance/components/RefusalReasonModal.tsx`
+- [X] T092 [P] [US3] Implement the staff attendance dashboard with protected-reason access, guarded writes, and administrative overrides in `src/features/attendance/pages/AttendanceDashboardPage.tsx`
+- [X] T093 [US3] Implement scoped Supabase Realtime subscriptions that only invalidate TanStack queries and unsubscribe on disposal/logout in `src/features/attendance/hooks/use-attendance-realtime.ts`
+- [X] T094 [US3] Register match, athlete attendance, and staff attendance routes with role/AAL2 guards in `src/app/router/router.tsx`
 
 **Checkpoint**: Setup + Foundation + US1–US3 form the usable operational core that replaces the attendance spreadsheet.
 

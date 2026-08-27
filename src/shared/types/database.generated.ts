@@ -189,6 +189,156 @@ export type Database = {
           },
         ]
       }
+      match_presences: {
+        Row: {
+          athlete_id: string
+          call_revision: number
+          call_status: Database["public"]["Enums"]["call_status"]
+          called_at: string | null
+          created_at: string
+          id: string
+          individual_deadline: string | null
+          is_exceptional_call: boolean
+          last_changed_by: string | null
+          match_id: string
+          presence_status: Database["public"]["Enums"]["presence_status"]
+          responded_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          athlete_id: string
+          call_revision?: number
+          call_status?: Database["public"]["Enums"]["call_status"]
+          called_at?: string | null
+          created_at?: string
+          id?: string
+          individual_deadline?: string | null
+          is_exceptional_call?: boolean
+          last_changed_by?: string | null
+          match_id: string
+          presence_status?: Database["public"]["Enums"]["presence_status"]
+          responded_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          athlete_id?: string
+          call_revision?: number
+          call_status?: Database["public"]["Enums"]["call_status"]
+          called_at?: string | null
+          created_at?: string
+          id?: string
+          individual_deadline?: string | null
+          is_exceptional_call?: boolean
+          last_changed_by?: string | null
+          match_id?: string
+          presence_status?: Database["public"]["Enums"]["presence_status"]
+          responded_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_presences_last_changed_by_fkey"
+            columns: ["last_changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_presences_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_presences_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "next_match_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      matches: {
+        Row: {
+          competition_name: string | null
+          confirmation_deadline: string
+          created_at: string
+          created_by: string
+          current_consolidation_id: string | null
+          id: string
+          location_name: string | null
+          match_date: string
+          opponent_name: string
+          schedule_revision: number
+          season_id: string
+          status: Database["public"]["Enums"]["match_status"]
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          competition_name?: string | null
+          confirmation_deadline: string
+          created_at?: string
+          created_by: string
+          current_consolidation_id?: string | null
+          id?: string
+          location_name?: string | null
+          match_date: string
+          opponent_name: string
+          schedule_revision?: number
+          season_id: string
+          status?: Database["public"]["Enums"]["match_status"]
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          competition_name?: string | null
+          confirmation_deadline?: string
+          created_at?: string
+          created_by?: string
+          current_consolidation_id?: string | null
+          id?: string
+          location_name?: string | null
+          match_date?: string
+          opponent_name?: string
+          schedule_revision?: number
+          season_id?: string
+          status?: Database["public"]["Enums"]["match_status"]
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_deliveries: {
         Row: {
           attempt_count: number
@@ -276,6 +426,66 @@ export type Database = {
         }
         Relationships: []
       }
+      presence_justifications: {
+        Row: {
+          created_at: string
+          created_by: string
+          presence_id: string
+          reason: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          presence_id: string
+          reason: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          presence_id?: string
+          reason?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "presence_justifications_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presence_justifications_presence_id_fkey"
+            columns: ["presence_id"]
+            isOneToOne: true
+            referencedRelation: "match_presences"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presence_justifications_presence_id_fkey"
+            columns: ["presence_id"]
+            isOneToOne: true
+            referencedRelation: "next_match_view"
+            referencedColumns: ["presence_id"]
+          },
+          {
+            foreignKeyName: "presence_justifications_presence_id_fkey"
+            columns: ["presence_id"]
+            isOneToOne: true
+            referencedRelation: "roster_presence_view"
+            referencedColumns: ["presence_id"]
+          },
+          {
+            foreignKeyName: "presence_justifications_presence_id_fkey"
+            columns: ["presence_id"]
+            isOneToOne: true
+            referencedRelation: "staff_attendance_view"
+            referencedColumns: ["presence_id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           account_status: Database["public"]["Enums"]["account_status"]
@@ -300,6 +510,27 @@ export type Database = {
           id?: string
           must_change_password?: boolean
           updated_at?: string
+        }
+        Relationships: []
+      }
+      seasons: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          year: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          year?: number
         }
         Relationships: []
       }
@@ -341,11 +572,125 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      next_match_view: {
+        Row: {
+          applicable_deadline: string | null
+          call_status: Database["public"]["Enums"]["call_status"] | null
+          competition_name: string | null
+          confirmation_deadline: string | null
+          id: string | null
+          individual_deadline: string | null
+          is_exceptional_call: boolean | null
+          location_name: string | null
+          match_date: string | null
+          opponent_name: string | null
+          presence_id: string | null
+          presence_status: Database["public"]["Enums"]["presence_status"] | null
+          schedule_revision: number | null
+          season_id: string | null
+          status: Database["public"]["Enums"]["match_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "matches_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      roster_presence_view: {
+        Row: {
+          athlete_id: string | null
+          athlete_name: string | null
+          call_revision: number | null
+          call_status: Database["public"]["Enums"]["call_status"] | null
+          individual_deadline: string | null
+          is_exceptional_call: boolean | null
+          match_id: string | null
+          presence_id: string | null
+          presence_status: Database["public"]["Enums"]["presence_status"] | null
+          responded_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_presences_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_presences_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "next_match_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_attendance_view: {
+        Row: {
+          applicable_deadline: string | null
+          athlete_id: string | null
+          athlete_name: string | null
+          call_revision: number | null
+          call_status: Database["public"]["Enums"]["call_status"] | null
+          individual_deadline: string | null
+          is_exceptional_call: boolean | null
+          match_id: string | null
+          presence_id: string | null
+          presence_status: Database["public"]["Enums"]["presence_status"] | null
+          reason: string | null
+          responded_at: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_presences_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_presences_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "next_match_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       accept_athlete_invitation: {
         Args: { invitation_uuid: string; request_trace_id: string }
+        Returns: Json
+      }
+      admin_set_presence: {
+        Args: {
+          athlete_uuid: string
+          change_explanation: string
+          command_idempotency_key: string
+          match_uuid: string
+          refusal_reason: string
+          target_status: Database["public"]["Enums"]["presence_status"]
+        }
         Returns: Json
       }
       anonymize_athlete: {
@@ -370,6 +715,10 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      cancel_match: {
+        Args: { command_idempotency_key: string; match_uuid: string }
+        Returns: Json
       }
       complete_admin_password_reset: {
         Args: {
@@ -428,6 +777,15 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      create_exceptional_call: {
+        Args: {
+          athlete_uuid: string
+          command_idempotency_key: string
+          individual_deadline_input: string
+          match_uuid: string
+        }
+        Returns: Json
+      }
       create_identity_invite: {
         Args: {
           actor_user_id: string
@@ -439,12 +797,49 @@ export type Database = {
         }
         Returns: Json
       }
+      create_match: {
+        Args: {
+          command_idempotency_key: string
+          competition_name_input: string
+          confirmation_deadline_input: string
+          location_name_input: string
+          match_date_input: string
+          opponent_name_input: string
+          season_uuid: string
+        }
+        Returns: Json
+      }
+      reactivate_match: {
+        Args: { command_idempotency_key: string; match_uuid: string }
+        Returns: Json
+      }
       record_identity_invite_resend: {
         Args: {
           actor_user_id: string
           command_idempotency_key: string
           invitation_uuid: string
           request_trace_id: string
+        }
+        Returns: Json
+      }
+      reschedule_match: {
+        Args: {
+          command_idempotency_key: string
+          competition_name_input: string
+          confirmation_deadline_input: string
+          location_name_input: string
+          match_date_input: string
+          match_uuid: string
+          opponent_name_input: string
+        }
+        Returns: Json
+      }
+      respond_to_call: {
+        Args: {
+          command_idempotency_key: string
+          match_uuid: string
+          refusal_reason: string
+          target_status: Database["public"]["Enums"]["presence_status"]
         }
         Returns: Json
       }
@@ -484,6 +879,14 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      set_match_callups: {
+        Args: {
+          called_athlete_ids: string[]
+          command_idempotency_key: string
+          match_uuid: string
+        }
+        Returns: Json
       }
       set_user_role: {
         Args: {

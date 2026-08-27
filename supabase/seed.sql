@@ -19,6 +19,36 @@ values
   ('10000000-0000-4000-8000-000000000005')
 on conflict (id) do nothing;
 
+insert into public.seasons (id, year, is_active)
+values ('30000000-0000-4000-8000-000000000001', 2026, true)
+on conflict (id) do nothing;
+
+insert into public.matches (
+  id,
+  season_id,
+  opponent_name,
+  competition_name,
+  location_name,
+  match_date,
+  confirmation_deadline,
+  schedule_revision,
+  created_by,
+  updated_by
+)
+values (
+  '30000000-0000-4000-8000-000000000101',
+  '30000000-0000-4000-8000-000000000001',
+  'Atlético Fictício',
+  'Amistoso local',
+  'Campo de testes',
+  '2026-09-05T18:00:00Z',
+  '2026-09-04T18:00:00Z',
+  2,
+  '10000000-0000-4000-8000-000000000001',
+  '10000000-0000-4000-8000-000000000001'
+)
+on conflict (id) do nothing;
+
 insert into public.user_roles (user_id, role, assigned_by)
 values
   ('10000000-0000-4000-8000-000000000001', 'PRESIDENT', '10000000-0000-4000-8000-000000000001'),
@@ -70,3 +100,47 @@ values
     '2026-01-01T12:00:00Z'
   )
 on conflict (id) do nothing;
+
+insert into public.match_presences (
+  id,
+  match_id,
+  athlete_id,
+  call_status,
+  presence_status,
+  called_at,
+  call_revision,
+  responded_at,
+  last_changed_by
+)
+values
+  (
+    '30000000-0000-4000-8000-000000000201',
+    '30000000-0000-4000-8000-000000000101',
+    '20000000-0000-4000-8000-000000000003',
+    'CALLED',
+    'CONFIRMED',
+    '2026-08-26T12:00:00Z',
+    1,
+    '2026-08-26T13:00:00Z',
+    '10000000-0000-4000-8000-000000000003'
+  ),
+  (
+    '30000000-0000-4000-8000-000000000202',
+    '30000000-0000-4000-8000-000000000101',
+    '20000000-0000-4000-8000-000000000004',
+    'CALLED',
+    'DECLINED',
+    '2026-08-27T12:00:00Z',
+    2,
+    '2026-08-27T13:00:00Z',
+    '10000000-0000-4000-8000-000000000004'
+  )
+on conflict (id) do nothing;
+
+insert into public.presence_justifications (presence_id, reason, created_by)
+values (
+  '30000000-0000-4000-8000-000000000202',
+  'Compromisso pessoal fictício',
+  '10000000-0000-4000-8000-000000000004'
+)
+on conflict (presence_id) do nothing;

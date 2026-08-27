@@ -100,3 +100,12 @@ export function useConnectivity(): ConnectivitySnapshot {
 export function resetConnectivityForTests(): void {
   emit(createSnapshot(null));
 }
+
+export function setConnectivityForTests(isOnline: boolean): void {
+  emit({
+    browserOnline: isOnline,
+    isOnline,
+    reason: isOnline ? null : 'browser',
+    requestReachable: isOnline ? true : null,
+  });
+}

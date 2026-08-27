@@ -4,6 +4,8 @@ import {
   formatSaoPauloDate,
   formatSaoPauloDateTime,
   formatSaoPauloTime,
+  saoPauloLocalToUtcIso,
+  toSaoPauloLocalInput,
   toUtcIsoString,
 } from '@/shared/lib/date-time';
 
@@ -18,6 +20,11 @@ describe('São Paulo date/time helpers', () => {
 
   it('normaliza instantes para armazenamento UTC', () => {
     expect(toUtcIsoString('2026-08-25T20:30:00-03:00')).toBe(instant);
+  });
+
+  it('converte o campo local de São Paulo sem depender do fuso do dispositivo', () => {
+    expect(saoPauloLocalToUtcIso('2026-08-25T20:30')).toBe(instant);
+    expect(toSaoPauloLocalInput(instant)).toBe('2026-08-25T20:30');
   });
 
   it('recusa datas inválidas com mensagem segura', () => {

@@ -13,6 +13,7 @@ export function AuthenticatedLayout() {
   const items: NavigationItem[] = [
     { label: 'Início', to: '/app' },
     { label: 'Elenco', to: '/app/roster' },
+    { label: 'Partidas', to: '/app/matches' },
   ];
 
   if (roles.includes('ATHLETE')) {

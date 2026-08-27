@@ -12,16 +12,26 @@ import {
   RoleRouteGuard,
 } from '@/app/router/guards';
 import { RoleAdministrationPage } from '@/features/auth/components/RoleManager';
+import { CallUpManager } from '@/features/attendance/components/CallUpManager';
+import { PresenceResponsePanel } from '@/features/attendance/components/PresenceResponsePanel';
+import { AttendanceDashboardPage } from '@/features/attendance/pages/AttendanceDashboardPage';
 import { AcceptInvitationPage } from '@/features/auth/pages/AcceptInvitationPage';
 import { ChangePasswordPage } from '@/features/auth/pages/ChangePasswordPage';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { MfaPage } from '@/features/auth/pages/MfaPage';
 import { WelcomePage } from '@/features/auth/pages/WelcomePage';
+import { createMatchesService, matchKeys } from '@/features/matches/api/matches.service';
+import { MatchForm } from '@/features/matches/components/MatchForm';
+import { MatchDetailPage } from '@/features/matches/pages/MatchDetailPage';
+import { MatchesPage } from '@/features/matches/pages/MatchesPage';
 import { AthleteProfilePage } from '@/features/roster/pages/AthleteProfilePage';
 import { RosterPage } from '@/features/roster/pages/RosterPage';
 import { CreateAthletePage, EditAthletePage } from '@/features/roster/pages/RosterManagementPage';
 import { EmptyState, ErrorState } from '@/shared/components/feedback';
+import { LoadingState } from '@/shared/components/feedback';
 import type { Database } from '@/shared/types/database.generated';
+import { useQuery } from '@tanstack/react-query';
+import { useParams } from 'react-router-dom';
 
 type AppRole = Database['public']['Enums']['app_role'];
 
@@ -80,6 +90,59 @@ function AthleteProfileRoutePage() {
   return <AthleteProfilePage canManage={isAal2 && roles.includes('PRESIDENT')} />;
 }
 
+function MatchesRoutePage() {
+  const { isAal2, roles } = useAuth();
+  return (
+    <MatchesPage
+      canManage={isAal2 && roles.some((role) => role === 'COACH' || role === 'PRESIDENT')}
+    />
+  );
+}
+
+function MatchDetailRoutePage() {
+  const { isAal2, roles } = useAuth();
+  const { matchId = '' } = useParams();
+  return (
+    <MatchDetailPage
+      canManage={isAal2 && roles.some((role) => role === 'COACH' || role === 'PRESIDENT')}
+      isAthlete={roles.includes('ATHLETE')}
+      matchId={matchId}
+    />
+  );
+}
+
+function AthleteAttendanceRoutePage() {
+  const { matchId = '' } = useParams();
+  return <PresenceResponsePanel matchId={matchId} />;
+}
+
+function StaffAttendanceRoutePage() {
+  const { matchId = '' } = useParams();
+  return <AttendanceDashboardPage matchId={matchId} />;
+}
+
+function NewMatchRoutePage() {
+  return <MatchForm />;
+}
+
+function EditMatchRoutePage() {
+  const { matchId = '' } = useParams();
+  const service = createMatchesService();
+  const query = useQuery({
+    queryFn: () => service.getMatch(matchId),
+    queryKey: matchKeys.detail(matchId),
+  });
+  if (query.isPending) return <LoadingState label="Carregando partida" />;
+  if (query.isError)
+    return <ErrorState title="Não foi possível carregar a partida" message="Tente novamente." />;
+  return (
+    <div className="space-y-6">
+      <MatchForm match={query.data} service={service} />
+      <CallUpManager matchId={matchId} />
+    </div>
+  );
+}
+
 export const appRoutes: RouteObject[] = [
   {
     element: <PublicLayout />,
@@ -130,6 +193,8 @@ export const appRoutes: RouteObject[] = [
               { index: true, element: <RoleHomeRedirect /> },
               { path: 'roster', element: <RosterRoutePage /> },
               { path: 'roster/:athleteId', element: <AthleteProfileRoutePage /> },
+              { path: 'matches', element: <MatchesRoutePage /> },
+              { path: 'matches/:matchId', element: <MatchDetailRoutePage /> },
               {
                 path: 'athlete',
                 element: <RoleRouteGuard allowedRoles={['ATHLETE']} />,
@@ -143,6 +208,7 @@ export const appRoutes: RouteObject[] = [
                       />
                     ),
                   },
+                  { path: 'matches/:matchId/attendance', element: <AthleteAttendanceRoutePage /> },
                 ],
               },
               {
@@ -159,6 +225,12 @@ export const appRoutes: RouteObject[] = [
                             description="Seu acesso à comissão técnica está protegido por verificação em duas etapas."
                           />
                         ),
+                      },
+                      { path: 'staff/matches/new', element: <NewMatchRoutePage /> },
+                      { path: 'staff/matches/:matchId/edit', element: <EditMatchRoutePage /> },
+                      {
+                        path: 'staff/matches/:matchId/attendance',
+                        element: <StaffAttendanceRoutePage />,
                       },
                     ],
                   },
