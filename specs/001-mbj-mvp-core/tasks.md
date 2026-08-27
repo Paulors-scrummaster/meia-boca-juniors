@@ -64,7 +64,7 @@
 - [x] T035 Create the responsive mobile-first authenticated shell and navigation driven by effective roles in `src/app/layouts/AuthenticatedLayout.tsx`
 - [x] T036 Seed only fictitious President, Coach, multi-role, Athlete, and inactive Athlete records supported by Foundation migrations in `supabase/seed.sql`
 - [x] T037 Add GitHub Actions gates for format, lint, typecheck, unit tests, Supabase lint/tests, generated-type drift, build, and Playwright artifacts in `.github/workflows/ci.yml`
-- [ ] T038 Publish only `feature/mbj-mvp-core`, open its Pull Request against the neutral bootstrap `main`, let CI register its checks, then configure a `main` ruleset requiring Pull Requests, passing CI, and documented Codex-assisted self-review while blocking direct project pushes, recording the PR/ruleset evidence in `docs/repository-setup.md`
+- [x] T038 Publish only `feature/mbj-mvp-core`, open its Pull Request against the neutral bootstrap `main`, let CI register its checks, then configure a `main` ruleset requiring Pull Requests, passing CI, and documented Codex-assisted self-review while blocking direct project pushes, recording the PR/ruleset evidence in `docs/repository-setup.md`
 
 **Checkpoint**: The application shell starts locally, security helpers and RLS tests pass, and CI can validate an empty authenticated feature route.
 
