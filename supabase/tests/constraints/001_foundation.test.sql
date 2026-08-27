@@ -58,14 +58,14 @@ values (
   '00000000-0000-0000-0000-000000000102',
   'Atleta Teste',
   'Teste',
-  10,
+  42,
   'Meia'
 );
 
 select throws_ok(
   $$
     insert into public.athletes (full_name, shirt_name, shirt_number, primary_position)
-    values ('Outro Atleta', 'Outro', 10, 'Ataque')
+    values ('Outro Atleta', 'Outro', 42, 'Ataque')
   $$,
   '23505',
   null,
@@ -81,7 +81,7 @@ select lives_ok(
       primary_position,
       status,
       inactivated_at
-    ) values ('Atleta Inativo', 'Inativo', 10, 'Defesa', 'INACTIVE', statement_timestamp())
+    ) values ('Atleta Inativo', 'Inativo', 42, 'Defesa', 'INACTIVE', statement_timestamp())
   $$,
   'inactive athletes release their shirt number'
 );

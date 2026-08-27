@@ -53,17 +53,17 @@
 - [x] T024 Implement the browser-safe Supabase client adapter with no service-role path in `src/shared/adapters/supabase/client.ts`
 - [x] T025 [P] Define stable Portuguese application errors, field errors, and trace-ID mapping in `src/shared/lib/app-error.ts`
 - [x] T026 [P] Define centralized typed status labels and São Paulo date/time formatting helpers in `src/shared/lib/domain-labels.ts` and `src/shared/lib/date-time.ts`
-- [ ] T027 Configure the TanStack Query client, retry policy, and server-state provider in `src/app/providers/QueryProvider.tsx`
-- [ ] T028 Implement authenticated-session resolution and account-change boundaries in `src/app/providers/AuthProvider.tsx`
-- [ ] T029 Implement public, authenticated, role-protected, and AAL2-protected route guards in `src/app/router/guards.tsx`
-- [ ] T030 Define the route tree for public and authenticated modules in `src/app/router/router.tsx`
-- [ ] T031 [P] Create accessible shared loading, error, empty-state, confirmation, and toast components in `src/shared/components/feedback.tsx`
-- [ ] T032 [P] Implement connectivity state combining browser signals and real request failures in `src/shared/hooks/use-connectivity.ts`
-- [ ] T033 [P] Implement the zero-retry online-only mutation policy with no paused replay in `src/shared/hooks/use-online-mutation.ts`
-- [ ] T034 [P] Implement the reusable accessible write-control guard and reconnection explanation in `src/shared/components/OnlineActionGuard.tsx`
-- [ ] T035 Create the responsive mobile-first authenticated shell and navigation driven by effective roles in `src/app/layouts/AuthenticatedLayout.tsx`
-- [ ] T036 Seed only fictitious President, Coach, multi-role, Athlete, and inactive Athlete records supported by Foundation migrations in `supabase/seed.sql`
-- [ ] T037 Add GitHub Actions gates for format, lint, typecheck, unit tests, Supabase lint/tests, generated-type drift, build, and Playwright artifacts in `.github/workflows/ci.yml`
+- [x] T027 Configure the TanStack Query client, retry policy, and server-state provider in `src/app/providers/QueryProvider.tsx`
+- [x] T028 Implement authenticated-session resolution and account-change boundaries in `src/app/providers/AuthProvider.tsx`
+- [x] T029 Implement public, authenticated, role-protected, and AAL2-protected route guards in `src/app/router/guards.tsx`
+- [x] T030 Define the route tree for public and authenticated modules in `src/app/router/router.tsx`
+- [x] T031 [P] Create accessible shared loading, error, empty-state, confirmation, and toast components in `src/shared/components/feedback.tsx`
+- [x] T032 [P] Implement connectivity state combining browser signals and real request failures in `src/shared/hooks/use-connectivity.ts`
+- [x] T033 [P] Implement the zero-retry online-only mutation policy with no paused replay in `src/shared/hooks/use-online-mutation.ts`
+- [x] T034 [P] Implement the reusable accessible write-control guard and reconnection explanation in `src/shared/components/OnlineActionGuard.tsx`
+- [x] T035 Create the responsive mobile-first authenticated shell and navigation driven by effective roles in `src/app/layouts/AuthenticatedLayout.tsx`
+- [x] T036 Seed only fictitious President, Coach, multi-role, Athlete, and inactive Athlete records supported by Foundation migrations in `supabase/seed.sql`
+- [x] T037 Add GitHub Actions gates for format, lint, typecheck, unit tests, Supabase lint/tests, generated-type drift, build, and Playwright artifacts in `.github/workflows/ci.yml`
 - [ ] T038 Publish only `feature/mbj-mvp-core`, open its Pull Request against the neutral bootstrap `main`, let CI register its checks, then configure a `main` ruleset requiring Pull Requests, passing CI, and documented Codex-assisted self-review while blocking direct project pushes, recording the PR/ruleset evidence in `docs/repository-setup.md`
 
 **Checkpoint**: The application shell starts locally, security helpers and RLS tests pass, and CI can validate an empty authenticated feature route.

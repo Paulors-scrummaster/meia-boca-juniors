@@ -66,7 +66,15 @@ select ok(private.has_role('COACH'), 'role helper finds the Coach role');
 select ok(not private.has_role('PRESIDENT'), 'role helper denies an absent role');
 select ok(private.has_any_role(array['PRESIDENT', 'COACH']::public.app_role[]), 'role union helper accepts any assigned role');
 select ok(not private.current_session_is_aal2(), 'AAL2 helper rejects an AAL1 session');
-select is((select count(*)::integer from public.athletes), 1, 'active accounts can read the core roster');
+select is(
+  (
+    select count(*)::integer
+    from public.athletes
+    where id = '00000000-0000-0000-0000-000000000601'
+  ),
+  1,
+  'active accounts can read the core roster'
+);
 select is((select count(*)::integer from public.audit_logs), 0, 'non-President cannot read audit logs');
 
 select throws_ok(

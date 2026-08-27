@@ -6,7 +6,8 @@ $ErrorActionPreference = 'Stop'
 
 $repositoryRoot = Split-Path -Parent $PSScriptRoot
 $targetPath = Join-Path $repositoryRoot 'src\shared\types\database.generated.ts'
-$supabaseCli = Join-Path $repositoryRoot 'node_modules\.bin\supabase.cmd'
+$supabaseExecutable = if ($env:OS -eq 'Windows_NT') { 'supabase.cmd' } else { 'supabase' }
+$supabaseCli = Join-Path $repositoryRoot "node_modules/.bin/$supabaseExecutable"
 
 if (-not (Test-Path -LiteralPath $supabaseCli)) {
   throw 'Supabase CLI is unavailable. Run npm ci before generating database types.'

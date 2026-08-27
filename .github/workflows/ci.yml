@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, feature/mbj-mvp-core]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  VITE_APP_ENV: test
+  VITE_CLUB_DEPLOYMENT_ID: mbj-ci
+  VITE_SUPABASE_URL: http://127.0.0.1:54321
+  VITE_SUPABASE_PUBLISHABLE_KEY: local-public-key-placeholder
+
+jobs:
+  quality:
+    name: Frontend quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:unit
+      - run: npm run build
+
+  database:
+    name: Database security
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx supabase start
+      - run: npm run db:reset
+      - run: npm run db:lint
+      - run: npm run test:db
+      - name: Check generated database bindings
+        shell: pwsh
+        run: ./scripts/generate-database-types.ps1 -Check
+      - if: always()
+        run: npx supabase stop
+
+  e2e:
+    name: Browser journeys
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  required:
+    name: Required
+    if: always()
+    needs: [quality, database, e2e]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every CI gate
+        env:
+          DATABASE_RESULT: ${{ needs.database.result }}
+          E2E_RESULT: ${{ needs.e2e.result }}
+          QUALITY_RESULT: ${{ needs.quality.result }}
+        run: |
+          test "$QUALITY_RESULT" = success
+          test "$DATABASE_RESULT" = success
+          test "$E2E_RESULT" = success
