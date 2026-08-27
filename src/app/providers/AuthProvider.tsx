@@ -179,8 +179,15 @@ export function AuthProvider({ children, client = supabase }: AuthProviderProps)
   }, [client, resolveSession]);
 
   const contextValue = useMemo(
-    () => ({ ...value, refresh: async () => resolveSession(value.session) }),
-    [resolveSession, value],
+    () => ({
+      ...value,
+      refresh: async () => {
+        const { data, error } = await client.auth.getSession();
+        if (error) throw mapToAppError(error);
+        await resolveSession(data.session);
+      },
+    }),
+    [client, resolveSession, value],
   );
 
   return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;

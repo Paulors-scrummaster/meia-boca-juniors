@@ -34,6 +34,24 @@ export function AuthenticatedRouteGuard({ children }: GuardProps) {
   return content(children);
 }
 
+export function PasswordChangedRouteGuard({ children }: GuardProps) {
+  const auth = useAuth();
+
+  if (auth.status === 'initializing') return <LoadingState label="Verificando credencial" />;
+  if (auth.status !== 'authenticated') return <Navigate replace to="/" />;
+  if (auth.profile?.must_change_password) return <Navigate replace to="/alterar-senha" />;
+  return content(children);
+}
+
+export function PasswordChangeRouteGuard({ children }: GuardProps) {
+  const auth = useAuth();
+
+  if (auth.status === 'initializing') return <LoadingState label="Verificando credencial" />;
+  if (auth.status !== 'authenticated') return <Navigate replace to="/" />;
+  if (!auth.profile?.must_change_password) return <Navigate replace to="/app" />;
+  return content(children);
+}
+
 interface RoleRouteGuardProps extends GuardProps {
   allowedRoles: readonly AppRole[];
 }
@@ -54,6 +72,6 @@ export function Aal2RouteGuard({ children }: GuardProps) {
 
   if (status === 'initializing') return <LoadingState label="Verificando segundo fator" />;
   if (status !== 'authenticated') return <Navigate replace to="/" />;
-  if (!isAal2) return <Navigate replace to="/app/mfa-required" />;
+  if (!isAal2) return <Navigate replace to="/mfa" />;
   return content(children);
 }

@@ -10,6 +10,7 @@ function clientStub(overrides: Record<string, unknown> = {}) {
       mfa: {
         challenge: vi.fn(),
         enroll: vi.fn(),
+        listFactors: vi.fn(),
         verify: vi.fn(),
       },
       signInWithPassword: vi.fn(),
@@ -79,7 +80,7 @@ describe('auth service', () => {
     const service = createAuthService(
       clientStub({
         auth: {
-          mfa: { challenge, enroll, verify },
+          mfa: { challenge, enroll, listFactors: vi.fn(), verify },
           signInWithPassword: vi.fn(),
           signOut: vi.fn(),
           updateUser: vi.fn(),
@@ -99,6 +100,32 @@ describe('auth service', () => {
       code: '123456',
       factorId: 'factor-id',
     });
+  });
+
+  it('lists verified and pending TOTP factors for enrollment continuation', async () => {
+    const listFactors = vi.fn().mockResolvedValue({
+      data: {
+        all: [
+          { factor_type: 'totp', friendly_name: 'MBJ', id: 'pending-id', status: 'unverified' },
+          { factor_type: 'phone', id: 'phone-id', status: 'verified' },
+        ],
+      },
+      error: null,
+    });
+    const service = createAuthService(
+      clientStub({
+        auth: {
+          mfa: { challenge: vi.fn(), enroll: vi.fn(), listFactors, verify: vi.fn() },
+          signInWithPassword: vi.fn(),
+          signOut: vi.fn(),
+          updateUser: vi.fn(),
+        },
+      }),
+    );
+
+    await expect(service.getMfaFactors()).resolves.toEqual([
+      { factorId: 'pending-id', friendlyName: 'MBJ', status: 'unverified' },
+    ]);
   });
 
   it('covers login, roles, forced password change, administrative reset, and local logout', async () => {
@@ -125,7 +152,7 @@ describe('auth service', () => {
     const service = createAuthService(
       clientStub({
         auth: {
-          mfa: { challenge: vi.fn(), enroll: vi.fn(), verify: vi.fn() },
+          mfa: { challenge: vi.fn(), enroll: vi.fn(), listFactors: vi.fn(), verify: vi.fn() },
           signInWithPassword,
           signOut,
           updateUser,

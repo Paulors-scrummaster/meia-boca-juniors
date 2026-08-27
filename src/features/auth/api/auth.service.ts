@@ -46,12 +46,19 @@ export interface MfaEnrollmentResult {
   uri: string;
 }
 
+export interface MfaFactor {
+  factorId: string;
+  friendlyName: string | null;
+  status: 'verified' | 'unverified';
+}
+
 export interface AuthService {
   acceptInvitation(invitationId: string): Promise<InvitationAcceptanceResult>;
   challengeMfa(factorId: string, code: string): Promise<void>;
   changePassword(password: string): Promise<void>;
   enrollMfa(friendlyName?: string): Promise<MfaEnrollmentResult>;
-  getRoles(): Promise<AppRole[]>;
+  getMfaFactors(): Promise<MfaFactor[]>;
+  getRoles(userId?: string): Promise<AppRole[]>;
   manageInvitation(input: InvitationManagementInput): Promise<InvitationManagementResult>;
   resetPassword(input: {
     idempotencyKey: string;
@@ -185,8 +192,22 @@ export function createAuthService(client: SupabaseClient<Database>): AuthService
       };
     },
 
-    async getRoles() {
-      const { data, error } = await client.from('user_roles').select('role');
+    async getMfaFactors() {
+      const { data, error } = await client.auth.mfa.listFactors();
+      await requireNoError(error);
+      return (data?.all ?? [])
+        .filter((factor) => factor.factor_type === 'totp')
+        .map((factor) => ({
+          factorId: factor.id,
+          friendlyName: factor.friendly_name ?? null,
+          status: factor.status,
+        }));
+    },
+
+    async getRoles(userId) {
+      let query = client.from('user_roles').select('role');
+      if (userId) query = query.eq('user_id', userId);
+      const { data, error } = await query;
       await requireNoError(error);
       return (data ?? []).map(({ role }) => role);
     },

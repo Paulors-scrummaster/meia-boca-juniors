@@ -82,8 +82,8 @@
 - [x] T040 [P] [US1] Add RLS and RPC denial-matrix tests for visitors, Athlete, Coach, President, disabled accounts, and missing AAL2 in `supabase/tests/rls/002_identity_roles_rls.test.sql`
 - [x] T041 [P] [US1] Add Edge Function contract tests for invitation management, acceptance, administrative reset, approved rate limits, and safe `RATE_LIMITED` failures in `supabase/functions/tests/identity-functions.test.ts`
 - [x] T042 [P] [US1] Add local Auth throttle coverage that verifies HTTP 429 is mapped to the stable Portuguese `RATE_LIMITED` error without leaking provider details in `tests/e2e/auth-rate-limit.spec.ts`
-- [ ] T043 [P] [US1] Add component tests for login, forced password change, invitation acceptance, role navigation, and MFA prompts in `src/features/auth/auth-flows.test.tsx`
-- [ ] T044 [P] [US1] Add the invitation, multi-role, MFA, and forbidden-direct-request browser journey in `tests/e2e/auth-invitation.spec.ts`
+- [x] T043 [P] [US1] Add component tests for login, forced password change, invitation acceptance, role navigation, and MFA prompts in `src/features/auth/auth-flows.test.tsx`
+- [x] T044 [P] [US1] Add the invitation, multi-role, MFA, and forbidden-direct-request browser journey in `tests/e2e/auth-invitation.spec.ts`
 
 ### Implementation for User Story 1
 
@@ -94,12 +94,12 @@
 - [x] T049 [US1] Implement single-use invitation acceptance and atomic athlete/profile/role linkage in `supabase/functions/athlete-invitations/accept.ts`
 - [x] T050 [US1] Implement President+AAL2 temporary-password reset, forced-change flag, session handling, sanitized audit, and five-per-hour actor limit in `supabase/functions/admin-reset-password/index.ts`
 - [x] T051 [US1] Implement typed auth, invitation, MFA enrollment/challenge, role, logout, and password-change service calls, explicitly mapping Supabase Auth HTTP 429 responses to the stable Portuguese `RATE_LIMITED` application error without provider details in `src/features/auth/api/auth.service.ts`
-- [ ] T052 [P] [US1] Implement e-mail/password login and public welcome screens in `src/features/auth/pages/LoginPage.tsx` and `src/features/auth/pages/WelcomePage.tsx`
-- [ ] T053 [P] [US1] Implement invitation validation, confirmed athlete identity, and account activation UI in `src/features/auth/pages/AcceptInvitationPage.tsx`
-- [ ] T054 [P] [US1] Implement forced temporary-password replacement UI with React Hook Form and Zod in `src/features/auth/pages/ChangePasswordPage.tsx`
-- [ ] T055 [P] [US1] Implement TOTP enrollment and AAL2 challenge UI for President and Coach in `src/features/auth/pages/MfaPage.tsx`
-- [ ] T056 [US1] Implement effective-role queries and President role-assignment controls in `src/features/auth/queries/roles.queries.ts` and `src/features/auth/components/RoleManager.tsx`
-- [ ] T057 [US1] Register public/authenticated/MFA/password-change routes and role-aware redirects in `src/app/router/router.tsx`
+- [x] T052 [P] [US1] Implement e-mail/password login and public welcome screens in `src/features/auth/pages/LoginPage.tsx` and `src/features/auth/pages/WelcomePage.tsx`
+- [x] T053 [P] [US1] Implement invitation validation, confirmed athlete identity, and account activation UI in `src/features/auth/pages/AcceptInvitationPage.tsx`
+- [x] T054 [P] [US1] Implement forced temporary-password replacement UI with React Hook Form and Zod in `src/features/auth/pages/ChangePasswordPage.tsx`
+- [x] T055 [P] [US1] Implement TOTP enrollment and AAL2 challenge UI for President and Coach in `src/features/auth/pages/MfaPage.tsx`
+- [x] T056 [US1] Implement effective-role queries and President role-assignment controls in `src/features/auth/queries/roles.queries.ts` and `src/features/auth/components/RoleManager.tsx`
+- [x] T057 [US1] Register public/authenticated/MFA/password-change routes and role-aware redirects in `src/app/router/router.tsx`
 
 **Checkpoint**: User Story 1 is independently usable and all server-side authorization denials pass without relying on hidden UI controls.
 

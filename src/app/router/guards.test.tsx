@@ -6,6 +6,8 @@ import { AuthContext, type AuthContextValue } from '@/app/providers/AuthProvider
 import {
   Aal2RouteGuard,
   AuthenticatedRouteGuard,
+  PasswordChangedRouteGuard,
+  PasswordChangeRouteGuard,
   PublicRouteGuard,
   RoleRouteGuard,
 } from '@/app/router/guards';
@@ -32,8 +34,9 @@ function renderGuard(guard: React.ReactNode, value: AuthContextValue, initialEnt
         <Routes>
           <Route path="/" element={<p>pública</p>} />
           <Route path="/app" element={<p>aplicação</p>} />
+          <Route path="/alterar-senha" element={<p>troca obrigatória</p>} />
           <Route path="/app/forbidden" element={<p>proibido</p>} />
-          <Route path="/app/mfa-required" element={<p>mfa necessário</p>} />
+          <Route path="/mfa" element={<p>mfa necessário</p>} />
           <Route path="/private" element={guard} />
         </Routes>
       </MemoryRouter>
@@ -67,5 +70,18 @@ describe('route guards', () => {
   it('exige AAL2 para a rota administrativa', () => {
     renderGuard(<Aal2RouteGuard />, { ...authenticated, isAal2: false });
     expect(screen.getByText('mfa necessário')).toBeInTheDocument();
+  });
+
+  it('interrompe rotas privadas enquanto a senha temporária estiver ativa', () => {
+    renderGuard(<PasswordChangedRouteGuard />, {
+      ...authenticated,
+      profile: { ...authenticated.profile, must_change_password: true },
+    });
+    expect(screen.getByText('troca obrigatória')).toBeInTheDocument();
+  });
+
+  it('não reabre a troca obrigatória depois de concluída', () => {
+    renderGuard(<PasswordChangeRouteGuard />, authenticated);
+    expect(screen.getByText('aplicação')).toBeInTheDocument();
   });
 });

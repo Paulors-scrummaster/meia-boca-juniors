@@ -1,26 +1,40 @@
-/* eslint-disable react-refresh/only-export-components -- route modules intentionally colocate route elements and configuration */
-import { createBrowserRouter, Link, Outlet, type RouteObject } from 'react-router-dom';
+/* eslint-disable react-refresh/only-export-components -- route elements and configuration are intentionally colocated */
+import { createBrowserRouter, Link, Navigate, Outlet, type RouteObject } from 'react-router-dom';
 
 import { AuthenticatedLayout } from '@/app/layouts/AuthenticatedLayout';
+import { useAuth } from '@/app/providers/AuthProvider';
 import {
   Aal2RouteGuard,
   AuthenticatedRouteGuard,
+  PasswordChangedRouteGuard,
+  PasswordChangeRouteGuard,
   PublicRouteGuard,
   RoleRouteGuard,
 } from '@/app/router/guards';
-import { clubConfig } from '@/config/club.config';
+import { RoleAdministrationPage } from '@/features/auth/components/RoleManager';
+import { AcceptInvitationPage } from '@/features/auth/pages/AcceptInvitationPage';
+import { ChangePasswordPage } from '@/features/auth/pages/ChangePasswordPage';
+import { LoginPage } from '@/features/auth/pages/LoginPage';
+import { MfaPage } from '@/features/auth/pages/MfaPage';
+import { WelcomePage } from '@/features/auth/pages/WelcomePage';
 import { EmptyState, ErrorState } from '@/shared/components/feedback';
+import type { Database } from '@/shared/types/database.generated';
+
+type AppRole = Database['public']['Enums']['app_role'];
 
 function PublicLayout() {
   return (
-    <main className="min-h-dvh bg-background px-5 py-10 text-foreground">
-      <div className="mx-auto max-w-3xl">
-        <nav aria-label="Navegação pública" className="mb-6 flex justify-end gap-2">
+    <main className="min-h-dvh bg-background px-5 py-8 text-foreground">
+      <div className="mx-auto max-w-5xl">
+        <nav aria-label="Navegação pública" className="mb-4 flex justify-end gap-2">
+          <Link className="min-h-11 rounded-lg px-3 py-2 font-semibold text-primary" to="/">
+            Início
+          </Link>
           <Link className="min-h-11 rounded-lg px-3 py-2 font-semibold text-primary" to="/login">
             Entrar
           </Link>
           <Link className="min-h-11 rounded-lg px-3 py-2 font-semibold text-primary" to="/convite">
-            Validar convite
+            Ativar convite
           </Link>
         </nav>
         <Outlet />
@@ -29,61 +43,62 @@ function PublicLayout() {
   );
 }
 
-function WelcomePage() {
+function AuthFlowLayout() {
   return (
-    <section className="flex min-h-[calc(100dvh-9rem)] items-center">
-      <div className="w-full rounded-3xl border bg-card p-8 shadow-xl shadow-primary/10 sm:p-12">
-        <img
-          alt={`Escudo do ${clubConfig.identity.shortName}`}
-          className="mb-8 h-24 w-24"
-          src={clubConfig.assets.logo}
-        />
-        <p className="mb-3 text-sm font-semibold uppercase tracking-[0.2em] text-primary">
-          {clubConfig.identity.shortName}
-        </p>
-        <h1 className="text-4xl font-black tracking-tight sm:text-5xl">
-          {clubConfig.institutional.welcomeTitle}
-        </h1>
-        <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
-          {clubConfig.institutional.welcomeDescription}
-        </p>
-        <p className="mt-8 inline-flex rounded-full bg-secondary px-4 py-2 text-sm font-bold text-secondary-foreground">
-          Base do aplicativo pronta para evoluir com segurança.
-        </p>
-      </div>
-    </section>
+    <main className="min-h-dvh bg-background px-5 py-12 text-foreground">
+      <Outlet />
+    </main>
   );
 }
 
-function FoundationPlaceholder({ description, title }: { description: string; title: string }) {
+function Placeholder({ description, title }: { description: string; title: string }) {
   return <EmptyState description={description} title={title} />;
+}
+
+export function defaultRouteForRoles(roles: readonly AppRole[]): string {
+  if (roles.includes('PRESIDENT')) return '/app/admin';
+  if (roles.includes('COACH')) return '/app/staff';
+  if (roles.includes('ATHLETE')) return '/app/athlete';
+  return '/app/forbidden';
+}
+
+function RoleHomeRedirect() {
+  const { roles } = useAuth();
+  return <Navigate replace to={defaultRouteForRoles(roles)} />;
 }
 
 export const appRoutes: RouteObject[] = [
   {
-    element: <PublicRouteGuard />,
+    element: <PublicLayout />,
     children: [
       {
-        element: <PublicLayout />,
+        element: <PublicRouteGuard />,
         children: [
           { index: true, element: <WelcomePage /> },
+          { path: '/login', element: <LoginPage /> },
+        ],
+      },
+      { path: '/convite', element: <AcceptInvitationPage /> },
+    ],
+  },
+  {
+    element: <AuthFlowLayout />,
+    children: [
+      {
+        element: <PasswordChangeRouteGuard />,
+        children: [{ path: '/alterar-senha', element: <ChangePasswordPage /> }],
+      },
+      {
+        element: <AuthenticatedRouteGuard />,
+        children: [
           {
-            path: '/login',
-            element: (
-              <FoundationPlaceholder
-                description="O fluxo de autenticação será habilitado na próxima etapa de identidade."
-                title="Acesso ao clube"
-              />
-            ),
-          },
-          {
-            path: '/convite',
-            element: (
-              <FoundationPlaceholder
-                description="A ativação individual será habilitada com o módulo de convites."
-                title="Validação de convite"
-              />
-            ),
+            element: <PasswordChangedRouteGuard />,
+            children: [
+              {
+                element: <RoleRouteGuard allowedRoles={['COACH', 'PRESIDENT']} />,
+                children: [{ path: '/mfa', element: <MfaPage /> }],
+              },
+            ],
           },
         ],
       },
@@ -94,87 +109,65 @@ export const appRoutes: RouteObject[] = [
     element: <AuthenticatedRouteGuard />,
     children: [
       {
-        element: <AuthenticatedLayout />,
+        element: <PasswordChangedRouteGuard />,
         children: [
           {
-            index: true,
-            element: (
-              <FoundationPlaceholder
-                description="Sua sessão e permissões estão prontas para os módulos do clube."
-                title="Área autenticada"
-              />
-            ),
-          },
-          {
-            path: 'athlete',
-            element: <RoleRouteGuard allowedRoles={['ATHLETE']} />,
+            element: <AuthenticatedLayout />,
             children: [
+              { index: true, element: <RoleHomeRedirect /> },
               {
-                index: true,
+                path: 'athlete',
+                element: <RoleRouteGuard allowedRoles={['ATHLETE']} />,
+                children: [
+                  {
+                    index: true,
+                    element: (
+                      <Placeholder
+                        title="Área do atleta"
+                        description="Seu acesso de atleta está ativo."
+                      />
+                    ),
+                  },
+                ],
+              },
+              {
+                element: <RoleRouteGuard allowedRoles={['COACH', 'PRESIDENT']} />,
+                children: [
+                  {
+                    element: <Aal2RouteGuard />,
+                    children: [
+                      {
+                        path: 'staff',
+                        element: (
+                          <Placeholder
+                            title="Comissão técnica"
+                            description="Seu acesso à comissão técnica está protegido por verificação em duas etapas."
+                          />
+                        ),
+                      },
+                    ],
+                  },
+                ],
+              },
+              {
+                element: <RoleRouteGuard allowedRoles={['PRESIDENT']} />,
+                children: [
+                  {
+                    element: <Aal2RouteGuard />,
+                    children: [{ path: 'admin', element: <RoleAdministrationPage /> }],
+                  },
+                ],
+              },
+              {
+                path: 'forbidden',
                 element: (
-                  <FoundationPlaceholder
-                    description="Os recursos do atleta serão adicionados nas histórias funcionais."
-                    title="Área do atleta"
+                  <ErrorState
+                    title="Acesso negado"
+                    message="Você não tem permissão para acessar esta área."
                   />
                 ),
               },
             ],
-          },
-          {
-            element: <RoleRouteGuard allowedRoles={['COACH', 'PRESIDENT']} />,
-            children: [
-              {
-                element: <Aal2RouteGuard />,
-                children: [
-                  {
-                    path: 'staff',
-                    element: (
-                      <FoundationPlaceholder
-                        description="As ferramentas esportivas serão adicionadas nos próximos módulos."
-                        title="Comissão técnica"
-                      />
-                    ),
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            element: <RoleRouteGuard allowedRoles={['PRESIDENT']} />,
-            children: [
-              {
-                element: <Aal2RouteGuard />,
-                children: [
-                  {
-                    path: 'admin',
-                    element: (
-                      <FoundationPlaceholder
-                        description="A administração será habilitada junto aos fluxos de identidade."
-                        title="Administração"
-                      />
-                    ),
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            path: 'forbidden',
-            element: (
-              <ErrorState
-                message="Você não tem permissão para acessar esta área."
-                title="Acesso negado"
-              />
-            ),
-          },
-          {
-            path: 'mfa-required',
-            element: (
-              <ErrorState
-                message="Confirme a verificação em duas etapas para acessar funções administrativas."
-                title="Verificação necessária"
-              />
-            ),
           },
         ],
       },
@@ -184,7 +177,7 @@ export const appRoutes: RouteObject[] = [
     path: '*',
     element: (
       <main className="mx-auto max-w-xl px-5 py-16">
-        <ErrorState message="A página solicitada não existe." title="Página não encontrada" />
+        <ErrorState title="Página não encontrada" message="A página solicitada não existe." />
       </main>
     ),
   },
