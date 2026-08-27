@@ -34,6 +34,64 @@ export type Database = {
   }
   public: {
     Tables: {
+      athlete_invites: {
+        Row: {
+          athlete_id: string
+          auth_user_id: string | null
+          created_at: string
+          created_by: string
+          email_normalized: string
+          id: string
+          redeemed_at: string | null
+          redeemed_by: string | null
+          revoked_at: string | null
+        }
+        Insert: {
+          athlete_id: string
+          auth_user_id?: string | null
+          created_at?: string
+          created_by: string
+          email_normalized: string
+          id?: string
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          revoked_at?: string | null
+        }
+        Update: {
+          athlete_id?: string
+          auth_user_id?: string | null
+          created_at?: string
+          created_by?: string
+          email_normalized?: string
+          id?: string
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          revoked_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "athlete_invites_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "athlete_invites_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "athlete_invites_redeemed_by_fkey"
+            columns: ["redeemed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       athletes: {
         Row: {
           anonymized_at: string | null
@@ -286,7 +344,74 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      accept_athlete_invitation: {
+        Args: { invitation_uuid: string; request_trace_id: string }
+        Returns: Json
+      }
+      complete_admin_password_reset: {
+        Args: {
+          actor_user_id: string
+          command_idempotency_key: string
+          request_trace_id: string
+          target_user_id: string
+        }
+        Returns: Json
+      }
+      complete_forced_password_change: {
+        Args: { request_trace_id: string }
+        Returns: Json
+      }
+      consume_identity_rate_limit: {
+        Args: {
+          counter_scope: string
+          maximum_attempts: number
+          subject_key: string
+          window_seconds: number
+        }
+        Returns: {
+          allowed: boolean
+          remaining: number
+          resets_at: string
+        }[]
+      }
+      create_identity_invite: {
+        Args: {
+          actor_user_id: string
+          athlete_uuid: string
+          command_idempotency_key: string
+          invitation_auth_user_id: string
+          normalized_email: string
+          request_trace_id: string
+        }
+        Returns: Json
+      }
+      record_identity_invite_resend: {
+        Args: {
+          actor_user_id: string
+          command_idempotency_key: string
+          invitation_uuid: string
+          request_trace_id: string
+        }
+        Returns: Json
+      }
+      revoke_identity_invite: {
+        Args: {
+          actor_user_id: string
+          athlete_uuid: string
+          command_idempotency_key: string
+          request_trace_id: string
+        }
+        Returns: Json
+      }
+      set_user_role: {
+        Args: {
+          request_trace_id: string
+          should_assign: boolean
+          target_role: Database["public"]["Enums"]["app_role"]
+          target_user_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       account_status: "ACTIVE" | "DISABLED"

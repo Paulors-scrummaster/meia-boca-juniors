@@ -78,22 +78,22 @@
 
 ### Tests for User Story 1
 
-- [ ] T039 [P] [US1] Add pgTAP constraints for one active logical invite per athlete, single redemption, and sanitized audit data in `supabase/tests/constraints/002_identity_invites.test.sql`
-- [ ] T040 [P] [US1] Add RLS and RPC denial-matrix tests for visitors, Athlete, Coach, President, disabled accounts, and missing AAL2 in `supabase/tests/rls/002_identity_roles_rls.test.sql`
-- [ ] T041 [P] [US1] Add Edge Function contract tests for invitation management, acceptance, administrative reset, approved rate limits, and safe `RATE_LIMITED` failures in `supabase/functions/tests/identity-functions.test.ts`
-- [ ] T042 [P] [US1] Add local Auth throttle coverage that verifies HTTP 429 is mapped to the stable Portuguese `RATE_LIMITED` error without leaking provider details in `tests/e2e/auth-rate-limit.spec.ts`
+- [x] T039 [P] [US1] Add pgTAP constraints for one active logical invite per athlete, single redemption, and sanitized audit data in `supabase/tests/constraints/002_identity_invites.test.sql`
+- [x] T040 [P] [US1] Add RLS and RPC denial-matrix tests for visitors, Athlete, Coach, President, disabled accounts, and missing AAL2 in `supabase/tests/rls/002_identity_roles_rls.test.sql`
+- [x] T041 [P] [US1] Add Edge Function contract tests for invitation management, acceptance, administrative reset, approved rate limits, and safe `RATE_LIMITED` failures in `supabase/functions/tests/identity-functions.test.ts`
+- [x] T042 [P] [US1] Add local Auth throttle coverage that verifies HTTP 429 is mapped to the stable Portuguese `RATE_LIMITED` error without leaking provider details in `tests/e2e/auth-rate-limit.spec.ts`
 - [ ] T043 [P] [US1] Add component tests for login, forced password change, invitation acceptance, role navigation, and MFA prompts in `src/features/auth/auth-flows.test.tsx`
 - [ ] T044 [P] [US1] Add the invitation, multi-role, MFA, and forbidden-direct-request browser journey in `tests/e2e/auth-invitation.spec.ts`
 
 ### Implementation for User Story 1
 
-- [ ] T045 [US1] Create `athlete_invites`, invitation lifecycle constraints, profile activation operations, and President-only role assignment policies in `supabase/migrations/20260825000400_identity_invites.sql`
-- [ ] T046 [US1] Regenerate and verify Supabase bindings after identity migrations in `src/shared/types/database.generated.ts`
-- [ ] T047 [P] [US1] Implement common Edge Function authentication, AAL2, idempotency, rate-limit consumption, CORS, safe-error, and trace helpers in `supabase/functions/_shared/security.ts`
-- [ ] T048 [US1] Implement create, resend, and revoke operations using Auth Admin link generation, approved per-President limits, and no product e-mail in `supabase/functions/athlete-invitations/index.ts`
-- [ ] T049 [US1] Implement single-use invitation acceptance and atomic athlete/profile/role linkage in `supabase/functions/athlete-invitations/accept.ts`
-- [ ] T050 [US1] Implement President+AAL2 temporary-password reset, forced-change flag, session handling, sanitized audit, and five-per-hour actor limit in `supabase/functions/admin-reset-password/index.ts`
-- [ ] T051 [US1] Implement typed auth, invitation, MFA enrollment/challenge, role, logout, and password-change service calls, explicitly mapping Supabase Auth HTTP 429 responses to the stable Portuguese `RATE_LIMITED` application error without provider details in `src/features/auth/api/auth.service.ts`
+- [x] T045 [US1] Create `athlete_invites`, invitation lifecycle constraints, profile activation operations, and President-only role assignment policies in `supabase/migrations/20260825000400_identity_invites.sql`
+- [x] T046 [US1] Regenerate and verify Supabase bindings after identity migrations in `src/shared/types/database.generated.ts`
+- [x] T047 [P] [US1] Implement common Edge Function authentication, AAL2, idempotency, rate-limit consumption, CORS, safe-error, and trace helpers in `supabase/functions/_shared/security.ts`
+- [x] T048 [US1] Implement create, resend, and revoke operations using Auth Admin link generation, approved per-President limits, and no product e-mail in `supabase/functions/athlete-invitations/index.ts`
+- [x] T049 [US1] Implement single-use invitation acceptance and atomic athlete/profile/role linkage in `supabase/functions/athlete-invitations/accept.ts`
+- [x] T050 [US1] Implement President+AAL2 temporary-password reset, forced-change flag, session handling, sanitized audit, and five-per-hour actor limit in `supabase/functions/admin-reset-password/index.ts`
+- [x] T051 [US1] Implement typed auth, invitation, MFA enrollment/challenge, role, logout, and password-change service calls, explicitly mapping Supabase Auth HTTP 429 responses to the stable Portuguese `RATE_LIMITED` application error without provider details in `src/features/auth/api/auth.service.ts`
 - [ ] T052 [P] [US1] Implement e-mail/password login and public welcome screens in `src/features/auth/pages/LoginPage.tsx` and `src/features/auth/pages/WelcomePage.tsx`
 - [ ] T053 [P] [US1] Implement invitation validation, confirmed athlete identity, and account activation UI in `src/features/auth/pages/AcceptInvitationPage.tsx`
 - [ ] T054 [P] [US1] Implement forced temporary-password replacement UI with React Hook Form and Zod in `src/features/auth/pages/ChangePasswordPage.tsx`

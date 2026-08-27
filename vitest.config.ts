@@ -10,7 +10,7 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}', 'supabase/functions/tests/**/*.{test,spec}.ts'],
     setupFiles: ['./src/test/setup.ts'],
     env: {
       VITE_APP_ENV: 'test',
