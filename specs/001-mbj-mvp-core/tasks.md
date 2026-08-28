@@ -212,22 +212,22 @@
 
 ### Tests for User Story 5
 
-- [ ] T109 [P] [US5] Add pgTAP constraints for immutable consolidation-lineup linkage, score/goal consistency, voting windows, unique/no-self votes, and tied awards in `supabase/tests/constraints/006_statistics_voting.test.sql`
-- [ ] T110 [P] [US5] Add RLS tests for President-only consolidation/reopen, Athlete-role voting, hidden vote details, candidate membership, and closed windows in `supabase/tests/rls/005_statistics_voting_rls.test.sql`
-- [ ] T111 [P] [US5] Add RPC tests for required published lineup, immutable candidate snapshot, idempotent consolidation, invalidated-round history, one vote per valid round, fresh voting after reconsolidation, concurrent voting, and tied close in `supabase/tests/rpc/003_statistics_voting_commands.test.sql`
+- [X] T109 [P] [US5] Add pgTAP constraints for immutable consolidation-lineup linkage, score/goal consistency, voting windows, unique/no-self votes, and tied awards in `supabase/tests/constraints/006_statistics_voting.test.sql`
+- [X] T110 [P] [US5] Add RLS tests for President-only consolidation/reopen, Athlete-role voting, hidden vote details, candidate membership, and closed windows in `supabase/tests/rls/005_statistics_voting_rls.test.sql`
+- [X] T111 [P] [US5] Add RPC tests for required published lineup, immutable candidate snapshot, idempotent consolidation, invalidated-round history, one vote per valid round, fresh voting after reconsolidation, concurrent voting, and tied close in `supabase/tests/rpc/003_statistics_voting_commands.test.sql`
 - [ ] T112 [P] [US5] Add unit/component tests for contribution validation, candidate exclusion, countdown states, rankings, and correction confirmation in `src/features/statistics/statistics-voting.test.tsx`
 - [ ] T113 [P] [US5] Add the consolidate/vote/tie/reopen/reconsolidate/new-round-vote/history browser journey in `tests/e2e/statistics-mvp.spec.ts`
 
 ### Implementation for User Story 5
 
-- [ ] T114 [US5] Create immutable `match_consolidations` linked to exact `lineup_id`, `match_goals`, `mvp_voting_rounds`, `mvp_votes`, and `mvp_awards` with RLS and historical foreign keys in `supabase/migrations/20260825001600_statistics_voting.sql`
-- [ ] T115 [US5] Implement `consolidate_match` with required current lineup snapshot, match locking, goal validation, idempotency, exact voting window, audit, and outbox event in `supabase/migrations/20260825001700_consolidate_match.sql`
-- [ ] T116 [US5] Implement President-only `reopen_match_statistics` with explanation, invalidation of consolidation/round/awards, preserved history, and audit in `supabase/migrations/20260825001800_reopen_statistics.sql`
-- [ ] T117 [US5] Implement `cast_mvp_vote` with server-derived voter, current valid round, lineup candidates, no-self, unique-per-round vote, invalidated-round independence, and deadline checks in `supabase/migrations/20260825001900_cast_mvp_vote.sql`
-- [ ] T118 [US5] Implement idempotent `close_mvp_voting` and scheduled recovery invocation that awards every positive top tie in `supabase/migrations/20260825002000_close_mvp_voting.sql`
-- [ ] T119 [US5] Create invoker-safe `season_rankings_view` and `open_mvp_voting_view` that exclude invalidated revisions and the caller in `supabase/migrations/20260825002100_statistics_views.sql`
-- [ ] T120 [US5] Regenerate and verify Supabase bindings after statistics and voting migrations in `src/shared/types/database.generated.ts`
-- [ ] T121 [P] [US5] Implement typed consolidation, reopen, rankings, round, and voting service calls/query keys in `src/features/statistics/api/statistics.service.ts` and `src/features/mvp-voting/api/voting.service.ts`
+- [X] T114 [US5] Create immutable `match_consolidations` linked to exact `lineup_id`, `match_goals`, `mvp_voting_rounds`, `mvp_votes`, and `mvp_awards` with RLS and historical foreign keys in `supabase/migrations/20260825001600_statistics_voting.sql`
+- [X] T115 [US5] Implement `consolidate_match` with required current lineup snapshot, match locking, goal validation, idempotency, exact voting window, audit, and outbox event in `supabase/migrations/20260825001700_consolidate_match.sql`
+- [X] T116 [US5] Implement President-only `reopen_match_statistics` with explanation, invalidation of consolidation/round/awards, preserved history, and audit in `supabase/migrations/20260825001800_reopen_statistics.sql`
+- [X] T117 [US5] Implement `cast_mvp_vote` with server-derived voter, current valid round, lineup candidates, no-self, unique-per-round vote, invalidated-round independence, and deadline checks in `supabase/migrations/20260825001900_cast_mvp_vote.sql`
+- [X] T118 [US5] Implement idempotent `close_mvp_voting` and scheduled recovery invocation that awards every positive top tie in `supabase/migrations/20260825002000_close_mvp_voting.sql`
+- [X] T119 [US5] Create invoker-safe `season_rankings_view` and `open_mvp_voting_view` that exclude invalidated revisions and the caller in `supabase/migrations/20260825002100_statistics_views.sql`
+- [X] T120 [US5] Regenerate and verify Supabase bindings after statistics and voting migrations in `src/shared/types/database.generated.ts`
+- [X] T121 [P] [US5] Implement typed consolidation, reopen, rankings, round, and voting service calls/query keys in `src/features/statistics/api/statistics.service.ts` and `src/features/mvp-voting/api/voting.service.ts`
 - [ ] T122 [US5] Implement online-guarded President result/contribution form with score consistency validation and explicit consolidation confirmation in `src/features/statistics/components/ConsolidationForm.tsx`
 - [ ] T123 [P] [US5] Implement season rankings and preserved athlete/match history views in `src/features/statistics/pages/SeasonRankingsPage.tsx`
 - [ ] T124 [P] [US5] Implement online-guarded current-round candidate list, countdown, one-vote state, and results UI in `src/features/mvp-voting/pages/MvpVotingPage.tsx`

@@ -95,6 +95,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "athlete_invites_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["candidate_athlete_id"]
+          },
+          {
+            foreignKeyName: "athlete_invites_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voter_athlete_id"]
+          },
+          {
+            foreignKeyName: "athlete_invites_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
             foreignKeyName: "athlete_invites_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -244,6 +265,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "lineup_players_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["candidate_athlete_id"]
+          },
+          {
+            foreignKeyName: "lineup_players_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voter_athlete_id"]
+          },
+          {
+            foreignKeyName: "lineup_players_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
             foreignKeyName: "lineup_players_lineup_id_fkey"
             columns: ["lineup_id"]
             isOneToOne: false
@@ -331,6 +373,198 @@ export type Database = {
           },
         ]
       }
+      match_consolidations: {
+        Row: {
+          consolidated_at: string
+          consolidated_by: string
+          id: string
+          idempotency_key: string
+          invalidated_at: string | null
+          invalidated_by: string | null
+          lineup_id: string
+          match_id: string
+          mbj_score: number
+          opponent_score: number
+          revision: number
+          status: Database["public"]["Enums"]["consolidation_status"]
+        }
+        Insert: {
+          consolidated_at?: string
+          consolidated_by: string
+          id?: string
+          idempotency_key: string
+          invalidated_at?: string | null
+          invalidated_by?: string | null
+          lineup_id: string
+          match_id: string
+          mbj_score: number
+          opponent_score: number
+          revision: number
+          status?: Database["public"]["Enums"]["consolidation_status"]
+        }
+        Update: {
+          consolidated_at?: string
+          consolidated_by?: string
+          id?: string
+          idempotency_key?: string
+          invalidated_at?: string | null
+          invalidated_by?: string | null
+          lineup_id?: string
+          match_id?: string
+          mbj_score?: number
+          opponent_score?: number
+          revision?: number
+          status?: Database["public"]["Enums"]["consolidation_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_consolidations_consolidated_by_fkey"
+            columns: ["consolidated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_consolidations_invalidated_by_fkey"
+            columns: ["invalidated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_consolidations_lineup_id_fkey"
+            columns: ["lineup_id"]
+            isOneToOne: false
+            referencedRelation: "lineups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_consolidations_lineup_id_fkey"
+            columns: ["lineup_id"]
+            isOneToOne: false
+            referencedRelation: "published_lineup_view"
+            referencedColumns: ["lineup_id"]
+          },
+          {
+            foreignKeyName: "match_consolidations_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_consolidations_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "next_match_view"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      match_goals: {
+        Row: {
+          assistant_athlete_id: string | null
+          consolidation_id: string
+          created_at: string
+          created_by: string
+          id: string
+          is_opponent_own_goal: boolean
+          scorer_athlete_id: string | null
+          sequence_number: number
+        }
+        Insert: {
+          assistant_athlete_id?: string | null
+          consolidation_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          is_opponent_own_goal?: boolean
+          scorer_athlete_id?: string | null
+          sequence_number: number
+        }
+        Update: {
+          assistant_athlete_id?: string | null
+          consolidation_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          is_opponent_own_goal?: boolean
+          scorer_athlete_id?: string | null
+          sequence_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_goals_assistant_athlete_id_fkey"
+            columns: ["assistant_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_goals_assistant_athlete_id_fkey"
+            columns: ["assistant_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["candidate_athlete_id"]
+          },
+          {
+            foreignKeyName: "match_goals_assistant_athlete_id_fkey"
+            columns: ["assistant_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voter_athlete_id"]
+          },
+          {
+            foreignKeyName: "match_goals_assistant_athlete_id_fkey"
+            columns: ["assistant_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "match_goals_consolidation_id_fkey"
+            columns: ["consolidation_id"]
+            isOneToOne: false
+            referencedRelation: "match_consolidations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_goals_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_goals_scorer_athlete_id_fkey"
+            columns: ["scorer_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_goals_scorer_athlete_id_fkey"
+            columns: ["scorer_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["candidate_athlete_id"]
+          },
+          {
+            foreignKeyName: "match_goals_scorer_athlete_id_fkey"
+            columns: ["scorer_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voter_athlete_id"]
+          },
+          {
+            foreignKeyName: "match_goals_scorer_athlete_id_fkey"
+            columns: ["scorer_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+        ]
+      }
       match_presences: {
         Row: {
           athlete_id: string
@@ -384,6 +618,27 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "athletes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["candidate_athlete_id"]
+          },
+          {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voter_athlete_id"]
+          },
+          {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
           },
           {
             foreignKeyName: "match_presences_last_changed_by_fkey"
@@ -466,6 +721,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "matches_current_consolidation_fk"
+            columns: ["current_consolidation_id"]
+            isOneToOne: false
+            referencedRelation: "match_consolidations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "matches_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["season_id"]
+          },
+          {
             foreignKeyName: "matches_season_id_fkey"
             columns: ["season_id"]
             isOneToOne: false
@@ -475,6 +744,216 @@ export type Database = {
           {
             foreignKeyName: "matches_updated_by_fkey"
             columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mvp_awards: {
+        Row: {
+          athlete_id: string
+          awarded_at: string
+          invalidated_at: string | null
+          vote_count: number
+          voting_round_id: string
+        }
+        Insert: {
+          athlete_id: string
+          awarded_at?: string
+          invalidated_at?: string | null
+          vote_count: number
+          voting_round_id: string
+        }
+        Update: {
+          athlete_id?: string
+          awarded_at?: string
+          invalidated_at?: string | null
+          vote_count?: number
+          voting_round_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mvp_awards_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mvp_awards_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["candidate_athlete_id"]
+          },
+          {
+            foreignKeyName: "mvp_awards_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voter_athlete_id"]
+          },
+          {
+            foreignKeyName: "mvp_awards_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "mvp_awards_voting_round_id_fkey"
+            columns: ["voting_round_id"]
+            isOneToOne: false
+            referencedRelation: "mvp_voting_rounds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mvp_awards_voting_round_id_fkey"
+            columns: ["voting_round_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voting_round_id"]
+          },
+        ]
+      }
+      mvp_votes: {
+        Row: {
+          created_at: string
+          id: string
+          voted_athlete_id: string
+          voter_athlete_id: string
+          voting_round_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          voted_athlete_id: string
+          voter_athlete_id: string
+          voting_round_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          voted_athlete_id?: string
+          voter_athlete_id?: string
+          voting_round_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mvp_votes_voted_athlete_id_fkey"
+            columns: ["voted_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mvp_votes_voted_athlete_id_fkey"
+            columns: ["voted_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["candidate_athlete_id"]
+          },
+          {
+            foreignKeyName: "mvp_votes_voted_athlete_id_fkey"
+            columns: ["voted_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voter_athlete_id"]
+          },
+          {
+            foreignKeyName: "mvp_votes_voted_athlete_id_fkey"
+            columns: ["voted_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "mvp_votes_voter_athlete_id_fkey"
+            columns: ["voter_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mvp_votes_voter_athlete_id_fkey"
+            columns: ["voter_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["candidate_athlete_id"]
+          },
+          {
+            foreignKeyName: "mvp_votes_voter_athlete_id_fkey"
+            columns: ["voter_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voter_athlete_id"]
+          },
+          {
+            foreignKeyName: "mvp_votes_voter_athlete_id_fkey"
+            columns: ["voter_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "mvp_votes_voting_round_id_fkey"
+            columns: ["voting_round_id"]
+            isOneToOne: false
+            referencedRelation: "mvp_voting_rounds"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mvp_votes_voting_round_id_fkey"
+            columns: ["voting_round_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voting_round_id"]
+          },
+        ]
+      }
+      mvp_voting_rounds: {
+        Row: {
+          closed_at: string | null
+          closes_at: string
+          consolidation_id: string
+          created_by: string
+          id: string
+          invalidated_at: string | null
+          opens_at: string
+          status: Database["public"]["Enums"]["voting_round_status"]
+        }
+        Insert: {
+          closed_at?: string | null
+          closes_at: string
+          consolidation_id: string
+          created_by: string
+          id?: string
+          invalidated_at?: string | null
+          opens_at?: string
+          status?: Database["public"]["Enums"]["voting_round_status"]
+        }
+        Update: {
+          closed_at?: string | null
+          closes_at?: string
+          consolidation_id?: string
+          created_by?: string
+          id?: string
+          invalidated_at?: string | null
+          opens_at?: string
+          status?: Database["public"]["Enums"]["voting_round_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mvp_voting_rounds_consolidation_id_fkey"
+            columns: ["consolidation_id"]
+            isOneToOne: true
+            referencedRelation: "match_consolidations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mvp_voting_rounds_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -737,7 +1216,59 @@ export type Database = {
             foreignKeyName: "matches_season_id_fkey"
             columns: ["season_id"]
             isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["season_id"]
+          },
+          {
+            foreignKeyName: "matches_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
             referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      open_mvp_voting_view: {
+        Row: {
+          assignment: Database["public"]["Enums"]["lineup_assignment"] | null
+          candidate_athlete_id: string | null
+          closes_at: string | null
+          has_voted: boolean | null
+          lineup_id: string | null
+          match_id: string | null
+          opens_at: string | null
+          shirt_name: string | null
+          shirt_number: number | null
+          voter_athlete_id: string | null
+          voting_round_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_consolidations_lineup_id_fkey"
+            columns: ["lineup_id"]
+            isOneToOne: false
+            referencedRelation: "lineups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_consolidations_lineup_id_fkey"
+            columns: ["lineup_id"]
+            isOneToOne: false
+            referencedRelation: "published_lineup_view"
+            referencedColumns: ["lineup_id"]
+          },
+          {
+            foreignKeyName: "match_consolidations_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_consolidations_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "next_match_view"
             referencedColumns: ["id"]
           },
         ]
@@ -765,6 +1296,27 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "athletes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineup_players_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["candidate_athlete_id"]
+          },
+          {
+            foreignKeyName: "lineup_players_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voter_athlete_id"]
+          },
+          {
+            foreignKeyName: "lineup_players_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
           },
           {
             foreignKeyName: "lineups_formation_code_fkey"
@@ -811,6 +1363,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["candidate_athlete_id"]
+          },
+          {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voter_athlete_id"]
+          },
+          {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
             foreignKeyName: "match_presences_match_id_fkey"
             columns: ["match_id"]
             isOneToOne: false
@@ -825,6 +1398,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      season_rankings_view: {
+        Row: {
+          assists: number | null
+          athlete_id: string | null
+          goals: number | null
+          mvp_awards: number | null
+          presences: number | null
+          season_id: string | null
+          shirt_name: string | null
+          shirt_number: number | null
+          year: number | null
+        }
+        Relationships: []
       }
       staff_attendance_view: {
         Row: {
@@ -848,6 +1435,27 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "athletes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["candidate_athlete_id"]
+          },
+          {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voter_athlete_id"]
+          },
+          {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
           },
           {
             foreignKeyName: "match_presences_match_id_fkey"
@@ -909,6 +1517,15 @@ export type Database = {
         Args: { command_idempotency_key: string; match_uuid: string }
         Returns: Json
       }
+      cast_mvp_vote: {
+        Args: {
+          candidate_athlete_uuid: string
+          command_idempotency_key: string
+          voting_round_uuid: string
+        }
+        Returns: Json
+      }
+      close_mvp_voting: { Args: { voting_round_uuid: string }; Returns: Json }
       complete_admin_password_reset: {
         Args: {
           actor_user_id: string
@@ -920,6 +1537,16 @@ export type Database = {
       }
       complete_forced_password_change: {
         Args: { request_trace_id: string }
+        Returns: Json
+      }
+      consolidate_match: {
+        Args: {
+          command_idempotency_key: string
+          goals_input: Json
+          match_uuid: string
+          mbj_score_input: number
+          opponent_score_input: number
+        }
         Returns: Json
       }
       consume_identity_rate_limit: {
@@ -1016,6 +1643,14 @@ export type Database = {
           command_idempotency_key: string
           invitation_uuid: string
           request_trace_id: string
+        }
+        Returns: Json
+      }
+      reopen_match_statistics: {
+        Args: {
+          command_idempotency_key: string
+          correction_explanation: string
+          match_uuid: string
         }
         Returns: Json
       }
@@ -1131,6 +1766,7 @@ export type Database = {
       app_role: "PRESIDENT" | "COACH" | "ATHLETE"
       athlete_status: "ACTIVE" | "INJURED" | "SUSPENDED" | "INACTIVE"
       call_status: "CALLED" | "NOT_CALLED"
+      consolidation_status: "VALID" | "INVALIDATED"
       lineup_assignment: "STARTER" | "RESERVE"
       lineup_status: "DRAFT" | "PUBLISHED" | "SUPERSEDED"
       match_status: "SCHEDULED" | "COMPLETED" | "CANCELLED"
@@ -1284,6 +1920,7 @@ export const Constants = {
       app_role: ["PRESIDENT", "COACH", "ATHLETE"],
       athlete_status: ["ACTIVE", "INJURED", "SUSPENDED", "INACTIVE"],
       call_status: ["CALLED", "NOT_CALLED"],
+      consolidation_status: ["VALID", "INVALIDATED"],
       lineup_assignment: ["STARTER", "RESERVE"],
       lineup_status: ["DRAFT", "PUBLISHED", "SUPERSEDED"],
       match_status: ["SCHEDULED", "COMPLETED", "CANCELLED"],
