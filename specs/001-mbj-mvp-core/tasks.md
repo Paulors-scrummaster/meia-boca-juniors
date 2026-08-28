@@ -246,24 +246,24 @@
 
 ### Tests for User Story 6
 
-- [ ] T127 [P] [US6] Add pgTAP tests for notices, subscriptions, recipient uniqueness, schedule/call-revision reminder keys, re-call delivery, retry lifecycle, and aggregate operational metrics in `supabase/tests/constraints/007_notifications.test.sql`
-- [ ] T128 [P] [US6] Add RLS tests for notice authorship, subscription ownership, protected provider identifiers, internal-only dispatch, and sanitized payloads in `supabase/tests/rls/006_notifications_rls.test.sql`
-- [ ] T129 [P] [US6] Add Edge Function tests for push-identity derivation/rate limits and dispatch claiming, bounded retry, permanent skip, failure isolation, and safe errors in `supabase/functions/tests/notifications-functions.test.ts`
+- [X] T127 [P] [US6] Add pgTAP tests for notices, subscriptions, recipient uniqueness, schedule/call-revision reminder keys, re-call delivery, retry lifecycle, and aggregate operational metrics in `supabase/tests/constraints/007_notifications.test.sql`
+- [X] T128 [P] [US6] Add RLS tests for notice authorship, subscription ownership, protected provider identifiers, internal-only dispatch, and sanitized payloads in `supabase/tests/rls/006_notifications_rls.test.sql`
+- [X] T129 [P] [US6] Add Edge Function tests for push-identity derivation/rate limits and dispatch claiming, bounded retry, permanent skip, failure isolation, and safe errors in `supabase/functions/tests/notifications-functions.test.ts`
 - [ ] T130 [P] [US6] Add component tests for the notice wall, in-app pending banner, permission soft prompt, iOS install guidance, and denied-push fallback in `src/features/notifications/notifications.test.tsx`
 - [ ] T131 [P] [US6] Add the notice, reminder, permission-denial, provider-outage, retry, and non-duplication browser journey in `tests/e2e/notices-notifications.spec.ts`
 
 ### Implementation for User Story 6
 
-- [ ] T132 [US6] Create length-bounded `notices` and protected `push_subscriptions`, complete delivery policies, and add safe operational aggregate views in `supabase/migrations/20260825002200_notices_notifications.sql`
-- [ ] T133 [US6] Implement notice publication with Coach/President AAL2, audit, and transactional outbox recipient creation in `supabase/migrations/20260825002300_publish_notice.sql`
-- [ ] T134 [US6] Implement 5-minute Cron scans with exact 24-hour/6-hour targets, `called_at` eligibility, 10-minute windows, missed-window skipping, and schedule/call-revision deterministic keys in `supabase/migrations/20260825002400_notification_reminders.sql`
-- [ ] T135 [US6] Regenerate and verify Supabase bindings after notice and notification migrations in `src/shared/types/database.generated.ts`
-- [ ] T136 [P] [US6] Define the push provider interface and forced-failure development adapter in `src/shared/adapters/push/push-adapter.ts`
-- [ ] T137 [US6] Implement the authenticated short-lived OneSignal identity-token endpoint with session-derived UUID and thirty-per-hour limit in `supabase/functions/push-identity/index.ts`
-- [ ] T138 [US6] Implement the OneSignal server adapter, verified external identity, delivery claiming, bounded retries, disable-on-permanent-error, and safe metrics in `supabase/functions/dispatch-notifications/index.ts`
-- [ ] T139 [P] [US6] Place the stable scoped OneSignal worker asset at `public/push/onesignal/OneSignalSDKWorker.js`
-- [ ] T140 [US6] Implement canonical-production-only OneSignal initialization, authenticated `push-identity` token retrieval, and login/logout binding in `src/shared/adapters/push/onesignal-browser.ts`
-- [ ] T141 [P] [US6] Implement typed notice and in-app pending queries plus publish mutation in `src/features/notices/api/notices.service.ts` and `src/features/notifications/api/notifications.service.ts`
+- [X] T132 [US6] Create length-bounded `notices` and protected `push_subscriptions`, complete delivery policies, and add safe operational aggregate views in `supabase/migrations/20260825002200_notices_notifications.sql`
+- [X] T133 [US6] Implement notice publication with Coach/President AAL2, audit, and transactional outbox recipient creation in `supabase/migrations/20260825002300_publish_notice.sql`
+- [X] T134 [US6] Implement 5-minute Cron scans with exact 24-hour/6-hour targets, `called_at` eligibility, 10-minute windows, missed-window skipping, and schedule/call-revision deterministic keys in `supabase/migrations/20260825002400_notification_reminders.sql`
+- [X] T135 [US6] Regenerate and verify Supabase bindings after notice and notification migrations in `src/shared/types/database.generated.ts`
+- [X] T136 [P] [US6] Define the push provider interface and forced-failure development adapter in `src/shared/adapters/push/push-adapter.ts`
+- [X] T137 [US6] Implement the authenticated short-lived OneSignal identity-token endpoint with session-derived UUID and thirty-per-hour limit in `supabase/functions/push-identity/index.ts`
+- [X] T138 [US6] Implement the OneSignal server adapter, verified external identity, delivery claiming, bounded retries, disable-on-permanent-error, and safe metrics in `supabase/functions/dispatch-notifications/index.ts`
+- [X] T139 [P] [US6] Place the stable scoped OneSignal worker asset at `public/push/onesignal/OneSignalSDKWorker.js`
+- [X] T140 [US6] Implement canonical-production-only OneSignal initialization, authenticated `push-identity` token retrieval, and login/logout binding in `src/shared/adapters/push/onesignal-browser.ts`
+- [X] T141 [P] [US6] Implement typed notice and in-app pending queries plus publish mutation in `src/features/notices/api/notices.service.ts` and `src/features/notifications/api/notifications.service.ts`
 - [ ] T142 [P] [US6] Implement the chronological notice wall and online-guarded authorized publication form in `src/features/notices/pages/NoticesPage.tsx`
 - [ ] T143 [P] [US6] Implement the authoritative in-app pending-presence/voting banner independent of push permission in `src/features/notifications/components/PendingActionsBanner.tsx`
 - [ ] T144 [US6] Implement contextual permission prompting, denial preference, supported-iOS Home Screen guidance, and manual retry UI in `src/features/notifications/components/PushPermissionCard.tsx`

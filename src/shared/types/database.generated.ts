@@ -365,6 +365,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "lineups_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "pending_action_metrics"
+            referencedColumns: ["match_id"]
+          },
+          {
             foreignKeyName: "lineups_published_by_fkey"
             columns: ["published_by"]
             isOneToOne: false
@@ -458,6 +465,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "next_match_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_consolidations_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "pending_action_metrics"
+            referencedColumns: ["match_id"]
           },
         ]
       }
@@ -660,6 +674,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "next_match_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_presences_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "pending_action_metrics"
+            referencedColumns: ["match_id"]
           },
         ]
       }
@@ -960,6 +981,38 @@ export type Database = {
           },
         ]
       }
+      notices: {
+        Row: {
+          body: string
+          id: string
+          published_at: string
+          published_by: string
+          title: string
+        }
+        Insert: {
+          body: string
+          id?: string
+          published_at?: string
+          published_by: string
+          title: string
+        }
+        Update: {
+          body?: string
+          id?: string
+          published_at?: string
+          published_by?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notices_published_by_fkey"
+            columns: ["published_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_deliveries: {
         Row: {
           attempt_count: number
@@ -1134,6 +1187,44 @@ export type Database = {
         }
         Relationships: []
       }
+      push_subscriptions: {
+        Row: {
+          created_at: string
+          id: string
+          is_enabled: boolean
+          last_seen_at: string
+          provider_subscription_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          last_seen_at?: string
+          provider_subscription_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_enabled?: boolean
+          last_seen_at?: string
+          provider_subscription_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       seasons: {
         Row: {
           created_at: string
@@ -1228,6 +1319,31 @@ export type Database = {
           },
         ]
       }
+      notification_delivery_metrics: {
+        Row: {
+          delivery_count: number | null
+          kind: Database["public"]["Enums"]["notification_kind"] | null
+          last_updated_at: string | null
+          status: Database["public"]["Enums"]["notification_status"] | null
+        }
+        Relationships: []
+      }
+      notification_dispatch_health: {
+        Row: {
+          failed_delivery_count: number | null
+          last_successful_dispatch_at: string | null
+        }
+        Relationships: []
+      }
+      notification_failure_metrics: {
+        Row: {
+          failure_count: number | null
+          kind: Database["public"]["Enums"]["notification_kind"] | null
+          last_error_code: string | null
+          last_updated_at: string | null
+        }
+        Relationships: []
+      }
       open_mvp_voting_view: {
         Row: {
           assignment: Database["public"]["Enums"]["lineup_assignment"] | null
@@ -1271,7 +1387,21 @@ export type Database = {
             referencedRelation: "next_match_view"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "match_consolidations_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "pending_action_metrics"
+            referencedColumns: ["match_id"]
+          },
         ]
+      }
+      pending_action_metrics: {
+        Row: {
+          match_id: string | null
+          pending_presence_count: number | null
+        }
+        Relationships: []
       }
       published_lineup_view: {
         Row: {
@@ -1339,6 +1469,13 @@ export type Database = {
             referencedRelation: "next_match_view"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "lineups_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "pending_action_metrics"
+            referencedColumns: ["match_id"]
+          },
         ]
       }
       roster_presence_view: {
@@ -1396,6 +1533,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "next_match_view"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_presences_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "pending_action_metrics"
+            referencedColumns: ["match_id"]
           },
         ]
       }
@@ -1471,6 +1615,13 @@ export type Database = {
             referencedRelation: "next_match_view"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "match_presences_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "pending_action_metrics"
+            referencedColumns: ["match_id"]
+          },
         ]
       }
     }
@@ -1525,6 +1676,17 @@ export type Database = {
         }
         Returns: Json
       }
+      claim_notification_deliveries: {
+        Args: { batch_limit: number }
+        Returns: {
+          attempt_count: number
+          delivery_id: string
+          external_id: string
+          kind: Database["public"]["Enums"]["notification_kind"]
+          payload: Json
+          subscription_id: string
+        }[]
+      }
       close_mvp_voting: { Args: { voting_round_uuid: string }; Returns: Json }
       complete_admin_password_reset: {
         Args: {
@@ -1538,6 +1700,15 @@ export type Database = {
       complete_forced_password_change: {
         Args: { request_trace_id: string }
         Returns: Json
+      }
+      complete_notification_delivery: {
+        Args: {
+          delivery_uuid: string
+          outcome: string
+          retry_at?: string
+          safe_error_code?: string
+        }
+        Returns: undefined
       }
       consolidate_match: {
         Args: {
@@ -1630,6 +1801,14 @@ export type Database = {
           command_idempotency_key: string
           draft_lineup_uuid: string
           match_uuid: string
+        }
+        Returns: Json
+      }
+      publish_notice: {
+        Args: {
+          body_input: string
+          command_idempotency_key: string
+          title_input: string
         }
         Returns: Json
       }

@@ -11,6 +11,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     include: ['src/**/*.{test,spec}.{ts,tsx}', 'supabase/functions/tests/**/*.{test,spec}.ts'],
+    maxWorkers: 1,
     setupFiles: ['./src/test/setup.ts'],
     env: {
       VITE_APP_ENV: 'test',
