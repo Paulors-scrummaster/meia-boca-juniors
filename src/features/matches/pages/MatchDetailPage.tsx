@@ -14,6 +14,7 @@ import { formatSaoPauloDateTime } from '@/shared/lib/date-time';
 import { domainLabels } from '@/shared/lib/domain-labels';
 
 interface MatchDetailPageProps {
+  canConsolidate?: boolean;
   canManage?: boolean;
   isAthlete?: boolean;
   matchId: string;
@@ -21,6 +22,7 @@ interface MatchDetailPageProps {
 }
 
 export function MatchDetailPage({
+  canConsolidate = false,
   canManage = false,
   isAthlete = false,
   matchId,
@@ -72,6 +74,14 @@ export function MatchDetailPage({
             >
               Editar partida
             </Link>
+            {canConsolidate ? (
+              <Link
+                className="min-h-11 rounded-xl border px-4 py-3 font-bold text-primary"
+                to={`/app/admin/matches/${match.id}/statistics`}
+              >
+                Estatísticas oficiais
+              </Link>
+            ) : null}
           </div>
         ) : null}
       </article>

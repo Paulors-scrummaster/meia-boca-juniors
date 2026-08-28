@@ -215,8 +215,8 @@
 - [X] T109 [P] [US5] Add pgTAP constraints for immutable consolidation-lineup linkage, score/goal consistency, voting windows, unique/no-self votes, and tied awards in `supabase/tests/constraints/006_statistics_voting.test.sql`
 - [X] T110 [P] [US5] Add RLS tests for President-only consolidation/reopen, Athlete-role voting, hidden vote details, candidate membership, and closed windows in `supabase/tests/rls/005_statistics_voting_rls.test.sql`
 - [X] T111 [P] [US5] Add RPC tests for required published lineup, immutable candidate snapshot, idempotent consolidation, invalidated-round history, one vote per valid round, fresh voting after reconsolidation, concurrent voting, and tied close in `supabase/tests/rpc/003_statistics_voting_commands.test.sql`
-- [ ] T112 [P] [US5] Add unit/component tests for contribution validation, candidate exclusion, countdown states, rankings, and correction confirmation in `src/features/statistics/statistics-voting.test.tsx`
-- [ ] T113 [P] [US5] Add the consolidate/vote/tie/reopen/reconsolidate/new-round-vote/history browser journey in `tests/e2e/statistics-mvp.spec.ts`
+- [X] T112 [P] [US5] Add unit/component tests for contribution validation, candidate exclusion, countdown states, rankings, and correction confirmation in `src/features/statistics/statistics-voting.test.tsx`
+- [X] T113 [P] [US5] Add the consolidate/vote/tie/reopen/reconsolidate/new-round-vote/history browser journey in `tests/e2e/statistics-mvp.spec.ts`
 
 ### Implementation for User Story 5
 
@@ -228,11 +228,11 @@
 - [X] T119 [US5] Create invoker-safe `season_rankings_view` and `open_mvp_voting_view` that exclude invalidated revisions and the caller in `supabase/migrations/20260825002100_statistics_views.sql`
 - [X] T120 [US5] Regenerate and verify Supabase bindings after statistics and voting migrations in `src/shared/types/database.generated.ts`
 - [X] T121 [P] [US5] Implement typed consolidation, reopen, rankings, round, and voting service calls/query keys in `src/features/statistics/api/statistics.service.ts` and `src/features/mvp-voting/api/voting.service.ts`
-- [ ] T122 [US5] Implement online-guarded President result/contribution form with score consistency validation and explicit consolidation confirmation in `src/features/statistics/components/ConsolidationForm.tsx`
-- [ ] T123 [P] [US5] Implement season rankings and preserved athlete/match history views in `src/features/statistics/pages/SeasonRankingsPage.tsx`
-- [ ] T124 [P] [US5] Implement online-guarded current-round candidate list, countdown, one-vote state, and results UI in `src/features/mvp-voting/pages/MvpVotingPage.tsx`
-- [ ] T125 [US5] Implement President reopen/correction/reconsolidation UI with mandatory explanation in `src/features/statistics/components/ReopenMatchDialog.tsx`
-- [ ] T126 [US5] Register statistics administration, rankings, and Athlete voting routes in `src/app/router/router.tsx`
+- [X] T122 [US5] Implement online-guarded President result/contribution form with score consistency validation and explicit consolidation confirmation in `src/features/statistics/components/ConsolidationForm.tsx`
+- [X] T123 [P] [US5] Implement season rankings and preserved athlete/match history views in `src/features/statistics/pages/SeasonRankingsPage.tsx`
+- [X] T124 [P] [US5] Implement online-guarded current-round candidate list, countdown, one-vote state, and results UI in `src/features/mvp-voting/pages/MvpVotingPage.tsx`
+- [X] T125 [US5] Implement President reopen/correction/reconsolidation UI with mandatory explanation in `src/features/statistics/components/ReopenMatchDialog.tsx`
+- [X] T126 [US5] Register statistics administration, rankings, and Athlete voting routes in `src/app/router/router.tsx`
 
 **Checkpoint**: User Story 5 produces trustworthy rankings and reversible official history under repeated and concurrent requests.
 

@@ -14,10 +14,12 @@ export function AuthenticatedLayout() {
     { label: 'Início', to: '/app' },
     { label: 'Elenco', to: '/app/roster' },
     { label: 'Partidas', to: '/app/matches' },
+    { label: 'Estatísticas', to: '/app/statistics' },
   ];
 
   if (roles.includes('ATHLETE')) {
     items.push({ label: 'Área do atleta', to: '/app/athlete' });
+    items.push({ label: 'Craque do Jogo', to: '/app/athlete/mvp-voting' });
   }
   if (roles.some((role) => role === 'COACH' || role === 'PRESIDENT')) {
     items.push({ label: 'Comissão técnica', to: '/app/staff' });
@@ -57,12 +59,12 @@ export function AuthenticatedLayout() {
 
       <nav
         aria-label="Navegação principal"
-        className="fixed inset-x-0 bottom-0 z-40 flex min-h-20 items-stretch justify-around border-t bg-card px-2 pb-[env(safe-area-inset-bottom)] md:static md:col-start-1 md:row-start-2 md:flex-col md:justify-start md:border-r md:border-t-0 md:px-3 md:pb-6"
+        className="fixed inset-x-0 bottom-0 z-40 flex min-h-20 items-stretch gap-1 overflow-x-auto border-t bg-card px-2 pb-[env(safe-area-inset-bottom)] md:static md:col-start-1 md:row-start-2 md:flex-col md:justify-start md:overflow-x-visible md:border-r md:border-t-0 md:px-3 md:pb-6"
       >
         {items.map((item) => (
           <NavLink
             className={({ isActive }) =>
-              `flex min-h-12 flex-1 items-center justify-center rounded-lg px-3 text-center text-xs font-bold md:flex-none md:justify-start md:text-sm ${
+              `flex min-h-12 min-w-24 shrink-0 items-center justify-center rounded-lg px-3 text-center text-xs font-bold md:min-w-0 md:flex-none md:justify-start md:text-sm ${
                 isActive ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
               }`
             }

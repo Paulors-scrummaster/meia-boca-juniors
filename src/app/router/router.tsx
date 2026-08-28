@@ -26,9 +26,12 @@ import { MatchDetailPage } from '@/features/matches/pages/MatchDetailPage';
 import { MatchesPage } from '@/features/matches/pages/MatchesPage';
 import { LineupEditorPage } from '@/features/lineups/pages/LineupEditorPage';
 import { PublishedLineupPage } from '@/features/lineups/pages/PublishedLineupPage';
+import { MvpVotingPage } from '@/features/mvp-voting/pages/MvpVotingPage';
 import { AthleteProfilePage } from '@/features/roster/pages/AthleteProfilePage';
 import { RosterPage } from '@/features/roster/pages/RosterPage';
 import { CreateAthletePage, EditAthletePage } from '@/features/roster/pages/RosterManagementPage';
+import { SeasonRankingsPage } from '@/features/statistics/pages/SeasonRankingsPage';
+import { StatisticsAdminPage } from '@/features/statistics/pages/StatisticsAdminPage';
 import { EmptyState, ErrorState } from '@/shared/components/feedback';
 import { LoadingState } from '@/shared/components/feedback';
 import type { Database } from '@/shared/types/database.generated';
@@ -107,6 +110,7 @@ function MatchDetailRoutePage() {
   return (
     <MatchDetailPage
       canManage={isAal2 && roles.some((role) => role === 'COACH' || role === 'PRESIDENT')}
+      canConsolidate={isAal2 && roles.includes('PRESIDENT')}
       isAthlete={roles.includes('ATHLETE')}
       matchId={matchId}
     />
@@ -131,6 +135,11 @@ function PublishedLineupRoutePage() {
 function LineupEditorRoutePage() {
   const { matchId = '' } = useParams();
   return <LineupEditorPage matchId={matchId} />;
+}
+
+function StatisticsAdminRoutePage() {
+  const { matchId = '' } = useParams();
+  return <StatisticsAdminPage matchId={matchId} />;
 }
 
 function NewMatchRoutePage() {
@@ -208,6 +217,7 @@ export const appRoutes: RouteObject[] = [
               { path: 'matches', element: <MatchesRoutePage /> },
               { path: 'matches/:matchId', element: <MatchDetailRoutePage /> },
               { path: 'matches/:matchId/lineup', element: <PublishedLineupRoutePage /> },
+              { path: 'statistics', element: <SeasonRankingsPage /> },
               {
                 path: 'athlete',
                 element: <RoleRouteGuard allowedRoles={['ATHLETE']} />,
@@ -222,6 +232,7 @@ export const appRoutes: RouteObject[] = [
                     ),
                   },
                   { path: 'matches/:matchId/attendance', element: <AthleteAttendanceRoutePage /> },
+                  { path: 'mvp-voting', element: <MvpVotingPage /> },
                 ],
               },
               {
@@ -262,6 +273,10 @@ export const appRoutes: RouteObject[] = [
                       { path: 'admin', element: <RoleAdministrationPage /> },
                       { path: 'admin/roster/new', element: <CreateAthletePage /> },
                       { path: 'admin/roster/:athleteId/edit', element: <EditAthletePage /> },
+                      {
+                        path: 'admin/matches/:matchId/statistics',
+                        element: <StatisticsAdminRoutePage />,
+                      },
                     ],
                   },
                 ],
