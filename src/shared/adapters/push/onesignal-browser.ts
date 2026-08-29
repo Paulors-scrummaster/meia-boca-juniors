@@ -6,6 +6,9 @@ import { supabase } from '@/shared/adapters/supabase/client';
 import type { Database } from '@/shared/types/database.generated';
 
 interface OneSignalSdk {
+  Notifications: {
+    requestPermission(): Promise<boolean>;
+  };
   User: {
     PushSubscription: { id?: string | null };
   };
@@ -34,6 +37,10 @@ export interface OneSignalBrowserBinding {
   sync(session: Session | null): Promise<void>;
 }
 
+export type BrowserPushPermission = NotificationPermission | 'unsupported';
+
+let activeOneSignalSdk: OneSignalSdk | null = null;
+
 function isCanonicalProduction(appId: string | undefined): appId is string {
   return Boolean(
     appId &&
@@ -41,6 +48,26 @@ function isCanonicalProduction(appId: string | undefined): appId is string {
     typeof window !== 'undefined' &&
     window.location.origin === clubConfig.links.canonicalWebsite,
   );
+}
+
+function hasBrowserNotificationSupport(): boolean {
+  return typeof window !== 'undefined' && 'Notification' in window;
+}
+
+export function getBrowserPushPermission(): BrowserPushPermission {
+  if (!hasBrowserNotificationSupport()) return 'unsupported';
+  if (activeOneSignalSdk || env.VITE_APP_ENV === 'test') return Notification.permission;
+  return 'unsupported';
+}
+
+export async function requestBrowserPushPermission(): Promise<BrowserPushPermission> {
+  if (!hasBrowserNotificationSupport()) return 'unsupported';
+  if (activeOneSignalSdk) {
+    await activeOneSignalSdk.Notifications.requestPermission();
+    return Notification.permission;
+  }
+  if (env.VITE_APP_ENV === 'test') return Notification.requestPermission();
+  throw new Error('Push provider unavailable');
 }
 
 function loadSdk(): Promise<OneSignalSdk> {
@@ -72,6 +99,7 @@ export async function createOneSignalBrowserBinding(
     serviceWorkerParam: { scope: '/push/onesignal/' },
     serviceWorkerPath: '/push/onesignal/OneSignalSDKWorker.js',
   });
+  activeOneSignalSdk = sdk;
   let disposed = false;
   let boundUserId: string | null = null;
 

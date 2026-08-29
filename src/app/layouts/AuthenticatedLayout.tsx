@@ -2,19 +2,27 @@ import { NavLink, Outlet } from 'react-router-dom';
 
 import { useAuth } from '@/app/providers/AuthProvider';
 import { clubConfig } from '@/config/club.config';
+import type { NotificationsService } from '@/features/notifications/api/notifications.service';
+import { PendingActionsBanner } from '@/features/notifications/components/PendingActionsBanner';
 
 interface NavigationItem {
   label: string;
   to: string;
 }
 
-export function AuthenticatedLayout() {
+interface AuthenticatedLayoutProps {
+  pendingActionsService?: NotificationsService;
+}
+
+export function AuthenticatedLayout({ pendingActionsService }: AuthenticatedLayoutProps = {}) {
   const { roles } = useAuth();
   const items: NavigationItem[] = [
     { label: 'Início', to: '/app' },
     { label: 'Elenco', to: '/app/roster' },
     { label: 'Partidas', to: '/app/matches' },
     { label: 'Estatísticas', to: '/app/statistics' },
+    { label: 'Mural', to: '/app/notices' },
+    { label: 'Notificações', to: '/app/notification-preferences' },
   ];
 
   if (roles.includes('ATHLETE')) {
@@ -54,6 +62,11 @@ export function AuthenticatedLayout() {
         className="mx-auto w-full max-w-6xl px-4 py-6 pb-28 md:px-8 md:pb-8"
         id="conteudo-principal"
       >
+        {pendingActionsService ? (
+          <PendingActionsBanner service={pendingActionsService} />
+        ) : (
+          <PendingActionsBanner />
+        )}
         <Outlet />
       </main>
 

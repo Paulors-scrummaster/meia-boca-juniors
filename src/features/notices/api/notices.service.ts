@@ -5,6 +5,7 @@ import { mapToAppError } from '@/shared/lib/app-error';
 import type { Database, Json } from '@/shared/types/database.generated';
 
 export type Notice = Database['public']['Tables']['notices']['Row'];
+export type NoticeWithAuthor = Notice & { authorName: string };
 
 export interface PublishNoticeInput {
   body: string;
@@ -22,7 +23,7 @@ export interface PublishNoticeResult {
 }
 
 export interface NoticesService {
-  list(limit?: number): Promise<Notice[]>;
+  list(limit?: number): Promise<NoticeWithAuthor[]>;
   publish(input: PublishNoticeInput): Promise<PublishNoticeResult>;
 }
 
@@ -48,7 +49,24 @@ export function createNoticesService(client: SupabaseClient<Database> = supabase
         .order('id', { ascending: false })
         .limit(boundedLimit);
       if (error) throw mapToAppError(error);
-      return data ?? [];
+      const notices = data ?? [];
+      const authorIds = [...new Set(notices.map((notice) => notice.published_by))];
+      if (authorIds.length === 0) return [];
+
+      const { data: authors, error: authorsError } = await client
+        .from('athletes')
+        .select('user_id, full_name')
+        .in('user_id', authorIds);
+      if (authorsError) throw mapToAppError(authorsError);
+      const authorNames = new Map(
+        (authors ?? []).flatMap((author) =>
+          author.user_id ? [[author.user_id, author.full_name] as const] : [],
+        ),
+      );
+      return notices.map((notice) => ({
+        ...notice,
+        authorName: authorNames.get(notice.published_by) ?? 'Membro autorizado',
+      }));
     },
     async publish(input) {
       const { data, error } = await client.rpc('publish_notice', {

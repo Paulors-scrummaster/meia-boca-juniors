@@ -249,8 +249,8 @@
 - [X] T127 [P] [US6] Add pgTAP tests for notices, subscriptions, recipient uniqueness, schedule/call-revision reminder keys, re-call delivery, retry lifecycle, and aggregate operational metrics in `supabase/tests/constraints/007_notifications.test.sql`
 - [X] T128 [P] [US6] Add RLS tests for notice authorship, subscription ownership, protected provider identifiers, internal-only dispatch, and sanitized payloads in `supabase/tests/rls/006_notifications_rls.test.sql`
 - [X] T129 [P] [US6] Add Edge Function tests for push-identity derivation/rate limits and dispatch claiming, bounded retry, permanent skip, failure isolation, and safe errors in `supabase/functions/tests/notifications-functions.test.ts`
-- [ ] T130 [P] [US6] Add component tests for the notice wall, in-app pending banner, permission soft prompt, iOS install guidance, and denied-push fallback in `src/features/notifications/notifications.test.tsx`
-- [ ] T131 [P] [US6] Add the notice, reminder, permission-denial, provider-outage, retry, and non-duplication browser journey in `tests/e2e/notices-notifications.spec.ts`
+- [X] T130 [P] [US6] Add component tests for the notice wall, in-app pending banner, permission soft prompt, iOS install guidance, and denied-push fallback in `src/features/notifications/notifications.test.tsx`
+- [X] T131 [P] [US6] Add the notice, reminder, permission-denial, provider-outage, retry, and non-duplication browser journey in `tests/e2e/notices-notifications.spec.ts`
 
 ### Implementation for User Story 6
 
@@ -264,10 +264,10 @@
 - [X] T139 [P] [US6] Place the stable scoped OneSignal worker asset at `public/push/onesignal/OneSignalSDKWorker.js`
 - [X] T140 [US6] Implement canonical-production-only OneSignal initialization, authenticated `push-identity` token retrieval, and login/logout binding in `src/shared/adapters/push/onesignal-browser.ts`
 - [X] T141 [P] [US6] Implement typed notice and in-app pending queries plus publish mutation in `src/features/notices/api/notices.service.ts` and `src/features/notifications/api/notifications.service.ts`
-- [ ] T142 [P] [US6] Implement the chronological notice wall and online-guarded authorized publication form in `src/features/notices/pages/NoticesPage.tsx`
-- [ ] T143 [P] [US6] Implement the authoritative in-app pending-presence/voting banner independent of push permission in `src/features/notifications/components/PendingActionsBanner.tsx`
-- [ ] T144 [US6] Implement contextual permission prompting, denial preference, supported-iOS Home Screen guidance, and manual retry UI in `src/features/notifications/components/PushPermissionCard.tsx`
-- [ ] T145 [US6] Register notice and notification-preference routes and add the pending banner to `src/app/layouts/AuthenticatedLayout.tsx`
+- [X] T142 [P] [US6] Implement the chronological notice wall and online-guarded authorized publication form in `src/features/notices/pages/NoticesPage.tsx`
+- [X] T143 [P] [US6] Implement the authoritative in-app pending-presence/voting banner independent of push permission in `src/features/notifications/components/PendingActionsBanner.tsx`
+- [X] T144 [US6] Implement contextual permission prompting, denial preference, supported-iOS Home Screen guidance, and manual retry UI in `src/features/notifications/components/PushPermissionCard.tsx`
+- [X] T145 [US6] Register notice and notification-preference routes and add the pending banner to `src/app/layouts/AuthenticatedLayout.tsx`
 
 **Checkpoint**: Every business transaction succeeds during a simulated OneSignal outage, while pending work remains discoverable inside the app.
 

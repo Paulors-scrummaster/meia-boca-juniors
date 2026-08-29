@@ -27,6 +27,8 @@ import { MatchesPage } from '@/features/matches/pages/MatchesPage';
 import { LineupEditorPage } from '@/features/lineups/pages/LineupEditorPage';
 import { PublishedLineupPage } from '@/features/lineups/pages/PublishedLineupPage';
 import { MvpVotingPage } from '@/features/mvp-voting/pages/MvpVotingPage';
+import { NoticesPage } from '@/features/notices/pages/NoticesPage';
+import { PushPermissionCard } from '@/features/notifications/components/PushPermissionCard';
 import { AthleteProfilePage } from '@/features/roster/pages/AthleteProfilePage';
 import { RosterPage } from '@/features/roster/pages/RosterPage';
 import { CreateAthletePage, EditAthletePage } from '@/features/roster/pages/RosterManagementPage';
@@ -100,6 +102,15 @@ function MatchesRoutePage() {
   return (
     <MatchesPage
       canManage={isAal2 && roles.some((role) => role === 'COACH' || role === 'PRESIDENT')}
+    />
+  );
+}
+
+function NoticesRoutePage() {
+  const { isAal2, roles } = useAuth();
+  return (
+    <NoticesPage
+      canPublish={isAal2 && roles.some((role) => role === 'COACH' || role === 'PRESIDENT')}
     />
   );
 }
@@ -218,6 +229,8 @@ export const appRoutes: RouteObject[] = [
               { path: 'matches/:matchId', element: <MatchDetailRoutePage /> },
               { path: 'matches/:matchId/lineup', element: <PublishedLineupRoutePage /> },
               { path: 'statistics', element: <SeasonRankingsPage /> },
+              { path: 'notices', element: <NoticesRoutePage /> },
+              { path: 'notification-preferences', element: <PushPermissionCard /> },
               {
                 path: 'athlete',
                 element: <RoleRouteGuard allowedRoles={['ATHLETE']} />,
