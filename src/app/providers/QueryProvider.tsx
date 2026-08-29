@@ -1,9 +1,21 @@
 /* eslint-disable react-refresh/only-export-components -- provider module exposes the query-client factory for deterministic tests */
 import { QueryCache, QueryClient, QueryClientProvider, type QueryKey } from '@tanstack/react-query';
-import { useState, type PropsWithChildren } from 'react';
+import { PersistQueryClientProvider, type Persister } from '@tanstack/react-query-persist-client';
+import { useContext, useEffect, useMemo, useState, type PropsWithChildren } from 'react';
 
+import { AuthContext } from '@/app/providers/AuthProvider';
+import { clubConfig } from '@/config/club.config';
+import { env } from '@/config/env';
 import { AppError } from '@/shared/lib/app-error';
 import { reportRequestFailure, reportRequestSuccess } from '@/shared/hooks/use-connectivity';
+import {
+  OFFLINE_CACHE_MAX_AGE,
+  createOfflineBuster,
+  createOfflinePersister,
+  registerOfflineCleanup,
+  shouldDehydrateOfflineMutation,
+  shouldPersistOfflineQuery,
+} from '@/shared/lib/offline-cache';
 
 const NON_RETRYABLE_CODES = new Set([
   'UNAUTHENTICATED',
@@ -54,10 +66,91 @@ interface QueryProviderProps extends PropsWithChildren {
   client?: QueryClient;
 }
 
-export function QueryProvider({ children, client }: QueryProviderProps) {
-  const [queryClient] = useState(() => client ?? createAppQueryClient());
+interface GuardedPersister extends Persister {
+  block: () => void;
+  unblock: () => void;
+}
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+export function QueryProvider({ children, client }: QueryProviderProps) {
+  const auth = useContext(AuthContext);
+  const userId = auth?.status === 'authenticated' ? auth.user?.id : undefined;
+
+  return (
+    <QueryBoundary {...(client ? { client } : {})} key={userId ?? 'public'} userId={userId}>
+      {children}
+    </QueryBoundary>
+  );
+}
+
+function QueryBoundary({
+  children,
+  client,
+  userId,
+}: QueryProviderProps & { userId: string | undefined }) {
+  const [queryClient] = useState(() => client ?? createAppQueryClient());
+  const basePersister = useMemo(
+    () =>
+      userId
+        ? createOfflinePersister({
+            clubId: clubConfig.identity.deploymentId,
+            deploymentId: env.VITE_CLUB_DEPLOYMENT_ID,
+            userId,
+          })
+        : null,
+    [userId],
+  );
+  const persister = useMemo<GuardedPersister | null>(() => {
+    if (!basePersister) return null;
+    let blocked = false;
+    return {
+      block: () => {
+        blocked = true;
+      },
+      persistClient: (persistedClient) =>
+        blocked ? Promise.resolve() : basePersister.persistClient(persistedClient),
+      removeClient: () => basePersister.removeClient(),
+      restoreClient: () => basePersister.restoreClient(),
+      unblock: () => {
+        blocked = false;
+      },
+    };
+  }, [basePersister]);
+
+  useEffect(() => {
+    if (!userId || !persister) return;
+    persister.unblock();
+    return registerOfflineCleanup(userId, async () => {
+      persister.block();
+      await queryClient.cancelQueries();
+      queryClient.clear();
+      await persister.removeClient();
+    });
+  }, [persister, queryClient, userId]);
+
+  if (!userId || !persister) {
+    return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  }
+
+  return (
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        buster: createOfflineBuster({
+          clubId: clubConfig.identity.deploymentId,
+          deploymentId: env.VITE_CLUB_DEPLOYMENT_ID,
+          userId,
+        }),
+        dehydrateOptions: {
+          shouldDehydrateMutation: shouldDehydrateOfflineMutation,
+          shouldDehydrateQuery: (query) => shouldPersistOfflineQuery(query, userId),
+        },
+        maxAge: OFFLINE_CACHE_MAX_AGE,
+        persister,
+      }}
+    >
+      {children}
+    </PersistQueryClientProvider>
+  );
 }
 
 export type AppQueryKey = QueryKey;

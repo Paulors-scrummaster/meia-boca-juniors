@@ -1,11 +1,10 @@
 import type { Session } from '@supabase/supabase-js';
-import { QueryClientProvider } from '@tanstack/react-query';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { PropsWithChildren } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 
 import { AuthProvider, readSessionAssuranceLevel, useAuth } from '@/app/providers/AuthProvider';
-import { createAppQueryClient } from '@/app/providers/QueryProvider';
+import { QueryProvider, createAppQueryClient } from '@/app/providers/QueryProvider';
 import type { Database } from '@/shared/types/database.generated';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
@@ -71,9 +70,9 @@ describe('AuthProvider', () => {
 
     function Wrapper({ children }: PropsWithChildren) {
       return (
-        <QueryClientProvider client={queryClient}>
-          <AuthProvider client={authClient}>{children}</AuthProvider>
-        </QueryClientProvider>
+        <AuthProvider client={authClient}>
+          <QueryProvider client={queryClient}>{children}</QueryProvider>
+        </AuthProvider>
       );
     }
 

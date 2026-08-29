@@ -6,6 +6,7 @@ import type { Database, Json } from '@/shared/types/database.generated';
 
 export type Match = Database['public']['Tables']['matches']['Row'];
 export type Season = Database['public']['Tables']['seasons']['Row'];
+export type NextMatchRow = Database['public']['Views']['next_match_view']['Row'];
 
 export interface MatchInput {
   competitionName: string | null;
@@ -27,6 +28,7 @@ export interface MatchesService {
   cancelMatch(matchId: string): Promise<Match>;
   createMatch(input: MatchInput): Promise<Match>;
   getMatch(matchId: string): Promise<Match>;
+  getNextMatch(): Promise<NextMatchRow | null>;
   listMatches(): Promise<Match[]>;
   listSeasons(): Promise<Season[]>;
   reactivateMatch(matchId: string): Promise<Match>;
@@ -89,6 +91,11 @@ export function createMatchesService(client: SupabaseClient<Database> = supabase
         .maybeSingle();
       if (error) throw mapMatchError(error);
       if (!data) throw new AppError('NOT_FOUND');
+      return data;
+    },
+    async getNextMatch() {
+      const { data, error } = await client.from('next_match_view').select('*').maybeSingle();
+      if (error) throw mapMatchError(error);
       return data;
     },
     async listMatches() {

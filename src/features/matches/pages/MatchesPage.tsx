@@ -3,13 +3,16 @@ import { CalendarPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 
+import { useAuth } from '@/app/providers/AuthProvider';
 import {
   createMatchesService,
   matchKeys,
   type Match,
   type MatchesService,
 } from '@/features/matches/api/matches.service';
+import { offlineNextMatchOptions } from '@/features/matches/queries/matches.queries';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/feedback';
+import { useConnectivity } from '@/shared/hooks/use-connectivity';
 import { mapToAppError } from '@/shared/lib/app-error';
 import { formatSaoPauloDateTime } from '@/shared/lib/date-time';
 import { domainLabels } from '@/shared/lib/domain-labels';
@@ -23,8 +26,35 @@ export function MatchesPage({
   canManage = false,
   service = createMatchesService(),
 }: MatchesPageProps) {
+  const { user } = useAuth();
+  const { isOnline } = useConnectivity();
+  const offlineNextMatch = useQuery(offlineNextMatchOptions(user?.id ?? '', service));
   const query = useQuery({ queryFn: () => service.listMatches(), queryKey: matchKeys.list() });
   const [renderedAt] = useState(() => Date.now());
+  if (!isOnline && offlineNextMatch.data) {
+    const snapshot = offlineNextMatch.data;
+    return (
+      <div className="space-y-6">
+        <header>
+          <p className="text-sm font-black uppercase tracking-[0.16em] text-primary">
+            Calendário MBJ
+          </p>
+          <h1 className="mt-2 text-3xl font-black">Próxima partida</h1>
+        </header>
+        <article className="rounded-2xl border bg-card p-5 shadow-sm">
+          <h2 className="text-lg font-black">MBJ × {snapshot.match.opponentName}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {formatSaoPauloDateTime(snapshot.match.matchDate)}
+          </p>
+          <p className="mt-3 text-sm">
+            {snapshot.match.competitionName ?? 'Sem campeonato'} ·{' '}
+            {snapshot.match.locationName ?? 'Local a definir'}
+          </p>
+          <p className="mt-3 text-sm font-semibold">Consulta somente leitura enquanto offline.</p>
+        </article>
+      </div>
+    );
+  }
   if (query.isPending) return <LoadingState label="Carregando partidas" />;
   if (query.isError)
     return (

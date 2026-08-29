@@ -1,9 +1,14 @@
+import { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 
 import { useAuth } from '@/app/providers/AuthProvider';
 import { clubConfig } from '@/config/club.config';
+import { createAuthService, type AuthService } from '@/features/auth/api/auth.service';
 import type { NotificationsService } from '@/features/notifications/api/notifications.service';
 import { PendingActionsBanner } from '@/features/notifications/components/PendingActionsBanner';
+import { OfflineIndicator } from '@/features/offline/components/OfflineIndicator';
+import { supabase } from '@/shared/adapters/supabase/client';
+import { useConnectivity } from '@/shared/hooks/use-connectivity';
 
 interface NavigationItem {
   label: string;
@@ -11,11 +16,17 @@ interface NavigationItem {
 }
 
 interface AuthenticatedLayoutProps {
+  authService?: AuthService;
   pendingActionsService?: NotificationsService;
 }
 
-export function AuthenticatedLayout({ pendingActionsService }: AuthenticatedLayoutProps = {}) {
+export function AuthenticatedLayout({
+  authService = createAuthService(supabase),
+  pendingActionsService,
+}: AuthenticatedLayoutProps = {}) {
   const { roles } = useAuth();
+  const { isOnline } = useConnectivity();
+  const [signingOut, setSigningOut] = useState(false);
   const items: NavigationItem[] = [
     { label: 'Início', to: '/app' },
     { label: 'Elenco', to: '/app/roster' },
@@ -56,18 +67,46 @@ export function AuthenticatedLayout({ pendingActionsService }: AuthenticatedLayo
             <p className="text-xs text-muted-foreground">Área do clube</p>
           </div>
         </div>
+        <button
+          className="mt-4 min-h-11 rounded-lg border px-4 text-sm font-bold text-primary disabled:opacity-60"
+          disabled={signingOut}
+          onClick={() => {
+            setSigningOut(true);
+            void authService.signOut().finally(() => setSigningOut(false));
+          }}
+          type="button"
+        >
+          {signingOut ? 'Saindo…' : 'Sair'}
+        </button>
       </header>
 
       <main
         className="mx-auto w-full max-w-6xl px-4 py-6 pb-28 md:px-8 md:pb-8"
         id="conteudo-principal"
       >
-        {pendingActionsService ? (
-          <PendingActionsBanner service={pendingActionsService} />
-        ) : (
-          <PendingActionsBanner />
-        )}
-        <Outlet />
+        <OfflineIndicator />
+        <fieldset
+          aria-describedby={!isOnline ? 'authenticated-offline-write-block' : undefined}
+          className="m-0 min-w-0 border-0 p-0"
+          disabled={!isOnline}
+        >
+          <legend className="sr-only">Conteúdo autenticado</legend>
+          {pendingActionsService ? (
+            <PendingActionsBanner service={pendingActionsService} />
+          ) : (
+            <PendingActionsBanner />
+          )}
+          <Outlet />
+        </fieldset>
+        {!isOnline ? (
+          <p
+            className="mt-4 text-sm font-medium text-muted-foreground"
+            id="authenticated-offline-write-block"
+            role="status"
+          >
+            Controles de escrita estão desabilitados até a reconexão.
+          </p>
+        ) : null}
       </main>
 
       <nav

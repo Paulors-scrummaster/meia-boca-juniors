@@ -6,10 +6,10 @@ import { appRouter } from '@/app/router/router';
 
 export function App() {
   return (
-    <QueryProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <QueryProvider>
         <RouterProvider router={appRouter} />
-      </AuthProvider>
-    </QueryProvider>
+      </QueryProvider>
+    </AuthProvider>
   );
 }

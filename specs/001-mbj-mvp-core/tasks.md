@@ -281,19 +281,19 @@
 
 ### Tests for User Story 7
 
-- [ ] T146 [P] [US7] Add unit tests for the exact query allowlist, DTO parsing, version/club/user buster, 24-hour expiry, and mutation exclusion in `src/shared/lib/offline-cache.test.ts`
-- [ ] T147 [P] [US7] Add component tests for offline/last-updated/no-cached-content states and proactive write-control disabling in `src/features/offline/offline-ui.test.tsx`
-- [ ] T148 [P] [US7] Add Playwright coverage for under-two-second restore, localStorage field inspection, no Cache Storage API data, no mutation replay, logout purge, and user switch in `tests/e2e/offline-privacy.spec.ts`
+- [X] T146 [P] [US7] Add unit tests for the exact query allowlist, DTO parsing, version/club/user buster, 24-hour expiry, and mutation exclusion in `src/shared/lib/offline-cache.test.ts`
+- [X] T147 [P] [US7] Add component tests for offline/last-updated/no-cached-content states and proactive write-control disabling in `src/features/offline/offline-ui.test.tsx`
+- [X] T148 [P] [US7] Add Playwright coverage for under-two-second restore, localStorage field inspection, no Cache Storage API data, no mutation replay, logout purge, and user switch in `tests/e2e/offline-privacy.spec.ts`
 
 ### Implementation for User Story 7
 
-- [ ] T149 [P] [US7] Define Zod-validated minimal `OfflineNextMatch` and `OfflinePublishedLineup` DTOs in `src/shared/types/offline-cache.ts`
-- [ ] T150 [US7] Implement the synchronous TanStack persister with exact metadata allowlist, per-user versioned key, 24-hour max age, deployment buster, and no mutation dehydration in `src/shared/lib/offline-cache.ts`
-- [ ] T151 [US7] Replace the base query provider with an authenticated per-user `PersistQueryClientProvider` lifecycle in `src/app/providers/QueryProvider.tsx`
-- [ ] T152 [US7] Implement multi-tab logout/session-revocation/user-switch purge ordering for memory, disk, active queries, routes, and registered provider cleanup hooks in `src/app/providers/AuthProvider.tsx`
-- [ ] T153 [P] [US7] Implement a discreet “Modo Offline”, last-updated timestamp, and no-cache explanation in `src/features/offline/components/OfflineIndicator.tsx`
-- [ ] T154 [US7] Mark only next-match and current-published-lineup queries as persistable and map them to sanitized DTOs in `src/features/matches/queries/matches.queries.ts` and `src/features/lineups/queries/lineups.queries.ts`
-- [ ] T155 [US7] Configure Workbox to precache only app-shell/static assets, use prompt updates, and exclude all Supabase/Auth responses from runtime caching in `vite.config.ts`
+- [X] T149 [P] [US7] Define Zod-validated minimal `OfflineNextMatch` and `OfflinePublishedLineup` DTOs in `src/shared/types/offline-cache.ts`
+- [X] T150 [US7] Implement the synchronous TanStack persister with exact metadata allowlist, per-user versioned key, 24-hour max age, deployment buster, and no mutation dehydration in `src/shared/lib/offline-cache.ts`
+- [X] T151 [US7] Replace the base query provider with an authenticated per-user `PersistQueryClientProvider` lifecycle in `src/app/providers/QueryProvider.tsx`
+- [X] T152 [US7] Implement multi-tab logout/session-revocation/user-switch purge ordering for memory, disk, active queries, routes, and registered provider cleanup hooks in `src/app/providers/AuthProvider.tsx`
+- [X] T153 [P] [US7] Implement a discreet “Modo Offline”, last-updated timestamp, and no-cache explanation in `src/features/offline/components/OfflineIndicator.tsx`
+- [X] T154 [US7] Mark only next-match and current-published-lineup queries as persistable and map them to sanitized DTOs in `src/features/matches/queries/matches.queries.ts` and `src/features/lineups/queries/lineups.queries.ts`
+- [X] T155 [US7] Configure Workbox to precache only app-shell/static assets, use prompt updates, and exclude all Supabase/Auth responses from runtime caching in `vite.config.ts`
 
 **Checkpoint**: Offline reads meet SC-006, persisted content matches the contract byte-for-byte, and no offline action can later mutate server state.
 

@@ -1,6 +1,5 @@
 /* eslint-disable react-refresh/only-export-components -- provider module exposes its typed context and testable JWT helper */
 import type { Session, SupabaseClient, User } from '@supabase/supabase-js';
-import { useQueryClient } from '@tanstack/react-query';
 import {
   createContext,
   useCallback,
@@ -13,7 +12,10 @@ import {
 } from 'react';
 
 import { supabase } from '@/shared/adapters/supabase/client';
+import { env } from '@/config/env';
+import { isConnectivityFailure } from '@/shared/hooks/use-connectivity';
 import { AppError, mapToAppError } from '@/shared/lib/app-error';
+import { purgeRegisteredOfflineState } from '@/shared/lib/offline-cache';
 import type { Database } from '@/shared/types/database.generated';
 
 type AppRole = Database['public']['Enums']['app_role'];
@@ -65,12 +67,44 @@ export function readSessionAssuranceLevel(session: Session | null): 'aal1' | 'aa
   return decodeJwtPayload(session?.access_token ?? '')?.aal === 'aal2' ? 'aal2' : 'aal1';
 }
 
+function readStoredOfflineSession(): Session | null {
+  if (typeof window === 'undefined' || navigator.onLine) return null;
+  try {
+    const raw = window.localStorage.getItem(`mbj:auth:${env.VITE_CLUB_DEPLOYMENT_ID}`);
+    if (!raw) return null;
+    const candidate = JSON.parse(raw) as Partial<Session>;
+    if (
+      typeof candidate.access_token !== 'string' ||
+      typeof candidate.refresh_token !== 'string' ||
+      typeof candidate.expires_at !== 'number' ||
+      candidate.expires_at <= Date.now() / 1000 ||
+      typeof candidate.user?.id !== 'string'
+    ) {
+      return null;
+    }
+    return candidate as Session;
+  } catch {
+    return null;
+  }
+}
+
+async function getInitialSession(client: SupabaseClient<Database>) {
+  const stored = readStoredOfflineSession();
+  if (!stored) return client.auth.getSession();
+
+  return Promise.race([
+    client.auth.getSession(),
+    new Promise<{ data: { session: Session }; error: null }>((resolve) => {
+      window.setTimeout(() => resolve({ data: { session: stored }, error: null }), 250);
+    }),
+  ]);
+}
+
 interface AuthProviderProps extends PropsWithChildren {
   client?: SupabaseClient<Database>;
 }
 
 export function AuthProvider({ children, client = supabase }: AuthProviderProps) {
-  const queryClient = useQueryClient();
   const [value, setValue] = useState<AuthContextValue>(initialAuthValue);
   const previousUserId = useRef<string | null | undefined>(undefined);
   const resolutionId = useRef(0);
@@ -81,14 +115,34 @@ export function AuthProvider({ children, client = supabase }: AuthProviderProps)
       const nextUserId = session?.user.id ?? null;
 
       if (previousUserId.current !== undefined && previousUserId.current !== nextUserId) {
-        await queryClient.cancelQueries();
-        queryClient.clear();
+        setValue(initialAuthValue);
+        const departedUserId = previousUserId.current;
+        if (departedUserId) {
+          await purgeRegisteredOfflineState(departedUserId);
+          if (typeof BroadcastChannel !== 'undefined') {
+            const channel = new BroadcastChannel('mbj:auth-lifecycle:v1');
+            channel.postMessage({ type: 'PURGE_USER', userId: departedUserId });
+            channel.close();
+          }
+        }
       }
       previousUserId.current = nextUserId;
 
       if (!session) {
         if (currentResolution === resolutionId.current) {
           setValue({ ...initialAuthValue, status: 'unauthenticated' });
+        }
+        return;
+      }
+
+      if (typeof navigator !== 'undefined' && !navigator.onLine) {
+        if (currentResolution === resolutionId.current) {
+          setValue({
+            ...initialAuthValue,
+            session,
+            status: 'authenticated',
+            user: session.user,
+          });
         }
         return;
       }
@@ -142,6 +196,15 @@ export function AuthProvider({ children, client = supabase }: AuthProviderProps)
         });
       } catch (error) {
         if (currentResolution === resolutionId.current) {
+          if (isConnectivityFailure(error)) {
+            setValue({
+              ...initialAuthValue,
+              session,
+              status: 'authenticated',
+              user: session.user,
+            });
+            return;
+          }
           setValue({
             ...initialAuthValue,
             error: mapToAppError(error),
@@ -152,13 +215,13 @@ export function AuthProvider({ children, client = supabase }: AuthProviderProps)
         }
       }
     },
-    [client, queryClient],
+    [client],
   );
 
   useEffect(() => {
     let active = true;
 
-    void client.auth.getSession().then(({ data, error }) => {
+    void getInitialSession(client).then(({ data, error }) => {
       if (!active) return;
       if (error) {
         setValue({ ...initialAuthValue, error: mapToAppError(error), status: 'error' });
@@ -177,6 +240,25 @@ export function AuthProvider({ children, client = supabase }: AuthProviderProps)
       data.subscription.unsubscribe();
     };
   }, [client, resolveSession]);
+
+  useEffect(() => {
+    if (typeof BroadcastChannel === 'undefined') return;
+    const channel = new BroadcastChannel('mbj:auth-lifecycle:v1');
+    channel.addEventListener('message', (event: MessageEvent<unknown>) => {
+      const payload = event.data;
+      if (
+        typeof payload === 'object' &&
+        payload !== null &&
+        'type' in payload &&
+        payload.type === 'PURGE_USER' &&
+        'userId' in payload &&
+        typeof payload.userId === 'string'
+      ) {
+        void purgeRegisteredOfflineState(payload.userId);
+      }
+    });
+    return () => channel.close();
+  }, []);
 
   const contextValue = useMemo(
     () => ({
