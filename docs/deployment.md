@@ -116,7 +116,7 @@ Preencher somente após validação real, sem secrets:
 | Auth invite-only e limite staging    | incompleto: signup aberto; HTTP 429 observado com identidade sintética             |
 | Auth invite-only e limite production | bloqueado pelo projeto production ainda inexistente                                |
 | Cloudflare Pages project/preview URL | `meia-boca-juniors`; `https://feature-mbj-mvp-core.meia-boca-juniors.pages.dev`    |
-| Preview SHA/resultado                | `7bf038fad47cdbea99f384eca57c564345b7a5a2`; build/deploy concluído com sucesso     |
+| Preview SHA/resultado                | `5405e285c136156fbba33b7d7e1e09a17f48e343`; build/deploy e gates aprovados         |
 
 Validação manual do preview em 2026-08-30: home HTTPS carregada; rota profunda recarregada sem 404
 e redirecionada pela proteção de autenticação; manifesto em português; `/sw.js` e o worker isolado
@@ -131,3 +131,7 @@ reportou signup aberto e produziu HTTP 429 na 36ª tentativa controlada com ende
 que migrations, seed e jornadas MBJ não foram executados no staging. Nenhum schema/tabela alheio ao
 MBJ foi enumerado ou lido. Criar production ou alterar Auth/schema/secrets hospedados permanece uma
 ação externa pendente; nenhuma configuração produtiva foi criada.
+
+No head final acima, Cloudflare Pages e os dois conjuntos de checks `Required`, frontend, banco e
+Playwright foram aprovados. Home, rota profunda, manifesto e os dois workers foram consultados após o
+deploy e retornaram HTTP 200 com MIME esperado.

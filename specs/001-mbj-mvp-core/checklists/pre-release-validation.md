@@ -18,8 +18,7 @@ autorizados/disponíveis para os cenários reais.
       28º teste, o runner permaneceu aberto sem resumo/exit code e foi interrompido. A atualização
       síncrona de `ConnectedOfflineStatus` durante a renderização foi corrigida com notificações
       diferidas e teste de regressão; a repetição completa não emitiu o warning React. Os dois jobs
-      equivalentes no runner Linux do GitHub encerraram normalmente no head anterior e foram
-      aprovados; o novo head ainda precisa passar no CI após o push.
+      equivalentes no runner Linux do GitHub encerraram normalmente e foram aprovados no novo head.
 
 ## Feature preview público
 
@@ -32,6 +31,9 @@ autorizados/disponíveis para os cenários reais.
       `X-Robots-Tag: noindex`.
 - [x] O check Cloudflare Pages do novo head `eef0967` foi aprovado; após o deploy, as cinco rotas
       públicas acima foram novamente consultadas e retornaram HTTP 200 com MIME esperado.
+- [x] No head final `5405e28`, Cloudflare Pages e os dois conjuntos de gates `Required`, frontend,
+      banco e Playwright foram aprovados; as cinco rotas públicas foram novamente consultadas com
+      HTTP 200 e MIME esperado.
 - [ ] Confirmar visualmente título/canonical, navegação por teclado, foco, contraste, touch targets,
       instalação/atualização PWA e preservação de formulário no deployment do novo head. **Bloqueio:**
       nenhum navegador interativo estava conectado.
@@ -58,5 +60,5 @@ autorizados/disponíveis para os cenários reais.
 ## Resultado
 
 Os controles locais e HTTP públicos possíveis foram executados. T175 não recebe `[X]`: faltam
-cenários hospedados reais, CI do novo head e o encerramento limpo da suíte E2E no Windows. Nenhuma
-evidência foi simulada.
+cenários hospedados reais e o encerramento limpo da suíte E2E no Windows. Nenhuma evidência foi
+simulada.

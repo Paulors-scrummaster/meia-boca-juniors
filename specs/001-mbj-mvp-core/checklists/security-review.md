@@ -89,6 +89,8 @@ verificados no ambiente real.
 - `npm run lint`, `npm run typecheck`, `npm run db:types:check` e `npm run build`: aprovados.
 - `npm run test:e2e`: os 28 cenários chegaram ao fim em desktop/mobile sem o warning React corrigido,
   mas o runner não encerrou sozinho; ver `LOCAL-E2E-001` na checklist de pré-release.
+- GitHub no head `5405e28`: dois conjuntos de `Required`, frontend, banco e Playwright aprovados;
+  Cloudflare Pages aprovado.
 
 Conclusão: a revisão local/de código está completa, mas T174 não pode receber `[X]` enquanto os três
 controles externos acima permanecerem sem verificação real.
