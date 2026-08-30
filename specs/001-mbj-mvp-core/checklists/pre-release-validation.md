@@ -17,7 +17,8 @@ autorizados/disponíveis para os cenários reais.
 - [ ] O comando Playwright encerra com sucesso sem intervenção. **Defeito `LOCAL-E2E-001`:** após o
       28º teste aprovado, o runner permaneceu aberto sem resumo/exit code e foi interrompido; durante
       alguns cenários também houve warnings React de atualização de `ConnectedOfflineStatus` durante
-      renderização. Não corrigido porque está fora de T167–T175.
+      renderização. Não corrigido porque está fora de T167–T175. Os dois jobs equivalentes no runner
+      Linux do GitHub encerraram normalmente e foram aprovados.
 
 ## Feature preview público
 
@@ -28,10 +29,11 @@ autorizados/disponíveis para os cenários reais.
 - [x] Respostas observadas com HSTS, CSP, `frame-ancestors 'none'`, `X-Frame-Options: DENY`,
       `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, Permissions Policy e
       `X-Robots-Tag: noindex`.
+- [x] O check Cloudflare Pages do novo head `eef0967` foi aprovado; após o deploy, as cinco rotas
+      públicas acima foram novamente consultadas e retornaram HTTP 200 com MIME esperado.
 - [ ] Confirmar visualmente título/canonical, navegação por teclado, foco, contraste, touch targets,
       instalação/atualização PWA e preservação de formulário no deployment do novo head. **Bloqueio:**
-      nenhum navegador interativo estava conectado; o preview publicado ainda precede os commits
-      deste lote.
+      nenhum navegador interativo estava conectado.
 - [ ] Inspecionar Cache Storage e rede no preview para confirmar ausência de Auth/Data API e ausência
       de inicialização OneSignal produtiva. **Bloqueio:** exige navegador interativo.
 
