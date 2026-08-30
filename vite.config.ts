@@ -6,6 +6,8 @@ import { fileURLToPath, URL } from 'node:url';
 import { defineConfig, loadEnv, type Plugin } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
+import { pwaNavigationFallbackDenylist } from './src/config/pwa-navigation.ts';
+
 async function findSourceMaps(directory: URL): Promise<string[]> {
   const matches: string[] = [];
   for (const entry of await readdir(directory, { withFileTypes: true })) {
@@ -88,13 +90,7 @@ export default defineConfig(({ mode }) => {
           cleanupOutdatedCaches: true,
           globPatterns: ['**/*.{css,html,ico,js,png,svg,woff2,webmanifest}'],
           navigateFallback: '/index.html',
-          navigateFallbackDenylist: [
-            /^\/auth\/v1\//,
-            /^\/functions\/v1\//,
-            /^\/realtime\/v1\//,
-            /^\/rest\/v1\//,
-            /^\/storage\/v1\//,
-          ],
+          navigateFallbackDenylist: pwaNavigationFallbackDenylist,
           runtimeCaching: [],
         },
       }),
