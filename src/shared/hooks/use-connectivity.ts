@@ -89,6 +89,14 @@ export function reportRequestSuccess(): void {
   emit(createSnapshot(true));
 }
 
+export function reportRequestFailureDeferred(error: unknown): void {
+  queueMicrotask(() => reportRequestFailure(error));
+}
+
+export function reportRequestSuccessDeferred(): void {
+  queueMicrotask(reportRequestSuccess);
+}
+
 export function getConnectivitySnapshot(): ConnectivitySnapshot {
   return snapshot;
 }

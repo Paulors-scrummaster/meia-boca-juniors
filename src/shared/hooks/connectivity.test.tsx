@@ -7,7 +7,9 @@ import { createAppQueryClient } from '@/app/providers/QueryProvider';
 import { OnlineActionGuard } from '@/shared/components/OnlineActionGuard';
 import {
   reportRequestFailure,
+  reportRequestFailureDeferred,
   reportRequestSuccess,
+  reportRequestSuccessDeferred,
   resetConnectivityForTests,
   useConnectivity,
 } from '@/shared/hooks/use-connectivity';
@@ -33,6 +35,22 @@ describe('connectivity foundation', () => {
 
     act(() => setBrowserOnline(false));
     expect(result.current.reason).toBe('browser');
+  });
+
+  it('adia notificações originadas pelo cache para fora da renderização atual', async () => {
+    setBrowserOnline(true);
+    resetConnectivityForTests();
+    const { result } = renderHook(() => useConnectivity());
+
+    reportRequestFailureDeferred(new TypeError('Failed to fetch'));
+    expect(result.current.isOnline).toBe(true);
+    await act(async () => Promise.resolve());
+    expect(result.current.reason).toBe('request');
+
+    reportRequestSuccessDeferred();
+    expect(result.current.isOnline).toBe(false);
+    await act(async () => Promise.resolve());
+    expect(result.current.isOnline).toBe(true);
   });
 
   it('não executa nem enfileira mutações enquanto offline', async () => {

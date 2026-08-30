@@ -7,7 +7,10 @@ import { AuthContext } from '@/app/providers/AuthProvider';
 import { clubConfig } from '@/config/club.config';
 import { env } from '@/config/env';
 import { AppError } from '@/shared/lib/app-error';
-import { reportRequestFailure, reportRequestSuccess } from '@/shared/hooks/use-connectivity';
+import {
+  reportRequestFailureDeferred,
+  reportRequestSuccessDeferred,
+} from '@/shared/hooks/use-connectivity';
 import {
   OFFLINE_CACHE_MAX_AGE,
   createOfflineBuster,
@@ -42,8 +45,8 @@ function shouldRetry(failureCount: number, error: Error): boolean {
 export function createAppQueryClient(): QueryClient {
   return new QueryClient({
     queryCache: new QueryCache({
-      onError: reportRequestFailure,
-      onSuccess: () => reportRequestSuccess(),
+      onError: reportRequestFailureDeferred,
+      onSuccess: reportRequestSuccessDeferred,
     }),
     defaultOptions: {
       queries: {

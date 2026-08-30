@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useSyncExternalStore } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 
 import { useAuth } from '@/app/providers/AuthProvider';
 import { useConnectivity } from '@/shared/hooks/use-connectivity';
@@ -8,6 +8,23 @@ import { formatSaoPauloDateTime } from '@/shared/lib/date-time';
 interface OfflineIndicatorProps {
   cachedAt?: string | null;
   hasCachedContent?: boolean;
+}
+
+function subscribeDeferred(subscribe: (notify: () => void) => () => void, notify: () => void) {
+  let active = true;
+  let queued = false;
+  const unsubscribe = subscribe(() => {
+    if (queued) return;
+    queued = true;
+    queueMicrotask(() => {
+      queued = false;
+      if (active) notify();
+    });
+  });
+  return () => {
+    active = false;
+    unsubscribe();
+  };
 }
 
 export function OfflineIndicator({
@@ -31,8 +48,12 @@ function ConnectedOfflineStatus({ isOnline }: { isOnline: boolean }) {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const cache = queryClient.getQueryCache();
+  const subscribeToCache = useCallback(
+    (notify: () => void) => subscribeDeferred((listener) => cache.subscribe(listener), notify),
+    [cache],
+  );
   const revision = useSyncExternalStore(
-    (notify) => cache.subscribe(notify),
+    subscribeToCache,
     () =>
       cache
         .getAll()
