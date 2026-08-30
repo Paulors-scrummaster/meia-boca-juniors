@@ -75,10 +75,16 @@ verificados no ambiente real.
 - [ ] Confirmar no GitHub/Supabase hospedado que os secret stores de staging e production são
       separados, completos e não compartilham valores. **Bloqueio:** T165 ainda não provisionou o
       projeto production nem concluiu Auth/secrets hospedados; valores secretos não foram lidos.
-- [ ] Confirmar no ambiente protegido `backup` o recipient público `age` e credencial R2 limitada ao
-      bucket `mbj-backups`. **Bloqueio:** acesso/provisionamento R2 não autorizado.
-- [ ] Confirmar no n8n real que somente a credencial fine-grained do repositório e a autenticação do
-      webhook estão associadas. **Bloqueio:** importação/ativação pertence à T177.
+
+### Controles pós-merge diferidos
+
+Os itens abaixo foram revisados como contratos/código, mas a verificação operacional real não integra
+o gate de T174: o plano de duas etapas exige que os workflows existam primeiro em `main` por T176.
+
+- T177 confirmará no ambiente protegido `backup` o recipient público `age`, a credencial R2 limitada
+  ao bucket `mbj-backups` e a credencial fine-grained/webhook do n8n.
+- T179 verificará o backup real e o gate de checksum antes de qualquer migration production.
+- T180 verificará heartbeat e alertas reais. Nenhum desses recursos foi antecipado nesta revisão.
 
 ## Evidência executada
 
@@ -92,5 +98,5 @@ verificados no ambiente real.
 - GitHub no head `5405e28`: dois conjuntos de `Required`, frontend, banco e Playwright aprovados;
   Cloudflare Pages aprovado.
 
-Conclusão: a revisão local/de código está completa, mas T174 não pode receber `[X]` enquanto os três
-controles externos acima permanecerem sem verificação real.
+Conclusão: a revisão local/de código está completa, mas T174 não pode receber `[X]` enquanto a
+separação real dos secret stores e controles hospedados de T165 permanecer sem verificação.

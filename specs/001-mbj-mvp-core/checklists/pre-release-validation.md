@@ -1,8 +1,7 @@
 # Validação pré-release — T175
 
-Data: 2026-08-30. Alvos produtivos, usuários reais e recursos externos não foram utilizados. A T175
-permanece aberta porque staging depende da T165 e porque não houve navegador interativo, R2 ou n8n
-autorizados/disponíveis para os cenários reais.
+Data: 2026-08-30. Alvos produtivos e usuários reais não foram utilizados. A T175 permanece aberta
+porque staging depende da T165 e porque não houve navegador interativo para os cenários reais.
 
 ## Local
 
@@ -50,12 +49,14 @@ autorizados/disponíveis para os cenários reais.
       acessada.
 - [ ] Executar jornadas reais de convite, MFA, papéis, RLS, Storage privado, Realtime, notificações e
       redaction no staging. **Bloqueio:** depende da T165; nenhum convite real foi enviado.
-- [ ] Executar upload/readback/retenção criptografada no R2 e restauração isolada. **Bloqueio:** R2
-      não autorizado/provisionado; nenhuma credencial, bucket ou objeto foi criado.
-- [ ] Importar e testar os ramos de sucesso/falha do workflow n8n. **Bloqueio:** ativação e
-      credenciais pertencem à T177; o JSON permaneceu inativo e sanitizado.
-- [ ] Validar Sentry staging, heartbeat UptimeRobot e alertas reais. **Bloqueio:** integrações externas
-      não configuradas/confirmadas por T165/T177.
+- [ ] Validar redaction/erro controlado no Sentry staging. **Bloqueio:** integração staging não
+      configurada/confirmada por T165.
+
+### Cenários pós-merge diferidos
+
+R2/n8n não são pré-requisitos de T175: T177 importa e testa o workflow somente depois que T176 o
+publicar em `main`; T179 verifica backup e release production; T180 valida UptimeRobot/alertas; T181
+executa a aceitação exclusivamente produtiva. Nenhum desses cenários foi antecipado.
 
 ## Resultado
 
