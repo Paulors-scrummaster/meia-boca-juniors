@@ -18,6 +18,12 @@ const publicEnvSchema = z.object({
     .regex(/^[a-z0-9-]+$/),
   VITE_SUPABASE_URL: z.string().url().refine(isHttpUrl),
   VITE_SUPABASE_PUBLISHABLE_KEY: z.string().trim().min(16),
+  VITE_SENTRY_DSN: z
+    .string()
+    .url()
+    .optional()
+    .or(z.literal('').transform(() => undefined)),
+  VITE_SENTRY_RELEASE: z.string().trim().min(7).max(64).optional(),
 });
 
 export type PublicEnv = z.infer<typeof publicEnvSchema>;

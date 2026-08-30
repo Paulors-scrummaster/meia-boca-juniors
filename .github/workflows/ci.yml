@@ -35,6 +35,13 @@ jobs:
       - run: npm run typecheck
       - run: npm run test:unit
       - run: npm run build
+      - name: Reject publicly deployable source maps
+        shell: bash
+        run: |
+          if find dist -type f -name '*.map' -print -quit | grep -q .; then
+            echo 'Public source maps are forbidden after the Sentry upload stage.' >&2
+            exit 1
+          fi
 
   database:
     name: Database security

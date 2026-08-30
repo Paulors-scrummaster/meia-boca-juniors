@@ -3,6 +3,7 @@ import { createBrowserRouter, Link, Navigate, Outlet, type RouteObject } from 'r
 
 import { AuthenticatedLayout } from '@/app/layouts/AuthenticatedLayout';
 import { useAuth } from '@/app/providers/AuthProvider';
+import { RouteErrorBoundary } from '@/app/providers/ErrorBoundary';
 import {
   Aal2RouteGuard,
   AuthenticatedRouteGuard,
@@ -175,7 +176,7 @@ function EditMatchRoutePage() {
   );
 }
 
-export const appRoutes: RouteObject[] = [
+const featureRoutes: RouteObject[] = [
   {
     element: <PublicLayout />,
     children: [
@@ -316,6 +317,13 @@ export const appRoutes: RouteObject[] = [
         <ErrorState title="Página não encontrada" message="A página solicitada não existe." />
       </main>
     ),
+  },
+];
+
+export const appRoutes: RouteObject[] = [
+  {
+    children: featureRoutes,
+    errorElement: <RouteErrorBoundary />,
   },
 ];
 

@@ -17,10 +17,10 @@ test('covers match lifecycle, call-ups, privacy, attendance, cancellation and re
   let roles = [{ role: 'PRESIDENT' }];
   const match = {
     competition_name: 'Liga de Teste',
-    confirmation_deadline: '2026-08-29T18:00:00.000Z',
+    confirmation_deadline: '2027-08-29T18:00:00.000Z',
     id: matchId,
     location_name: 'Campo Fictício',
-    match_date: '2026-08-30T18:00:00.000Z',
+    match_date: '2027-08-30T18:00:00.000Z',
     opponent_name: 'Adversário E2E',
     schedule_revision: 1,
     season_id: '00000000-0000-4000-8000-000000011101',
@@ -168,8 +168,8 @@ test('covers match lifecycle, call-ups, privacy, attendance, cancellation and re
   await page.goto('/app/staff/matches/new');
   await page.getByLabel('Temporada').selectOption(match.season_id);
   await page.getByLabel('Adversário').fill('Adversário E2E');
-  await page.getByLabel('Data e hora da partida').fill('2026-08-30T15:00');
-  await page.getByLabel('Prazo de confirmação').fill('2026-08-29T15:00');
+  await page.getByLabel('Data e hora da partida').fill('2027-08-30T15:00');
+  await page.getByLabel('Prazo de confirmação').fill('2027-08-29T15:00');
   await page.getByRole('button', { name: 'Salvar partida' }).click();
   await expect(page.getByText('Partida salva.')).toBeVisible();
 
@@ -188,15 +188,15 @@ test('covers match lifecycle, call-ups, privacy, attendance, cancellation and re
   await page.getByRole('button', { name: 'Salvar convocação' }).click();
   await expect(page.getByText('Convocação atualizada.')).toBeVisible();
   await page.getByLabel('Atleta da convocação excepcional').selectOption(attendance[0].athlete_id);
-  await page.getByLabel('Prazo individual').fill('2026-08-30T14:00');
+  await page.getByLabel('Prazo individual').fill('2027-08-30T14:00');
   await page.getByRole('button', { name: 'Criar convocação excepcional' }).click();
   await expect(page.getByText('Convocação excepcional criada.')).toBeVisible();
   await page.getByRole('button', { name: 'Cancelar partida' }).click();
   await expect(page.getByText('Partida cancelada.')).toBeVisible();
   await page.getByRole('button', { name: 'Reativar partida' }).click();
   await expect(page.getByText('Partida reativada.')).toBeVisible();
-  await page.getByLabel('Data e hora da partida').fill('2026-09-06T15:00');
-  await page.getByLabel('Prazo de confirmação').fill('2026-09-05T15:00');
+  await page.getByLabel('Data e hora da partida').fill('2027-09-06T15:00');
+  await page.getByLabel('Prazo de confirmação').fill('2027-09-05T15:00');
   await page.getByRole('button', { name: 'Salvar partida' }).click();
   await expect(page.getByText(/reconfirmação solicitada/i)).toBeVisible();
 

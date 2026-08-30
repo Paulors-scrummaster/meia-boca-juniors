@@ -254,7 +254,15 @@ export function AuthProvider({ children, client = supabase }: AuthProviderProps)
         'userId' in payload &&
         typeof payload.userId === 'string'
       ) {
-        void purgeRegisteredOfflineState(payload.userId);
+        const purgedUserId = payload.userId;
+        void (async () => {
+          await purgeRegisteredOfflineState(purgedUserId);
+          if (previousUserId.current === purgedUserId) {
+            resolutionId.current += 1;
+            previousUserId.current = null;
+            setValue({ ...initialAuthValue, status: 'unauthenticated' });
+          }
+        })();
       }
     });
     return () => channel.close();

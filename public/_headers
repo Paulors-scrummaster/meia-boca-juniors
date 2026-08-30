@@ -1,0 +1,30 @@
+/*
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.onesignal.com wss://*.onesignal.com https://*.sentry.io; font-src 'self'; form-action 'self'; frame-ancestors 'none'; img-src 'self' blob: data:; manifest-src 'self'; object-src 'none'; script-src 'self' https://cdn.onesignal.com; style-src 'self'; worker-src 'self' blob:
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+  Permissions-Policy: camera=(), display-capture=(), geolocation=(), microphone=(), payment=(), usb=()
+  Referrer-Policy: no-referrer
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+
+/index.html
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/manifest.webmanifest
+  Cache-Control: no-cache, must-revalidate
+
+/sw.js
+  Cache-Control: no-cache, no-store, must-revalidate
+  Content-Type: application/javascript; charset=utf-8
+
+/workbox-*.js
+  Cache-Control: no-cache, must-revalidate
+  Content-Type: application/javascript; charset=utf-8
+
+/push/onesignal/OneSignalSDKWorker.js
+  Cache-Control: no-cache, must-revalidate
+  Content-Type: application/javascript; charset=utf-8
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

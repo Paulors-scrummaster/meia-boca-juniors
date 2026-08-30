@@ -303,15 +303,15 @@
 
 **Purpose**: Complete code, workflow definitions, security review, and local/staging/preview validation before the implementation Pull Request is merged, without changing production data.
 
-- [ ] T156 [P] Implement the Sentry adapter with PII disabled, no Replay, low sampling, release tags, and `beforeSend` scrubbing in `src/shared/adapters/monitoring/sentry.ts`
-- [ ] T157 [P] Add safe request-local Sentry capture and flush helpers for Edge Functions in `supabase/functions/_shared/monitoring.ts`
-- [ ] T158 Integrate stable trace IDs and sanitized monitoring into global React and route error boundaries in `src/app/providers/ErrorBoundary.tsx`
-- [ ] T159 Configure production-only Sentry source-map upload by commit release and fail if `.map` files remain in the public artifact in `.github/workflows/ci.yml` and `vite.config.ts`
-- [ ] T160 [P] Add accessibility regression tests for keyboard, focus, semantics, contrast, screen readers, and touch targets in `tests/e2e/accessibility.spec.ts`
-- [ ] T161 [P] Add performance checks for two-second primary/offline screens and list query-count regressions in `tests/e2e/performance.spec.ts`
-- [ ] T162 Configure PWA manifest, update prompt, canonical URL metadata, and Portuguese install identity in `vite.config.ts` and `index.html`
-- [ ] T163 [P] Define Cloudflare security headers and document SPA fallback/canonical-domain redirect requirements in `public/_headers` and `docs/deployment.md`
-- [ ] T164 Document production, staging, preview, custom-domain, Supabase secret, OneSignal worker, and Pages validation steps in `docs/deployment.md`
+- [X] T156 [P] Implement the Sentry adapter with PII disabled, no Replay, low sampling, release tags, and `beforeSend` scrubbing in `src/shared/adapters/monitoring/sentry.ts`
+- [X] T157 [P] Add safe request-local Sentry capture and flush helpers for Edge Functions in `supabase/functions/_shared/monitoring.ts`
+- [X] T158 Integrate stable trace IDs and sanitized monitoring into global React and route error boundaries in `src/app/providers/ErrorBoundary.tsx`
+- [X] T159 Configure production-only Sentry source-map upload by commit release and fail if `.map` files remain in the public artifact in `.github/workflows/ci.yml` and `vite.config.ts`
+- [X] T160 [P] Add accessibility regression tests for keyboard, focus, semantics, contrast, screen readers, and touch targets in `tests/e2e/accessibility.spec.ts`
+- [X] T161 [P] Add performance checks for two-second primary/offline screens and list query-count regressions in `tests/e2e/performance.spec.ts`
+- [X] T162 Configure PWA manifest, update prompt, canonical URL metadata, and Portuguese install identity in `vite.config.ts` and `index.html`
+- [X] T163 [P] Define Cloudflare security headers and document SPA fallback/canonical-domain redirect requirements in `public/_headers` and `docs/deployment.md`
+- [X] T164 Document production, staging, preview, custom-domain, Supabase secret, OneSignal worker, and Pages validation steps in `docs/deployment.md`
 - [ ] T165 Provision separate hosted Supabase staging and production projects, configure invite-only Auth and sign-in throttling, populate only environment secret stores, and record safe project identifiers plus tested 429 evidence in `docs/deployment.md` and `docs/security-controls.md`
 - [ ] T166 Create the Cloudflare Pages project connected to GitHub, configure staging-only preview variables, validate the feature Pull Request preview, and document deferred production-domain steps in `docs/deployment.md`
 - [ ] T167 Implement an allowlisted backup script for database roles/schema/data, private Storage objects, manifest, SHA-256, local `age` encryption, private R2 upload/verification, and exit codes in `scripts/backup/export-supabase.ps1`
