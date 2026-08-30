@@ -31,7 +31,7 @@ autorizados/disponíveis para os cenários reais.
       `X-Robots-Tag: noindex`.
 - [x] O check Cloudflare Pages do novo head `eef0967` foi aprovado; após o deploy, as cinco rotas
       públicas acima foram novamente consultadas e retornaram HTTP 200 com MIME esperado.
-- [x] No head final `5405e28`, Cloudflare Pages e os dois conjuntos de gates `Required`, frontend,
+- [x] No head de implementação `5405e28`, Cloudflare Pages e os dois conjuntos de gates `Required`, frontend,
       banco e Playwright foram aprovados; as cinco rotas públicas foram novamente consultadas com
       HTTP 200 e MIME esperado.
 - [ ] Confirmar visualmente título/canonical, navegação por teclado, foco, contraste, touch targets,

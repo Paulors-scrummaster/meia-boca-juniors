@@ -132,6 +132,6 @@ que migrations, seed e jornadas MBJ não foram executados no staging. Nenhum sch
 MBJ foi enumerado ou lido. Criar production ou alterar Auth/schema/secrets hospedados permanece uma
 ação externa pendente; nenhuma configuração produtiva foi criada.
 
-No head final acima, Cloudflare Pages e os dois conjuntos de checks `Required`, frontend, banco e
+No head de implementação acima, Cloudflare Pages e os dois conjuntos de checks `Required`, frontend, banco e
 Playwright foram aprovados. Home, rota profunda, manifesto e os dois workers foram consultados após o
 deploy e retornaram HTTP 200 com MIME esperado.
