@@ -115,5 +115,11 @@ Preencher somente após validação real, sem secrets:
 | Supabase production project ref      | pendente de autenticação da conta                                                  |
 | Auth invite-only e limite staging    | pendente de autenticação da conta                                                  |
 | Auth invite-only e limite production | pendente de autenticação da conta                                                  |
-| Cloudflare Pages project/preview URL | projeto `meia-boca-juniors`; primeiro preview ainda não gerado                     |
-| Preview SHA/resultado                | aguardando o primeiro build Git da branch `feature/mbj-mvp-core`                   |
+| Cloudflare Pages project/preview URL | `meia-boca-juniors`; `https://feature-mbj-mvp-core.meia-boca-juniors.pages.dev`    |
+| Preview SHA/resultado                | `7bf038fad47cdbea99f384eca57c564345b7a5a2`; build/deploy concluído com sucesso     |
+
+Validação manual do preview em 2026-08-30: home HTTPS carregada; rota profunda recarregada sem 404
+e redirecionada pela proteção de autenticação; manifesto em português; `/sw.js` e o worker isolado
+do OneSignal servidos como JavaScript. A validação encontrou e corrigiu uma interceptação indevida
+de arquivos pelo fallback SPA, coberta por teste de regressão. Produção permaneceu sem variáveis e
+com deploy desativado durante toda a T166.
