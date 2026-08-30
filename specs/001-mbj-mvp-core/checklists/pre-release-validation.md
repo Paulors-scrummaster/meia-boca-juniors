@@ -7,7 +7,7 @@ autorizados/disponíveis para os cenários reais.
 ## Local
 
 - [x] Formatação, lint, TypeScript, bindings gerados e build de produção aprovados.
-- [x] 104 testes unitários aprovados, incluindo Auth, redaction/Sentry, cache offline e contratos dos
+- [x] 106 testes unitários aprovados, incluindo Auth, redaction/Sentry, cache offline e contratos dos
       workflows de backup/release/n8n.
 - [x] Supabase local reinicializado com 25 migrations e seed exclusivamente fictício.
 - [x] Lint do banco aprovado e 348 testes SQL de constraints, RLS e RPC aprovados em 18 arquivos.
@@ -15,10 +15,11 @@ autorizados/disponíveis para os cenários reais.
       resposta 429, elenco, partidas/presença, escalação, estatísticas/MVP, avisos/notificações,
       privacidade offline e orçamento de desempenho.
 - [ ] O comando Playwright encerra com sucesso sem intervenção. **Defeito `LOCAL-E2E-001`:** após o
-      28º teste aprovado, o runner permaneceu aberto sem resumo/exit code e foi interrompido; durante
-      alguns cenários também houve warnings React de atualização de `ConnectedOfflineStatus` durante
-      renderização. Não corrigido porque está fora de T167–T175. Os dois jobs equivalentes no runner
-      Linux do GitHub encerraram normalmente e foram aprovados.
+      28º teste, o runner permaneceu aberto sem resumo/exit code e foi interrompido. A atualização
+      síncrona de `ConnectedOfflineStatus` durante a renderização foi corrigida com notificações
+      diferidas e teste de regressão; a repetição completa não emitiu o warning React. Os dois jobs
+      equivalentes no runner Linux do GitHub encerraram normalmente no head anterior e foram
+      aprovados; o novo head ainda precisa passar no CI após o push.
 
 ## Feature preview público
 
@@ -40,8 +41,11 @@ autorizados/disponíveis para os cenários reais.
 ## Staging e outros cenários não produtivos
 
 - [ ] Confirmar que o preview aponta somente para o ref público staging `lqkybvqnppxxehiriunq`, com
-      dados fictícios, convite fechado e throttling Auth produzindo 429 real. **Bloqueio:** T165 não
-      concluiu configuração/validação hospedada; a tabela RAG alheia ao MBJ não foi acessada.
+      dados fictícios, convite fechado e throttling Auth produzindo 429 real. **Parcial:** o bundle
+      público aponta para o ref allowlisted e o Auth retornou HTTP 429 após requisições com identidade
+      sintética; porém signup permanece aberto e o endpoint MBJ `profiles` retornou 404, indicando que
+      a configuração/schema de staging ainda não foi concluída. A tabela RAG alheia ao MBJ não foi
+      acessada.
 - [ ] Executar jornadas reais de convite, MFA, papéis, RLS, Storage privado, Realtime, notificações e
       redaction no staging. **Bloqueio:** depende da T165; nenhum convite real foi enviado.
 - [ ] Executar upload/readback/retenção criptografada no R2 e restauração isolada. **Bloqueio:** R2
@@ -54,4 +58,5 @@ autorizados/disponíveis para os cenários reais.
 ## Resultado
 
 Os controles locais e HTTP públicos possíveis foram executados. T175 não recebe `[X]`: faltam
-cenários hospedados reais e o encerramento limpo da suíte E2E. Nenhuma evidência foi simulada.
+cenários hospedados reais, CI do novo head e o encerramento limpo da suíte E2E no Windows. Nenhuma
+evidência foi simulada.

@@ -85,10 +85,10 @@ verificados no ambiente real.
 - `npm run db:reset`: 25 migrations e seed fictício aplicados localmente.
 - `npm run db:lint`: nenhum erro de schema.
 - `npm run test:db`: 18 arquivos, 348 testes aprovados.
-- `npm run test:unit`: 27 arquivos, 104 testes aprovados.
+- `npm run test:unit`: 27 arquivos, 106 testes aprovados.
 - `npm run lint`, `npm run typecheck`, `npm run db:types:check` e `npm run build`: aprovados.
-- `npm run test:e2e`: 28/28 cenários aprovados em desktop/mobile, mas o runner não encerrou sozinho;
-  ver `LOCAL-E2E-001` na checklist de pré-release.
+- `npm run test:e2e`: os 28 cenários chegaram ao fim em desktop/mobile sem o warning React corrigido,
+  mas o runner não encerrou sozinho; ver `LOCAL-E2E-001` na checklist de pré-release.
 
 Conclusão: a revisão local/de código está completa, mas T174 não pode receber `[X]` enquanto os três
 controles externos acima permanecerem sem verificação real.

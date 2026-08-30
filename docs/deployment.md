@@ -112,9 +112,9 @@ Preencher somente após validação real, sem secrets:
 | Controle                             | Evidência segura                                                                   |
 | ------------------------------------ | ---------------------------------------------------------------------------------- |
 | Supabase staging project ref         | `lqkybvqnppxxehiriunq` (`Manager01`, designado exclusivamente como staging do MBJ) |
-| Supabase production project ref      | pendente de autenticação da conta                                                  |
-| Auth invite-only e limite staging    | pendente de autenticação da conta                                                  |
-| Auth invite-only e limite production | pendente de autenticação da conta                                                  |
+| Supabase production project ref      | não provisionado; auditoria autenticada encontrou zero candidato MBJ separado      |
+| Auth invite-only e limite staging    | incompleto: signup aberto; HTTP 429 observado com identidade sintética             |
+| Auth invite-only e limite production | bloqueado pelo projeto production ainda inexistente                                |
 | Cloudflare Pages project/preview URL | `meia-boca-juniors`; `https://feature-mbj-mvp-core.meia-boca-juniors.pages.dev`    |
 | Preview SHA/resultado                | `7bf038fad47cdbea99f384eca57c564345b7a5a2`; build/deploy concluído com sucesso     |
 
@@ -123,3 +123,11 @@ e redirecionada pela proteção de autenticação; manifesto em português; `/sw
 do OneSignal servidos como JavaScript. A validação encontrou e corrigiu uma interceptação indevida
 de arquivos pelo fallback SPA, coberta por teste de regressão. Produção permaneceu sem variáveis e
 com deploy desativado durante toda a T166.
+
+Auditoria somente leitura em 2026-08-30 confirmou `Manager01` ativo e saudável em `us-east-1`. O
+bundle público do preview contém somente o ref staging allowlisted. O endpoint público de Auth
+reportou signup aberto e produziu HTTP 429 na 36ª tentativa controlada com endereço sintético
+`.invalid`, às `2026-08-30T22:20:00.7220374Z`. O endpoint exato `public.profiles` retornou 404, de modo
+que migrations, seed e jornadas MBJ não foram executados no staging. Nenhum schema/tabela alheio ao
+MBJ foi enumerado ou lido. Criar production ou alterar Auth/schema/secrets hospedados permanece uma
+ação externa pendente; nenhuma configuração produtiva foi criada.
