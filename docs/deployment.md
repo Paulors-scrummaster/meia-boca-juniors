@@ -16,6 +16,7 @@ O preview nunca recebe URL, chave, project ref, banco, Storage ou secrets do pro
 
 ## Build e Cloudflare Pages
 
+- Projeto Pages: `meia-boca-juniors` (`meia-boca-juniors.pages.dev`).
 - Repositório: `Paulors-scrummaster/meia-boca-juniors`.
 - Branch produtiva: `main`.
 - Branch de preview desta entrega: `feature/mbj-mvp-core`.
@@ -24,6 +25,8 @@ O preview nunca recebe URL, chave, project ref, banco, Storage ou secrets do pro
 - Versão Node: `24` por `NODE_VERSION=24`.
 - Diretório raiz: raiz do repositório.
 - O projeto deve usar integração Git; Direct Upload não satisfaz o fluxo de previews do PR.
+- Deploy produtivo permanece desativado durante T166. O filtro de preview aceita somente
+  `feature/mbj-mvp-core`; produção, domínio personalizado e DNS continuam adiados para T178.
 
 Não existe `404.html` na raiz. Assim, o serving do Pages aplica fallback SPA para rotas profundas.
 Validar uma rota como `/app/matches` por acesso direto e recarga. Os caminhos
@@ -106,11 +109,11 @@ T166 não altera DNS, não promove preview e não publica variáveis produtivas.
 
 Preencher somente após validação real, sem secrets:
 
-| Controle                             | Evidência segura                  |
-| ------------------------------------ | --------------------------------- |
-| Supabase staging project ref         | pendente de autenticação da conta |
-| Supabase production project ref      | pendente de autenticação da conta |
-| Auth invite-only e limite staging    | pendente de autenticação da conta |
-| Auth invite-only e limite production | pendente de autenticação da conta |
-| Cloudflare Pages project/preview URL | pendente de autenticação da conta |
-| Preview SHA/resultado                | pendente de autenticação da conta |
+| Controle                             | Evidência segura                                                                   |
+| ------------------------------------ | ---------------------------------------------------------------------------------- |
+| Supabase staging project ref         | `lqkybvqnppxxehiriunq` (`Manager01`, designado exclusivamente como staging do MBJ) |
+| Supabase production project ref      | pendente de autenticação da conta                                                  |
+| Auth invite-only e limite staging    | pendente de autenticação da conta                                                  |
+| Auth invite-only e limite production | pendente de autenticação da conta                                                  |
+| Cloudflare Pages project/preview URL | projeto `meia-boca-juniors`; primeiro preview ainda não gerado                     |
+| Preview SHA/resultado                | aguardando o primeiro build Git da branch `feature/mbj-mvp-core`                   |
