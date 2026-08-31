@@ -1,8 +1,7 @@
 # Revisão de segurança e privacidade — T174
 
-Data da revisão: 2026-08-30. Esta checklist registra somente evidência técnica sanitizada. A T174
-permanece aberta enquanto os secrets/controles hospedados dependentes de T165 não puderem ser
-verificados no ambiente real.
+Data da revisão: 2026-08-31. Esta checklist registra somente evidência técnica sanitizada. A revisão
+local e os controles hospedados pré-merge de T165 foram verificados sem leitura de valores secretos.
 
 ## Banco, papéis e superfícies expostas
 
@@ -72,9 +71,11 @@ verificados no ambiente real.
       ações e ferramentas fixadas; o resultado publicado é allowlisted e tem retenção de um dia.
 - [x] Preview e staging estão documentados como não produtivos; o preview tem `noindex`, CSP, HSTS,
       `nosniff`, anti-frame e Permissions Policy observados por HTTPS público.
-- [ ] Confirmar no GitHub/Supabase hospedado que os secret stores de staging e production são
-      separados, completos e não compartilham valores. **Bloqueio:** T165 ainda não provisionou o
-      projeto production nem concluiu Auth/secrets hospedados; valores secretos não foram lidos.
+- [x] Staging e production usam refs Supabase distintos; o preview contém somente o ref staging; e o
+      ambiente GitHub `production-release`, limitado a `main` e sem bypass administrativo, contém a
+      variável/ref production e os três nomes de secrets exigidos. Valores não foram lidos; o usuário
+      confirmou a inserção direta dos valores production no secret store, e os refs/chaves públicas
+      específicas de projeto permanecem separados por ambiente.
 
 ### Controles pós-merge diferidos
 
@@ -98,5 +99,5 @@ o gate de T174: o plano de duas etapas exige que os workflows existam primeiro e
 - GitHub no head `5405e28`: dois conjuntos de `Required`, frontend, banco e Playwright aprovados;
   Cloudflare Pages aprovado.
 
-Conclusão: a revisão local/de código está completa, mas T174 não pode receber `[X]` enquanto a
-separação real dos secret stores e controles hospedados de T165 permanecer sem verificação.
+Conclusão: T174 está completa para o gate pré-merge. R2, n8n, backup/release e monitoramento reais
+continuam deliberadamente diferidos para T177–T180.

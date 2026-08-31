@@ -1,7 +1,8 @@
 # Validação pré-release — T175
 
-Data: 2026-08-30. Alvos produtivos e usuários reais não foram utilizados. A T175 permanece aberta
-porque staging depende da T165 e porque não houve navegador interativo para os cenários reais.
+Data: 2026-08-31. Alvos produtivos e usuários reais não foram utilizados. A T175 permanece aberta
+porque não houve navegador interativo nem identidades de teste autenticáveis para todas as jornadas
+staging.
 
 ## Local
 
@@ -46,9 +47,10 @@ porque staging depende da T165 e porque não houve navegador interativo para os 
       acesso anônimo; e o Auth produziu HTTP 429 real na 31ª tentativa sintética. A tabela RAG alheia
       ao MBJ não foi acessada.
 - [ ] Executar jornadas reais de convite, MFA, papéis, RLS, Storage privado, Realtime, notificações e
-      redaction no staging. **Bloqueio:** depende da T165; nenhum convite real foi enviado.
+      redaction no staging. **Pendente:** T165 está completa, mas não foram criadas credenciais de
+      identidades fictícias autenticáveis nem enviados convites reais.
 - [ ] Validar redaction/erro controlado no Sentry staging. **Bloqueio:** integração staging não
-      configurada/confirmada por T165.
+      configurada/confirmada; nenhum evento foi simulado.
 
 ### Cenários pós-merge diferidos
 

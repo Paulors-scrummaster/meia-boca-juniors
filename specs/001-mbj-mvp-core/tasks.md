@@ -312,7 +312,7 @@
 - [X] T162 Configure PWA manifest, update prompt, canonical URL metadata, and Portuguese install identity in `vite.config.ts` and `index.html`
 - [X] T163 [P] Define Cloudflare security headers and document SPA fallback/canonical-domain redirect requirements in `public/_headers` and `docs/deployment.md`
 - [X] T164 Document production, staging, preview, custom-domain, Supabase secret, OneSignal worker, and Pages validation steps in `docs/deployment.md`
-- [ ] T165 Provision separate hosted Supabase staging and production projects, configure invite-only Auth and sign-in throttling, populate only environment secret stores, and record safe project identifiers plus tested 429 evidence in `docs/deployment.md` and `docs/security-controls.md`
+- [X] T165 Provision separate hosted Supabase staging and production projects, configure invite-only Auth and sign-in throttling, populate only environment secret stores, and record safe project identifiers plus tested 429 evidence in `docs/deployment.md` and `docs/security-controls.md`
 - [X] T166 Create the Cloudflare Pages project connected to GitHub, configure staging-only preview variables, validate the feature Pull Request preview, and document deferred production-domain steps in `docs/deployment.md`
 - [X] T167 Implement an allowlisted backup script for database roles/schema/data, private Storage objects, manifest, SHA-256, local `age` encryption, private R2 upload/verification, and exit codes in `scripts/backup/export-supabase.ps1`
 - [X] T168 Add a protected-`main`, manually dispatchable and reusable pinned-Windows backup runner conforming to `specs/001-mbj-mvp-core/contracts/backup-automation.md`, with PII-free `request_id` input/run name, pinned Supabase CLI and `age`, typed outputs, one-day sanitized result artifact, and unconditional plaintext cleanup in `.github/workflows/backup.yml`
@@ -321,7 +321,7 @@
 - [X] T171 Add a production migration workflow that directly calls the reusable verified backup workflow, blocks on its backup ID/checksum, performs dry-run/apply, and runs smoke validation in `.github/workflows/database-release.yml`
 - [X] T172 [P] Document isolated monthly restore verification, Auth continuity limits, row counts, and avatar checksum evidence in `docs/backup-restore.md`
 - [X] T173 [P] Add repository contribution, two-stage release, branch, PR self-review, Definition of Done, and secret/data prohibitions in `CONTRIBUTING.md`
-- [ ] T174 Run and record the full role/RLS/privacy/security review checklist against every exposed table, view, RPC, function, log, cache, and deployment secret in `specs/001-mbj-mvp-core/checklists/security-review.md`
+- [X] T174 Run and record the full role/RLS/privacy/security review checklist against every exposed table, view, RPC, function, log, cache, and deployment secret in `specs/001-mbj-mvp-core/checklists/security-review.md`
 - [ ] T175 Execute the local, staging, feature-preview, and non-production acceptance scenarios from the validation guide and record results or linked defects in `specs/001-mbj-mvp-core/checklists/pre-release-validation.md`
 - [ ] T176 After CI, preview, security review, and Codex-assisted self-review pass, merge the implementation Pull Request into protected `main` without running production migrations; then create and publish `chore/mbj-production-activation` from updated `main` and record the implementation merge SHA in `docs/release-activation.md`
 

@@ -112,9 +112,9 @@ Preencher somente após validação real, sem secrets:
 | Controle                             | Evidência segura                                                                   |
 | ------------------------------------ | ---------------------------------------------------------------------------------- |
 | Supabase staging project ref         | `lqkybvqnppxxehiriunq` (`Manager01`, designado exclusivamente como staging do MBJ) |
-| Supabase production project ref      | não provisionado; auditoria autenticada encontrou zero candidato MBJ separado      |
+| Supabase production project ref      | `sclxmrondkegopyokdym` (`MBJ Production`, `us-east-1`, ativo/saudável e vazio)     |
 | Auth invite-only e limite staging    | concluído: signup fechado; limite 30/5 min; HTTP 429 verificado                    |
-| Auth invite-only e limite production | bloqueado pelo projeto production ainda inexistente                                |
+| Auth invite-only e limite production | concluído manualmente: signup fechado e limite 30/5 min                            |
 | Cloudflare Pages project/preview URL | `meia-boca-juniors`; `https://feature-mbj-mvp-core.meia-boca-juniors.pages.dev`    |
 | Preview SHA/resultado                | `5405e285c136156fbba33b7d7e1e09a17f48e343`; build/deploy e gates aprovados         |
 
@@ -130,8 +130,17 @@ exclusivamente fictício; um dry-run posterior confirmou drift zero. As quatro E
 `ACTIVE`, com ambiente e origens públicas configurados no secret store e integrações sem credenciais
 mantidas fail-closed. A configuração pública confirmou signup fechado; o endpoint `profiles` existe e
 rejeitou acesso anônimo com HTTP 401; o throttling produziu HTTP 429 na 31ª tentativa sintética às
-`2026-08-31T01:20:47.7664083Z`. Nenhum schema/tabela alheio ao MBJ foi enumerado ou lido. Criar
-production permanece pendente; nenhuma configuração produtiva foi criada.
+`2026-08-31T01:20:47.7664083Z`. Nenhum schema/tabela alheio ao MBJ foi enumerado ou lido. Nesse
+checkpoint, production ainda permanecia pendente e nenhuma configuração produtiva havia sido criada.
+
+Em 2026-08-31, o projeto separado `MBJ Production` (`sclxmrondkegopyokdym`) foi criado em
+`us-east-1` e confirmado `ACTIVE_HEALTHY`. O dry-run remoto listou todas as 25 migrations e o seed
+como pendentes, confirmando que nenhum schema/dado MBJ foi aplicado. A configuração manual confirmou
+signup fechado, limite de 30 sign-ups/sign-ins por cinco minutos, zero usuários e URL canônica futura
+sem ativação. O ambiente GitHub `production-release` contém somente a variável pública
+`SUPABASE_PROJECT_REF` e os três nomes de secrets exigidos pelo workflow, aceita apenas `main` e não
+permite bypass administrativo. Valores secretos não foram lidos. Nenhum workflow production foi
+executado.
 
 No head de implementação acima, Cloudflare Pages e os dois conjuntos de checks `Required`, frontend, banco e
 Playwright foram aprovados. Home, rota profunda, manifesto e os dois workers foram consultados após o
