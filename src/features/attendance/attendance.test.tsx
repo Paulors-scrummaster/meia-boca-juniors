@@ -10,11 +10,16 @@ import type {
 } from '@/features/attendance/api/attendance.service';
 import { PresenceResponsePanel } from '@/features/attendance/components/PresenceResponsePanel';
 import { RefusalReasonModal } from '@/features/attendance/components/RefusalReasonModal';
+import { useAttendanceRealtime } from '@/features/attendance/hooks/use-attendance-realtime';
 import { AttendanceDashboardPage } from '@/features/attendance/pages/AttendanceDashboardPage';
 import {
   resetConnectivityForTests,
   setConnectivityForTests,
 } from '@/shared/hooks/use-connectivity';
+
+vi.mock('@/features/attendance/hooks/use-attendance-realtime', () => ({
+  useAttendanceRealtime: vi.fn(),
+}));
 
 const presence: PresenceSummary = {
   applicable_deadline: '2026-08-28T18:00:00.000Z',
@@ -114,5 +119,12 @@ describe('attendance', () => {
       reason: null,
       status: 'CONFIRMED',
     });
+  });
+
+  it('subscribes the staff dashboard to attendance Realtime updates', async () => {
+    renderAttendance(<AttendanceDashboardPage matchId={presence.match_id} service={service()} />);
+
+    await screen.findByText('Atleta Teste');
+    expect(useAttendanceRealtime).toHaveBeenCalledWith(presence.match_id);
   });
 });

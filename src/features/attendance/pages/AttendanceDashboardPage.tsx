@@ -8,6 +8,7 @@ import {
   type PresenceStatus,
   type PresenceSummary,
 } from '@/features/attendance/api/attendance.service';
+import { useAttendanceRealtime } from '@/features/attendance/hooks/use-attendance-realtime';
 import { OnlineActionGuard } from '@/shared/components/OnlineActionGuard';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/feedback';
 import { useOnlineMutation } from '@/shared/hooks/use-online-mutation';
@@ -24,6 +25,7 @@ export function AttendanceDashboardPage({
   matchId,
   service = createAttendanceService(),
 }: AttendanceDashboardPageProps) {
+  useAttendanceRealtime(matchId);
   const query = useQuery({
     queryFn: () => service.listStaffAttendance(matchId),
     queryKey: attendanceKeys.staff(matchId),
