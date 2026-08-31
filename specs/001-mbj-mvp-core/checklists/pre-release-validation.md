@@ -1,13 +1,14 @@
 # Validação pré-release — T175
 
-Data: 2026-08-31. Alvos produtivos e usuários reais não foram utilizados. A T175 permanece aberta
-porque não houve navegador interativo nem identidades de teste autenticáveis para todas as jornadas
-staging.
+Data: 2026-08-31. Alvos produtivos e usuários reais não foram utilizados. O navegador interativo e
+identidades exclusivamente sintéticas permitiram validar as jornadas hospedadas de Auth, MFA,
+papéis, convite e ciclo de vida do atleta descritas abaixo. A T175 permanece aberta porque os demais
+cenários staging ainda não foram executados integralmente.
 
 ## Local
 
 - [x] Formatação, lint, TypeScript, bindings gerados e build de produção aprovados.
-- [x] 107 testes unitários aprovados, incluindo Auth, redaction/Sentry, cache offline e contratos dos
+- [x] 109 testes unitários aprovados, incluindo Auth, redaction/Sentry, cache offline e contratos dos
       workflows de backup/release/n8n.
 - [x] Supabase local reinicializado com 26 migrations e seed exclusivamente fictício.
 - [x] Lint do banco aprovado e 353 testes SQL de constraints, RLS e RPC aprovados em 18 arquivos.
@@ -54,19 +55,37 @@ staging.
       o seed fictício foram aplicados sem drift posterior; signup está fechado; `profiles` rejeita
       acesso anônimo; e o Auth produziu HTTP 429 real na 31ª tentativa sintética. A tabela RAG alheia
       ao MBJ não foi acessada.
-- [ ] Executar jornadas reais de convite, MFA, papéis, RLS, Storage privado, Realtime, notificações e
-      redaction no staging. Uma identidade `.invalid` autenticável foi criada manualmente, vinculada a
-      um perfil `PRESIDENT` fictício e confirmou login, cadastro TOTP, AAL2 e acesso a `/app/admin`.
-      A consulta do Coach fictício encontrou um defeito real: a role existente era exibida desmarcada
-      porque a UI usava a política self-only. A correção adiciona `get_user_roles`, negada para Atleta,
-      Técnico, Presidente AAL1 e Presidente desativado; 353 testes SQL e a aplicação da 26ª migration
-      no staging passaram, sem reaplicar seed. No commit `2baff66`, os nove checks do GitHub e o deploy
-      Cloudflare passaram; após atualizar o PWA, a consulta hospedada exibiu somente `COACH` marcado e
-      o grid desktop manteve navegação lateral e conteúdo na coluna principal. A role `COACH` do
-      integrante fictício foi removida e restaurada pela UI, com mensagens de sucesso; a verificação
-      agregada final confirmou uma atribuição ativa e exatamente dois eventos de auditoria de papel,
-      sem leitura dos respectivos estados/payloads. Faltam as demais jornadas hospedadas; nenhum
-      convite real foi enviado.
+- [ ] Executar jornadas hospedadas de convite, MFA, papéis, RLS, Storage privado, Realtime,
+      notificações e redaction no staging. Uma identidade `.invalid` autenticável foi vinculada a um
+      perfil `PRESIDENT` fictício e confirmou login, cadastro TOTP, AAL2 e acesso a `/app/admin`. A
+      consulta do Coach fictício encontrou um defeito real: a role existente era exibida desmarcada
+      porque a UI usava a política self-only. A correção adicionou `get_user_roles`, negada para
+      Atleta, Técnico, Presidente AAL1 e Presidente desativado; 353 testes SQL e a aplicação da 26ª
+      migration no staging passaram, sem reaplicar seed. No commit `2baff66`, os nove checks do GitHub
+      e o deploy Cloudflare passaram; após atualizar o PWA, a consulta hospedada exibiu somente
+      `COACH` marcado. A role foi removida e restaurada pela UI, com mensagens de sucesso; a
+      verificação agregada confirmou uma atribuição ativa e exatamente dois eventos sanitizados de
+      auditoria.
+
+      Os controles de convite foram então exercitados apenas com atletas e endereços `.invalid`. O
+      teste encontrou e corrigiu três defeitos hospedados: o preflight da Edge Function não permitia
+      `apikey` (`1170728`), o redirect de Auth não chegava à rota de ativação (`b2690b1`) e a renovação
+      de convite pendente gerava um link do tipo incorreto, imediatamente inválido (`2d8df1c`). Após
+      o último deploy, a renovação alterou o link, preservou o redirect allowlisted e abriu
+      imediatamente `/convite` com a identidade confirmada, sem parâmetros de erro ou exposição do
+      token nos registros desta checklist.
+
+      Uma conta Atleta sintética foi ativada por convite e acessou `/app/athlete` sem MFA. A adição do
+      papel Técnico redirecionou a mesma sessão para `/mfa`, confirmando a exigência administrativa;
+      a remoção dos papéis e a inativação do atleta preservaram o histórico esportivo. O convite de
+      renovação foi revogado e o segundo atleta sintético também foi inativado. Uma consulta final
+      limitada retornou somente quatro booleanos verdadeiros: papel único da conta Presidente de
+      recuperação, dois atletas inativos, convite revogado e identidade revogada desabilitada. A
+      senha perdida da primeira conta Presidente sintética exigiu uma substituta: ela recebeu somente
+      `PRESIDENT`, concluiu MFA/AAL2, e a conta anterior teve o papel removido e foi bloqueada até
+      2126. Faltam as verificações hospedadas integrais de matriz RLS, Storage privado, Realtime,
+      notificações e redaction; nenhum usuário real foi convidado e nenhum segredo, UUID ou link de
+      convite foi registrado.
 - [ ] Validar redaction/erro controlado no Sentry staging. **Bloqueio:** integração staging não
       configurada: a consulta sanitizada do Pages confirmou ausência de `VITE_SENTRY_DSN` no Preview.
       Nenhum valor de DSN foi lido e nenhum evento foi simulado.
@@ -79,5 +98,6 @@ executa a aceitação exclusivamente produtiva. Nenhum desses cenários foi ante
 
 ## Resultado
 
-Os controles locais e HTTP públicos possíveis foram executados. T175 não recebe `[X]`: faltam os
-cenários hospedados reais descritos acima. Nenhuma evidência foi simulada.
+Os controles locais, HTTP públicos e as jornadas hospedadas de Auth/convite acima foram executados.
+T175 não recebe `[X]`: faltam os cenários hospedados integrais de RLS, Storage privado, Realtime,
+notificações e redaction/Sentry. Nenhuma evidência foi simulada.
