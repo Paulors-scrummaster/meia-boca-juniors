@@ -34,14 +34,19 @@ staging.
 - [x] No head de implementação `5405e28`, Cloudflare Pages e os dois conjuntos de gates `Required`, frontend,
       banco e Playwright foram aprovados; as cinco rotas públicas foram novamente consultadas com
       HTTP 200 e MIME esperado.
-- [ ] Confirmar visualmente título/canonical, navegação por teclado, foco, contraste, touch targets,
+- [x] Confirmar visualmente título/canonical, navegação por teclado, foco, contraste, touch targets,
       instalação/atualização PWA e preservação de formulário no deployment do novo head. Título,
       canonical, teclado/foco, contraste, alvos de toque e preservação do formulário durante o prompt
-      de atualização passaram em desktop e mobile no preview; falta instalar a PWA real e repetir no
-      deployment que contém a correção hospedada descoberta abaixo.
-- [ ] Inspecionar Cache Storage e rede no preview para confirmar ausência de Auth/Data API e ausência
-      de inicialização OneSignal produtiva. **Bloqueio:** exige navegador interativo; a configuração
-      sanitizada do Pages confirmou `VITE_ONESIGNAL_APP_ID` vazio no escopo Preview.
+      de atualização passaram em desktop e mobile no preview. Após o deploy corrigido, o prompt
+      atualizou o bundle e a PWA foi instalada e aberta em janela standalone, com título MBJ, sessão
+      preservada, navegação e grid desktop corretos.
+- [x] Inspecionar Cache Storage e rede no preview para confirmar ausência de Auth/Data API e ausência
+      de inicialização OneSignal produtiva. A inspeção manual do único cache Workbox encontrou nove
+      entradas, todas assets estáticos same-origin (HTML, CSS, JavaScript, manifesto, logo, favicon,
+      ícone PWA e worker isolado), sem Supabase, `/auth/v1`, `/rest/v1`, `/storage/v1` ou OneSignal.
+      A configuração sanitizada do Pages confirmou `VITE_ONESIGNAL_APP_ID` vazio no Preview; após
+      recarga autenticada, o filtro `onesignal` da aba Network retornou zero correspondências enquanto
+      as requisições normais do app foram observadas.
 
 ## Staging e outros cenários não produtivos
 
