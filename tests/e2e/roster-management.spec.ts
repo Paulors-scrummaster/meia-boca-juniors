@@ -29,6 +29,7 @@ async function json(route: Route, body: unknown, status = 200) {
 }
 
 test('cria, edita, inativa, preserva histórico e reutiliza número', async ({ page }) => {
+  const invitationOperations: string[] = [];
   const athletes: Array<Record<string, unknown>> = [
     {
       anonymized_at: null,
@@ -113,6 +114,20 @@ test('cria, edita, inativa, preserva histórico e reutiliza número', async ({ p
       });
       return json(route, current);
     }
+    if (url.pathname === '/functions/v1/athlete-invitations/manage') {
+      const input = request.postDataJSON();
+      invitationOperations.push(input.operation);
+      return json(route, {
+        data: {
+          ...(input.operation === 'REVOKE'
+            ? {}
+            : { deliveryLink: `https://auth.example.test/${input.operation.toLowerCase()}` }),
+          invitationId: '00000000-0000-4000-8000-000000006201',
+          logicalStatus: input.operation === 'REVOKE' ? 'REVOKED' : 'PENDING',
+        },
+        traceId: '00000000-0000-4000-8000-000000006299',
+      });
+    }
     return json(route, { message: `Mock ausente: ${request.method()} ${url.pathname}` }, 500);
   });
 
@@ -130,6 +145,16 @@ test('cria, edita, inativa, preserva histórico e reutiliza número', async ({ p
   await page.getByLabel('Posição principal').fill('Atacante');
   await page.getByRole('button', { name: 'Salvar atleta' }).click();
   await expect(page.getByText('Novo Atleta')).toBeVisible();
+
+  await page.getByLabel('E-mail individual').fill('novo-atleta@mbj.example.invalid');
+  await page.getByRole('button', { name: 'Gerar convite' }).click();
+  await expect(page.getByLabel('Link temporário')).toHaveValue('https://auth.example.test/create');
+  await page.getByRole('button', { name: 'Gerar novo link do convite ativo' }).click();
+  await expect(page.getByLabel('Link temporário')).toHaveValue('https://auth.example.test/resend');
+  await page.getByRole('button', { name: 'Revogar convite ativo' }).click();
+  await page.getByRole('button', { name: 'Revogar convite', exact: true }).click();
+  await expect(page.getByText('Convite revogado com sucesso.')).toBeVisible();
+  expect(invitationOperations).toEqual(['CREATE', 'RESEND', 'REVOKE']);
 
   await page.getByRole('link', { name: 'Editar perfil' }).click();
   await page.getByLabel('Nome de camisa').fill('Novo 7');

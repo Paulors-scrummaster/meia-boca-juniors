@@ -1,6 +1,8 @@
 import { ArrowLeft, History, Pencil } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 
+import type { AuthService } from '@/features/auth/api/auth.service';
+import { InvitationManager } from '@/features/auth/components/InvitationManager';
 import type { RosterService } from '@/features/roster/api/roster.service';
 import { AthleteAvatar } from '@/features/roster/components/AthleteAvatar';
 import { useAthlete } from '@/features/roster/queries/roster.queries';
@@ -11,12 +13,14 @@ import { domainLabels } from '@/shared/lib/domain-labels';
 
 interface AthleteProfilePageProps {
   athleteId?: string;
+  authService?: AuthService;
   canManage?: boolean;
   service?: RosterService;
 }
 
 export function AthleteProfilePage({
   athleteId,
+  authService,
   canManage = false,
   service,
 }: AthleteProfilePageProps) {
@@ -69,6 +73,13 @@ export function AthleteProfilePage({
           ) : null}
         </div>
       </section>
+
+      {canManage && !athlete.anonymized_at && !athlete.user_id ? (
+        <InvitationManager
+          athleteId={athlete.id}
+          {...(authService ? { service: authService } : {})}
+        />
+      ) : null}
 
       <section aria-labelledby="history-title" className="rounded-3xl border bg-card p-6">
         <div className="flex items-center gap-3">

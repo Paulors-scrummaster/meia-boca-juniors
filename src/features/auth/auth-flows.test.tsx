@@ -9,6 +9,7 @@ import { createAppQueryClient } from '@/app/providers/QueryProvider';
 import { defaultRouteForRoles } from '@/app/router/router';
 import type { AuthService } from '@/features/auth/api/auth.service';
 import { RoleManager } from '@/features/auth/components/RoleManager';
+import { InvitationManager } from '@/features/auth/components/InvitationManager';
 import { AcceptInvitationPage } from '@/features/auth/pages/AcceptInvitationPage';
 import { ChangePasswordPage } from '@/features/auth/pages/ChangePasswordPage';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
@@ -152,6 +153,59 @@ describe('fluxos de identidade', () => {
     await user.click(screen.getByRole('checkbox', { name: 'Técnico' }));
     expect(auth.setRole).toHaveBeenCalledWith({ assigned: true, role: 'COACH', userId });
     await waitFor(() => expect(screen.getByRole('checkbox', { name: 'Técnico' })).toBeChecked());
+  });
+
+  it('cria, renova e revoga um convite sem persistir o link temporário', async () => {
+    const user = userEvent.setup();
+    const manageInvitation = vi
+      .fn()
+      .mockResolvedValueOnce({
+        deliveryLink: 'https://auth.example.test/action-one',
+        invitationId,
+        logicalStatus: 'PENDING',
+      })
+      .mockResolvedValueOnce({
+        deliveryLink: 'https://auth.example.test/action-two',
+        invitationId,
+        logicalStatus: 'PENDING',
+      })
+      .mockResolvedValueOnce({ invitationId, logicalStatus: 'REVOKED' });
+    const auth = service({ manageInvitation });
+
+    renderWithAuth(<InvitationManager athleteId={userId} service={auth} />);
+    await user.type(screen.getByLabelText('E-mail individual'), 'atleta@mbj.example.invalid');
+    await user.click(screen.getByRole('button', { name: 'Gerar convite' }));
+    expect(await screen.findByDisplayValue('https://auth.example.test/action-one')).toHaveAttribute(
+      'readonly',
+    );
+    expect(manageInvitation).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        athleteId: userId,
+        email: 'atleta@mbj.example.invalid',
+        idempotencyKey: expect.any(String),
+        operation: 'CREATE',
+      }),
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Gerar novo link do convite ativo' }));
+    expect(await screen.findByDisplayValue('https://auth.example.test/action-two')).toHaveAttribute(
+      'readonly',
+    );
+    expect(manageInvitation).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ athleteId: userId, operation: 'RESEND' }),
+    );
+
+    await user.click(screen.getByRole('button', { name: 'Revogar convite ativo' }));
+    expect(screen.getByRole('alertdialog', { name: 'Revogar convite ativo?' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Revogar convite' }));
+    expect(await screen.findByText('Convite revogado com sucesso.')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Link temporário')).not.toBeInTheDocument();
+    expect(manageInvitation).toHaveBeenNthCalledWith(
+      3,
+      expect.objectContaining({ athleteId: userId, operation: 'REVOKE' }),
+    );
   });
 
   it('orienta o cadastro TOTP e confirma o desafio AAL2', async () => {
