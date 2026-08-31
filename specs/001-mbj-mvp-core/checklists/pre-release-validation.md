@@ -15,6 +15,10 @@ cenários staging ainda não foram executados integralmente.
 - [x] Os 28 cenários Playwright passaram em Chromium desktop e mobile: acessibilidade, Auth/convite,
       resposta 429, elenco, partidas/presença, escalação, estatísticas/MVP, avisos/notificações,
       privacidade offline e orçamento de desempenho.
+- [x] O CI final expôs uma dependência temporal no cenário MVP: o encerramento fictício fixado em
+      31/08/2026 já havia passado e, corretamente, desabilitava o botão de voto. A falha foi
+      reproduzida localmente e o relógio exclusivamente simulado foi movido para um instante futuro
+      estável; o cenário afetado passou em desktop e mobile e a suíte completa voltou a 28/28.
 - [x] O comando Playwright encerrou com sucesso e sem intervenção: 28/28 cenários aprovados em
       Chromium desktop/mobile, resumo emitido em 59,0 s e exit code 0. O `LOCAL-E2E-001` era uma
       limitação do executor restrito no Windows: o Playwright não recebia permissão para finalizar

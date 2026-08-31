@@ -9,6 +9,7 @@ const matchId = '00000000-0000-4000-8000-000000017020';
 const seasonId = '00000000-0000-4000-8000-000000017021';
 const capturedLineupId = '00000000-0000-4000-8000-000000017030';
 const newerLineupId = '00000000-0000-4000-8000-000000017031';
+const futureVotingClosesAt = '2099-08-31T18:00:00.000Z';
 
 function jwt(userId: string) {
   return `header.${Buffer.from(JSON.stringify({ aal: 'aal2', exp: 2_000_000_000, sub: userId })).toString('base64url')}.signature`;
@@ -137,7 +138,7 @@ test('consolida, empata, reabre, reconsolida, permite novo voto e preserva hist√
       currentRound = `00000000-0000-4000-8000-00000001705${currentRevision}`;
       roundClosed = false;
       return json(route, {
-        closesAt: '2026-08-31T18:00:00.000Z',
+        closesAt: futureVotingClosesAt,
         consolidationId: currentConsolidation,
         lineupId: currentRevision === 1 ? capturedLineupId : newerLineupId,
         matchId,
@@ -170,7 +171,7 @@ test('consolida, empata, reabre, reconsolida, permite novo voto e preserva hist√
         {
           assignment: 'STARTER',
           candidate_athlete_id: candidateAthleteId,
-          closes_at: '2026-08-31T18:00:00.000Z',
+          closes_at: futureVotingClosesAt,
           has_voted: hasVoted,
           lineup_id: currentRevision === 1 ? capturedLineupId : newerLineupId,
           match_id: matchId,
@@ -202,7 +203,7 @@ test('consolida, empata, reabre, reconsolida, permite novo voto e preserva hist√
           ? [
               {
                 closed_at: '2026-08-31T18:00:01.000Z',
-                closes_at: '2026-08-31T18:00:00.000Z',
+                closes_at: futureVotingClosesAt,
                 consolidation_id: currentConsolidation,
                 created_by: presidentId,
                 id: currentRound,
