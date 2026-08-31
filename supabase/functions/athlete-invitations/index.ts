@@ -9,6 +9,7 @@ import {
   jsonFailure,
   jsonSuccess,
   readJsonObject,
+  requiredEdgeEnv,
   requireIdempotencyKey,
   requireUuid,
   type EdgeRequestHandler,
@@ -62,12 +63,33 @@ interface InvitationRepository {
 }
 
 interface AthleteInvitationsDependencies {
+  activationOrigin: string;
   authAdmin: InvitationAuthAdmin;
   repository: InvitationRepository;
   security: IdentitySecurity;
 }
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function deliveryLinkForInvitation(
+  actionLink: string,
+  activationOrigin: string,
+  invitationId: string,
+) {
+  const actionUrl = new URL(actionLink);
+  const originUrl = new URL(activationOrigin);
+  const secureOrigin =
+    originUrl.protocol === 'https:' ||
+    (originUrl.protocol === 'http:' && ['127.0.0.1', 'localhost'].includes(originUrl.hostname));
+  if (!secureOrigin || originUrl.username || originUrl.password) {
+    throw new EdgeFunctionError('INTERNAL_ERROR');
+  }
+
+  const activationUrl = new URL('/convite', originUrl.origin);
+  activationUrl.searchParams.set('invitationId', invitationId);
+  actionUrl.searchParams.set('redirect_to', activationUrl.toString());
+  return actionUrl.toString();
+}
 
 function operation(value: unknown): InvitationOperation {
   if (value === 'CREATE' || value === 'RESEND' || value === 'REVOKE') return value;
@@ -122,7 +144,11 @@ export function createAthleteInvitationsHandler(
           });
           return jsonSuccess(
             {
-              deliveryLink: generated.actionLink,
+              deliveryLink: deliveryLinkForInvitation(
+                generated.actionLink,
+                dependencies.activationOrigin,
+                invitation.id,
+              ),
               invitationId: invitation.id,
               logicalStatus: 'PENDING',
             },
@@ -148,7 +174,11 @@ export function createAthleteInvitationsHandler(
         });
         return jsonSuccess(
           {
-            deliveryLink: generated.actionLink,
+            deliveryLink: deliveryLinkForInvitation(
+              generated.actionLink,
+              dependencies.activationOrigin,
+              invitation.id,
+            ),
             invitationId: invitation.id,
             logicalStatus: 'PENDING',
           },
@@ -257,6 +287,7 @@ if (runtime) {
   const serviceClient = createServiceClient();
   const security = createDefaultIdentitySecurity();
   const manageHandler = createAthleteInvitationsHandler({
+    activationOrigin: requiredEdgeEnv('CANONICAL_ORIGIN'),
     authAdmin: createAuthAdmin(serviceClient),
     repository: createRepository(serviceClient),
     security,

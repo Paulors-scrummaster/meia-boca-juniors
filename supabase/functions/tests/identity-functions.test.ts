@@ -13,6 +13,7 @@ import { createAthleteInvitationsHandler } from '../athlete-invitations/index';
 
 const traceId = '00000000-0000-4000-8000-000000009999';
 const actorUserId = '00000000-0000-4000-8000-000000009001';
+const activationOrigin = 'https://feature-mbj-mvp-core.meia-boca-juniors.pages.dev';
 
 function securityContext(): SecurityContext {
   return {
@@ -61,6 +62,7 @@ describe('identity Edge Function contracts', () => {
 
   it('returns a safe unauthenticated failure without provider details', async () => {
     const handler = createAthleteInvitationsHandler({
+      activationOrigin,
       authAdmin: { disableUser: vi.fn(), generateLink: vi.fn() },
       repository: { create: vi.fn(), findActive: vi.fn(), revoke: vi.fn() },
       security: security({
@@ -96,6 +98,7 @@ describe('identity Edge Function contracts', () => {
     });
     const identitySecurity = security();
     const handler = createAthleteInvitationsHandler({
+      activationOrigin,
       authAdmin: { disableUser: vi.fn(), generateLink },
       repository: { create, findActive: vi.fn(), revoke: vi.fn() },
       security: identitySecurity,
@@ -126,7 +129,9 @@ describe('identity Edge Function contracts', () => {
     expect(JSON.stringify(create.mock.calls)).not.toContain('opaque-test-value');
     expect(await responseBody(response)).toEqual({
       data: {
-        deliveryLink: 'https://auth.example.test/verify?code=opaque-test-value',
+        deliveryLink: expect.stringContaining(
+          'redirect_to=https%3A%2F%2Ffeature-mbj-mvp-core.meia-boca-juniors.pages.dev%2Fconvite%3FinvitationId%3Dinvite-id',
+        ),
         invitationId: 'invite-id',
         logicalStatus: 'PENDING',
       },
@@ -152,6 +157,7 @@ describe('identity Edge Function contracts', () => {
     const disableUser = vi.fn().mockResolvedValue(undefined);
     const revoke = vi.fn().mockResolvedValue({ authUserId: 'auth-user-id', id: 'invite-id' });
     const handler = createAthleteInvitationsHandler({
+      activationOrigin,
       authAdmin: { disableUser, generateLink },
       repository: { create: vi.fn(), findActive, revoke },
       security: security(),
@@ -176,7 +182,8 @@ describe('identity Edge Function contracts', () => {
 
     expect(generateLink).toHaveBeenCalledWith('jogador@example.test', 'magiclink');
     expect((await responseBody(resend)).data).toEqual({
-      deliveryLink: 'https://auth.example.test/fresh',
+      deliveryLink:
+        'https://auth.example.test/fresh?redirect_to=https%3A%2F%2Ffeature-mbj-mvp-core.meia-boca-juniors.pages.dev%2Fconvite%3FinvitationId%3Dinvite-id',
       invitationId: 'invite-id',
       logicalStatus: 'PENDING',
     });
