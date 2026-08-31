@@ -25,20 +25,22 @@ Configuração obrigatória, separadamente em staging e production:
 
 ### Evidência sanitizada T165
 
-| Ambiente   | Project ref público    | Signup aberto |         Limite | Teste 429          | Dados usados                    |
-| ---------- | ---------------------- | ------------: | -------------: | ------------------ | ------------------------------- |
-| staging    | `lqkybvqnppxxehiriunq` |           sim | não verificado | HTTP 429 observado | identidade sintética `.invalid` |
-| production | não provisionado       |      pendente |       pendente | pendente           | nenhuma identidade real         |
+| Ambiente   | Project ref público    | Signup aberto |          Limite | Teste 429          | Dados usados                    |
+| ---------- | ---------------------- | ------------: | --------------: | ------------------ | ------------------------------- |
+| staging    | `lqkybvqnppxxehiriunq` |           não | 30 por 5 min/IP | HTTP 429 observado | identidade sintética `.invalid` |
+| production | não provisionado       |      pendente |        pendente | pendente           | nenhuma identidade real         |
 
 O teste registra apenas timestamp UTC, ambiente, status HTTP `429`, código estável `RATE_LIMITED` e
 trace ID técnico. Não registrar endereço IP, e-mail, request body, headers de autenticação ou payload
 do provedor.
 
-Evidência de staging em 2026-08-30: projeto `Manager01` ativo/saudável em `us-east-1`; HTTP 429
-observado na 36ª tentativa controlada às `2026-08-30T22:20:00.7220374Z`. O endereço sintético e os
-corpos das requisições não foram registrados. O controle invite-only falhou porque o endpoint público
-de configuração indicou signup aberto. O schema MBJ também não estava disponível no endpoint exato
-`public.profiles`; nenhuma tabela alheia ao MBJ foi consultada. T165 permanece aberta.
+Evidência final de staging em 2026-08-31: projeto `Manager01` ativo/saudável em `us-east-1`; signup
+fechado confirmado pelo endpoint público de configuração; 30 respostas HTTP 422 sem criação de
+usuário e HTTP 429 na 31ª tentativa controlada às `2026-08-31T01:20:47.7664083Z`. O endereço sintético
+e os corpos das requisições não foram registrados. As 25 migrations e o seed exclusivamente fictício
+foram aplicados, o dry-run posterior ficou sem drift, `public.profiles` rejeitou acesso anônimo com
+HTTP 401 e as quatro Edge Functions ficaram ativas. Nenhuma tabela alheia ao MBJ foi consultada. T165
+permanece aberta somente porque production ainda não foi provisionado/configurado.
 
 ## Cloudflare Pages
 

@@ -113,7 +113,7 @@ Preencher somente após validação real, sem secrets:
 | ------------------------------------ | ---------------------------------------------------------------------------------- |
 | Supabase staging project ref         | `lqkybvqnppxxehiriunq` (`Manager01`, designado exclusivamente como staging do MBJ) |
 | Supabase production project ref      | não provisionado; auditoria autenticada encontrou zero candidato MBJ separado      |
-| Auth invite-only e limite staging    | incompleto: signup aberto; HTTP 429 observado com identidade sintética             |
+| Auth invite-only e limite staging    | concluído: signup fechado; limite 30/5 min; HTTP 429 verificado                    |
 | Auth invite-only e limite production | bloqueado pelo projeto production ainda inexistente                                |
 | Cloudflare Pages project/preview URL | `meia-boca-juniors`; `https://feature-mbj-mvp-core.meia-boca-juniors.pages.dev`    |
 | Preview SHA/resultado                | `5405e285c136156fbba33b7d7e1e09a17f48e343`; build/deploy e gates aprovados         |
@@ -124,13 +124,14 @@ do OneSignal servidos como JavaScript. A validação encontrou e corrigiu uma in
 de arquivos pelo fallback SPA, coberta por teste de regressão. Produção permaneceu sem variáveis e
 com deploy desativado durante toda a T166.
 
-Auditoria somente leitura em 2026-08-30 confirmou `Manager01` ativo e saudável em `us-east-1`. O
-bundle público do preview contém somente o ref staging allowlisted. O endpoint público de Auth
-reportou signup aberto e produziu HTTP 429 na 36ª tentativa controlada com endereço sintético
-`.invalid`, às `2026-08-30T22:20:00.7220374Z`. O endpoint exato `public.profiles` retornou 404, de modo
-que migrations, seed e jornadas MBJ não foram executados no staging. Nenhum schema/tabela alheio ao
-MBJ foi enumerado ou lido. Criar production ou alterar Auth/schema/secrets hospedados permanece uma
-ação externa pendente; nenhuma configuração produtiva foi criada.
+Auditoria inicial em 2026-08-30 confirmou `Manager01` ativo e saudável em `us-east-1`, mas encontrou
+signup aberto e schema MBJ ausente. Em 2026-08-31 foram aplicadas ao staging as 25 migrations e o seed
+exclusivamente fictício; um dry-run posterior confirmou drift zero. As quatro Edge Functions ficaram
+`ACTIVE`, com ambiente e origens públicas configurados no secret store e integrações sem credenciais
+mantidas fail-closed. A configuração pública confirmou signup fechado; o endpoint `profiles` existe e
+rejeitou acesso anônimo com HTTP 401; o throttling produziu HTTP 429 na 31ª tentativa sintética às
+`2026-08-31T01:20:47.7664083Z`. Nenhum schema/tabela alheio ao MBJ foi enumerado ou lido. Criar
+production permanece pendente; nenhuma configuração produtiva foi criada.
 
 No head de implementação acima, Cloudflare Pages e os dois conjuntos de checks `Required`, frontend, banco e
 Playwright foram aprovados. Home, rota profunda, manifesto e os dois workers foram consultados após o

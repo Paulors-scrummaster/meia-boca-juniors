@@ -41,12 +41,10 @@ porque staging depende da T165 e porque não houve navegador interativo para os 
 
 ## Staging e outros cenários não produtivos
 
-- [ ] Confirmar que o preview aponta somente para o ref público staging `lqkybvqnppxxehiriunq`, com
-      dados fictícios, convite fechado e throttling Auth produzindo 429 real. **Parcial:** o bundle
-      público aponta para o ref allowlisted e o Auth retornou HTTP 429 após requisições com identidade
-      sintética; porém signup permanece aberto e o endpoint MBJ `profiles` retornou 404, indicando que
-      a configuração/schema de staging ainda não foi concluída. A tabela RAG alheia ao MBJ não foi
-      acessada.
+- [x] O preview aponta somente para o ref público staging `lqkybvqnppxxehiriunq`; as 25 migrations e
+      o seed fictício foram aplicados sem drift posterior; signup está fechado; `profiles` rejeita
+      acesso anônimo; e o Auth produziu HTTP 429 real na 31ª tentativa sintética. A tabela RAG alheia
+      ao MBJ não foi acessada.
 - [ ] Executar jornadas reais de convite, MFA, papéis, RLS, Storage privado, Realtime, notificações e
       redaction no staging. **Bloqueio:** depende da T165; nenhum convite real foi enviado.
 - [ ] Validar redaction/erro controlado no Sentry staging. **Bloqueio:** integração staging não
