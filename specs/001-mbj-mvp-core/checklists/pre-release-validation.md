@@ -14,11 +14,11 @@ staging.
 - [x] Os 28 cenários Playwright passaram em Chromium desktop e mobile: acessibilidade, Auth/convite,
       resposta 429, elenco, partidas/presença, escalação, estatísticas/MVP, avisos/notificações,
       privacidade offline e orçamento de desempenho.
-- [ ] O comando Playwright encerra com sucesso sem intervenção. **Defeito `LOCAL-E2E-001`:** após o
-      28º teste, o runner permaneceu aberto sem resumo/exit code e foi interrompido. A atualização
-      síncrona de `ConnectedOfflineStatus` durante a renderização foi corrigida com notificações
-      diferidas e teste de regressão; a repetição completa não emitiu o warning React. Os dois jobs
-      equivalentes no runner Linux do GitHub encerraram normalmente e foram aprovados no novo head.
+- [x] O comando Playwright encerrou com sucesso e sem intervenção: 28/28 cenários aprovados em
+      Chromium desktop/mobile, resumo emitido em 59,0 s e exit code 0. O `LOCAL-E2E-001` era uma
+      limitação do executor restrito no Windows: o Playwright não recebia permissão para finalizar
+      sua própria árvore Vite com `taskkill`. A mesma execução fora dessa restrição encerrou
+      normalmente, sem mudança no código, assim como os dois jobs equivalentes no runner Linux.
 
 ## Feature preview público
 
@@ -60,6 +60,5 @@ executa a aceitação exclusivamente produtiva. Nenhum desses cenários foi ante
 
 ## Resultado
 
-Os controles locais e HTTP públicos possíveis foram executados. T175 não recebe `[X]`: faltam
-cenários hospedados reais e o encerramento limpo da suíte E2E no Windows. Nenhuma evidência foi
-simulada.
+Os controles locais e HTTP públicos possíveis foram executados. T175 não recebe `[X]`: faltam os
+cenários hospedados reais descritos acima. Nenhuma evidência foi simulada.
