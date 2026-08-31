@@ -205,8 +205,14 @@ export function createAuthService(client: SupabaseClient<Database>): AuthService
     },
 
     async getRoles(userId) {
-      let query = client.from('user_roles').select('role');
-      if (userId) query = query.eq('user_id', userId);
+      if (userId) {
+        const { data, error } = await client.rpc('get_user_roles', {
+          target_user_id: userId,
+        });
+        await requireNoError(error);
+        return parseRoles(data);
+      }
+      const query = client.from('user_roles').select('role');
       const { data, error } = await query;
       await requireNoError(error);
       return (data ?? []).map(({ role }) => role);

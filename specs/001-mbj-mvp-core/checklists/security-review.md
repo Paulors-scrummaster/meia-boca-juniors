@@ -27,11 +27,11 @@ local e os controles hospedados pré-merge de T165 foram verificados sem leitura
 
 ## RPCs e funções
 
-- [x] As 28 RPCs públicas foram revisadas e exercitadas conforme o papel: `accept_athlete_invitation`,
+- [x] As 29 RPCs públicas foram revisadas e exercitadas conforme o papel: `accept_athlete_invitation`,
       `admin_set_presence`, `anonymize_athlete`, `cancel_match`, `cast_mvp_vote`,
       `claim_notification_deliveries`, `close_mvp_voting`, `complete_admin_password_reset`,
       `complete_forced_password_change`, `complete_notification_delivery`, `consolidate_match`,
-      `consume_identity_rate_limit`, `create_athlete`, `create_exceptional_call`,
+      `consume_identity_rate_limit`, `create_athlete`, `create_exceptional_call`, `get_user_roles`,
       `create_identity_invite`, `create_match`, `publish_lineup`, `publish_notice`,
       `reactivate_match`, `record_identity_invite_resend`, `reopen_match_statistics`,
       `reschedule_match`, `respond_to_call`, `revoke_identity_invite`, `set_athlete_status`,
@@ -89,13 +89,13 @@ o gate de T174: o plano de duas etapas exige que os workflows existam primeiro e
 
 ## Evidência executada
 
-- `npm run db:reset`: 25 migrations e seed fictício aplicados localmente.
+- `npm run db:reset`: 26 migrations e seed fictício aplicados localmente.
 - `npm run db:lint`: nenhum erro de schema.
-- `npm run test:db`: 18 arquivos, 348 testes aprovados.
-- `npm run test:unit`: 27 arquivos, 106 testes aprovados.
+- `npm run test:db`: 18 arquivos, 353 testes aprovados.
+- `npm run test:unit`: 27 arquivos, 107 testes aprovados.
 - `npm run lint`, `npm run typecheck`, `npm run db:types:check` e `npm run build`: aprovados.
-- `npm run test:e2e`: os 28 cenários chegaram ao fim em desktop/mobile sem o warning React corrigido,
-  mas o runner não encerrou sozinho; ver `LOCAL-E2E-001` na checklist de pré-release.
+- `npm run test:e2e`: 28 cenários aprovados em desktop/mobile, incluindo a regressão do grid
+  autenticado e da consulta administrativa de papéis.
 - GitHub no head `5405e28`: dois conjuntos de `Required`, frontend, banco e Playwright aprovados;
   Cloudflare Pages aprovado.
 

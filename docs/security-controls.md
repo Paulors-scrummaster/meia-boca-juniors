@@ -41,6 +41,11 @@ e os corpos das requisições não foram registrados. As 25 migrations e o seed 
 foram aplicados, o dry-run posterior ficou sem drift, `public.profiles` rejeitou acesso anônimo com
 HTTP 401 e as quatro Edge Functions ficaram ativas. Nenhuma tabela alheia ao MBJ foi consultada.
 
+Na aceitação T175, o staging recebeu somente a 26ª migration, que expõe `get_user_roles(uuid)` como
+`security definer` com `search_path` vazio e bloqueio obrigatório de Presidente ativo+AAL2. Atleta,
+Técnico, Presidente AAL1 e Presidente desativado foram negados em pgTAP; a política self-only da
+tabela `user_roles` permaneceu inalterada.
+
 Evidência production em 2026-08-31: projeto separado `sclxmrondkegopyokdym` ativo/saudável em
 `us-east-1`; dry-run confirmou as 25 migrations e seed ainda pendentes; Auth foi configurado
 manualmente com signup fechado e limite 30/5 min; zero usuários; e nenhum workflow foi executado. O

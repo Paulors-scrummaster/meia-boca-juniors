@@ -133,6 +133,12 @@ rejeitou acesso anônimo com HTTP 401; o throttling produziu HTTP 429 na 31ª te
 `2026-08-31T01:20:47.7664083Z`. Nenhum schema/tabela alheio ao MBJ foi enumerado ou lido. Nesse
 checkpoint, production ainda permanecia pendente e nenhuma configuração produtiva havia sido criada.
 
+Durante T175, a jornada hospedada de Presidente+AAL2 encontrou a consulta administrativa de papéis
+retornando vazio sob a política self-only. A migration `20260831000100_admin_role_lookup.sql` adicionou
+uma RPC estreita, autorizada somente para Presidente ativo com AAL2. O staging passou a ter 26
+migrations; `db push --dry-run` confirmou ausência de drift e a função foi verificada por contagem
+sanitizada. O seed não foi reaplicado e nenhum usuário, papel ou dado de production foi alterado.
+
 Em 2026-08-31, o projeto separado `MBJ Production` (`sclxmrondkegopyokdym`) foi criado em
 `us-east-1` e confirmado `ACTIVE_HEALTHY`. O dry-run remoto listou todas as 25 migrations e o seed
 como pendentes, confirmando que nenhum schema/dado MBJ foi aplicado. A configuração manual confirmou

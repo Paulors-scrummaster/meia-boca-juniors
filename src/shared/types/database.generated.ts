@@ -1796,6 +1796,7 @@ export type Database = {
         }
         Returns: Json
       }
+      get_user_roles: { Args: { target_user_id: string }; Returns: Json }
       publish_lineup: {
         Args: {
           command_idempotency_key: string

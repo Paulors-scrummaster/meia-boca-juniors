@@ -141,6 +141,18 @@ test('ativa convite individual e libera a união de papéis somente após MFA', 
   await page.getByLabel('Código de 6 números').fill('123456');
   await page.getByRole('button', { name: 'Verificar código' }).click();
   await expect(page.getByRole('heading', { name: 'Gerenciar acessos' })).toBeVisible();
+  const navigationBox = await page
+    .getByRole('navigation', { name: 'Navegação principal' })
+    .boundingBox();
+  const mainBox = await page.getByRole('main').boundingBox();
+  expect(navigationBox).not.toBeNull();
+  expect(mainBox).not.toBeNull();
+  if (page.viewportSize()!.width >= 768) {
+    expect(mainBox!.x).toBeGreaterThan(navigationBox!.x + navigationBox!.width - 1);
+    expect(mainBox!.width).toBeGreaterThan(600);
+  } else {
+    expect(mainBox!.width).toBeGreaterThan(300);
+  }
   await expect(page.getByRole('link', { name: 'Área do atleta' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Comissão técnica' })).toBeVisible();
   await expect(page.getByRole('link', { name: 'Administração' })).toBeVisible();

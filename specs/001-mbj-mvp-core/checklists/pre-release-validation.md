@@ -7,10 +7,10 @@ staging.
 ## Local
 
 - [x] Formatação, lint, TypeScript, bindings gerados e build de produção aprovados.
-- [x] 106 testes unitários aprovados, incluindo Auth, redaction/Sentry, cache offline e contratos dos
+- [x] 107 testes unitários aprovados, incluindo Auth, redaction/Sentry, cache offline e contratos dos
       workflows de backup/release/n8n.
-- [x] Supabase local reinicializado com 25 migrations e seed exclusivamente fictício.
-- [x] Lint do banco aprovado e 348 testes SQL de constraints, RLS e RPC aprovados em 18 arquivos.
+- [x] Supabase local reinicializado com 26 migrations e seed exclusivamente fictício.
+- [x] Lint do banco aprovado e 353 testes SQL de constraints, RLS e RPC aprovados em 18 arquivos.
 - [x] Os 28 cenários Playwright passaram em Chromium desktop e mobile: acessibilidade, Auth/convite,
       resposta 429, elenco, partidas/presença, escalação, estatísticas/MVP, avisos/notificações,
       privacidade offline e orçamento de desempenho.
@@ -35,8 +35,10 @@ staging.
       banco e Playwright foram aprovados; as cinco rotas públicas foram novamente consultadas com
       HTTP 200 e MIME esperado.
 - [ ] Confirmar visualmente título/canonical, navegação por teclado, foco, contraste, touch targets,
-      instalação/atualização PWA e preservação de formulário no deployment do novo head. **Bloqueio:**
-      o runtime do navegador foi consultado novamente e não encontrou navegador conectado.
+      instalação/atualização PWA e preservação de formulário no deployment do novo head. Título,
+      canonical, teclado/foco, contraste, alvos de toque e preservação do formulário durante o prompt
+      de atualização passaram em desktop e mobile no preview; falta instalar a PWA real e repetir no
+      deployment que contém a correção hospedada descoberta abaixo.
 - [ ] Inspecionar Cache Storage e rede no preview para confirmar ausência de Auth/Data API e ausência
       de inicialização OneSignal produtiva. **Bloqueio:** exige navegador interativo; a configuração
       sanitizada do Pages confirmou `VITE_ONESIGNAL_APP_ID` vazio no escopo Preview.
@@ -48,9 +50,13 @@ staging.
       acesso anônimo; e o Auth produziu HTTP 429 real na 31ª tentativa sintética. A tabela RAG alheia
       ao MBJ não foi acessada.
 - [ ] Executar jornadas reais de convite, MFA, papéis, RLS, Storage privado, Realtime, notificações e
-      redaction no staging. **Pendente:** o seed criou cinco registros Auth exclusivamente fictícios
-      `.invalid`, mas intencionalmente sem senha conhecida; não existem credenciais de teste
-      autenticáveis e nenhum convite real foi enviado.
+      redaction no staging. Uma identidade `.invalid` autenticável foi criada manualmente, vinculada a
+      um perfil `PRESIDENT` fictício e confirmou login, cadastro TOTP, AAL2 e acesso a `/app/admin`.
+      A consulta do Coach fictício encontrou um defeito real: a role existente era exibida desmarcada
+      porque a UI usava a política self-only. A correção adiciona `get_user_roles`, negada para Atleta,
+      Técnico, Presidente AAL1 e Presidente desativado; 353 testes SQL e a aplicação da 26ª migration
+      no staging passaram, sem reaplicar seed. Falta revalidar o preview corrigido e executar as demais
+      jornadas hospedadas; nenhum convite real foi enviado.
 - [ ] Validar redaction/erro controlado no Sentry staging. **Bloqueio:** integração staging não
       configurada: a consulta sanitizada do Pages confirmou ausência de `VITE_SENTRY_DSN` no Preview.
       Nenhum valor de DSN foi lido e nenhum evento foi simulado.

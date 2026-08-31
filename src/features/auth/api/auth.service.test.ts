@@ -181,4 +181,14 @@ describe('auth service', () => {
     await expect(service.signOut()).resolves.toBeUndefined();
     expect(signOut).toHaveBeenCalledWith({ scope: 'local' });
   });
+
+  it('reads another user role list only through the guarded administrative RPC', async () => {
+    const rpc = vi.fn().mockResolvedValue({ data: { roles: ['COACH'] }, error: null });
+    const from = vi.fn();
+    const service = createAuthService(clientStub({ from, rpc }));
+
+    await expect(service.getRoles('target-id')).resolves.toEqual(['COACH']);
+    expect(rpc).toHaveBeenCalledWith('get_user_roles', { target_user_id: 'target-id' });
+    expect(from).not.toHaveBeenCalled();
+  });
 });

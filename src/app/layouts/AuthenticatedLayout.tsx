@@ -55,7 +55,7 @@ export function AuthenticatedLayout({
       >
         Ir para o conteúdo
       </a>
-      <header className="border-b bg-card px-4 py-4 md:row-span-2 md:border-b-0 md:border-r md:px-5">
+      <header className="border-b bg-card px-4 py-4 md:col-start-1 md:row-span-2 md:row-start-1 md:border-b-0 md:border-r md:px-5">
         <div className="flex items-center gap-3">
           <img
             alt={`Escudo do ${clubConfig.identity.shortName}`}
@@ -81,7 +81,7 @@ export function AuthenticatedLayout({
       </header>
 
       <main
-        className="mx-auto w-full max-w-6xl px-4 py-6 pb-28 md:px-8 md:pb-8"
+        className="mx-auto w-full max-w-6xl px-4 py-6 pb-28 md:col-start-2 md:row-span-2 md:row-start-1 md:px-8 md:pb-8"
         id="conteudo-principal"
       >
         <OfflineIndicator />

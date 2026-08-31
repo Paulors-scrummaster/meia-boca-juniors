@@ -1,6 +1,6 @@
 begin;
 
-select plan(19);
+select plan(24);
 
 insert into auth.users (id, email)
 values
@@ -68,6 +68,12 @@ select throws_ok(
   'Athletes cannot assign roles by direct RPC'
 );
 select throws_ok(
+  $$select public.get_user_roles('00000000-0000-4000-8000-000000002002')$$,
+  '42501',
+  'President with AAL2 required',
+  'Athletes cannot inspect another user role list'
+);
+select throws_ok(
   $$select public.accept_athlete_invitation(
     '00000000-0000-4000-8000-000000002201',
     '00000000-0000-4000-8000-000000002298'
@@ -91,6 +97,12 @@ select throws_ok(
   'President with AAL2 required',
   'Coach cannot assign roles'
 );
+select throws_ok(
+  $$select public.get_user_roles('00000000-0000-4000-8000-000000002003')$$,
+  '42501',
+  'President with AAL2 required',
+  'Coach cannot inspect another user role list'
+);
 reset role;
 
 set local role authenticated;
@@ -105,6 +117,12 @@ select throws_ok(
   '42501',
   'President with AAL2 required',
   'President without AAL2 cannot assign roles'
+);
+select throws_ok(
+  $$select public.get_user_roles('00000000-0000-4000-8000-000000002002')$$,
+  '42501',
+  'President with AAL2 required',
+  'President without AAL2 cannot inspect another user role list'
 );
 reset role;
 
@@ -121,12 +139,23 @@ select throws_ok(
   'President with AAL2 required',
   'disabled President cannot assign roles'
 );
+select throws_ok(
+  $$select public.get_user_roles('00000000-0000-4000-8000-000000002002')$$,
+  '42501',
+  'President with AAL2 required',
+  'disabled President cannot inspect another user role list'
+);
 reset role;
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-4000-8000-000000002001', true);
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-4000-8000-000000002001","role":"authenticated","aal":"aal2"}', true);
 select is((select count(*)::integer from public.athlete_invites), 1, 'President with AAL2 reads invitations');
+select is(
+  public.get_user_roles('00000000-0000-4000-8000-000000002002')->'roles',
+  '["COACH"]'::jsonb,
+  'President with AAL2 reads the target role list through the narrow RPC'
+);
 select lives_ok(
   $$select public.set_user_role(
     '00000000-0000-4000-8000-000000002005', 'COACH', true,
