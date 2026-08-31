@@ -90,6 +90,21 @@ cenários staging ainda não foram executados integralmente.
       2126. Faltam as verificações hospedadas integrais de matriz RLS, Storage privado, Realtime,
       notificações e redaction; nenhum usuário real foi convidado e nenhum segredo, UUID ou link de
       convite foi registrado.
+
+      Em 31/08/2026 foi executada uma auditoria hospedada somente-leitura, limitada aos catálogos e
+      objetos MBJ allowlisted. Retornaram verdadeiros os oito controles: RLS nas 21 tabelas públicas
+      MBJ esperadas; políticas públicas críticas; bucket privado `athlete-avatars` com limite e MIME
+      allowlisted; políticas do Storage; as quatro tabelas permitidas no Realtime; exclusão do
+      Realtime para tabelas MBJ sensíveis; outbox não legível por cliente; e funções de dispatch
+      exclusivas de `service_role`. A tabela RAG alheia não foi consultada. O primeiro ensaio
+      comportamental do Realtime revelou que o painel de presenças não assinava o canal: a alteração
+      temporária de uma presença fictícia não apareceu na segunda aba sem recarga. O estado foi
+      imediatamente restaurado. A correção adicionou a assinatura ao painel e o teste unitário
+      dedicado passou (5/5), assim como format, lint, typecheck e build; o Pages publicou o commit
+      `6047864` com sucesso. A repetição hospedada após a publicação ficou pendente porque o
+      controlador autenticado do Chrome encerrou inesperadamente durante a recarga forçada das abas.
+      Essa não é evidência de aprovação: Realtime, Storage comportamental, notificações e redaction
+      continuam pendentes até a nova execução observável.
 - [ ] Validar redaction/erro controlado no Sentry staging. **Bloqueio:** integração staging não
       configurada: a consulta sanitizada do Pages confirmou ausência de `VITE_SENTRY_DSN` no Preview.
       Nenhum valor de DSN foi lido e nenhum evento foi simulado.
