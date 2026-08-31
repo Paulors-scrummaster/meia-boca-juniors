@@ -55,8 +55,13 @@ staging.
       A consulta do Coach fictício encontrou um defeito real: a role existente era exibida desmarcada
       porque a UI usava a política self-only. A correção adiciona `get_user_roles`, negada para Atleta,
       Técnico, Presidente AAL1 e Presidente desativado; 353 testes SQL e a aplicação da 26ª migration
-      no staging passaram, sem reaplicar seed. Falta revalidar o preview corrigido e executar as demais
-      jornadas hospedadas; nenhum convite real foi enviado.
+      no staging passaram, sem reaplicar seed. No commit `2baff66`, os nove checks do GitHub e o deploy
+      Cloudflare passaram; após atualizar o PWA, a consulta hospedada exibiu somente `COACH` marcado e
+      o grid desktop manteve navegação lateral e conteúdo na coluna principal. A role `COACH` do
+      integrante fictício foi removida e restaurada pela UI, com mensagens de sucesso; a verificação
+      agregada final confirmou uma atribuição ativa e exatamente dois eventos de auditoria de papel,
+      sem leitura dos respectivos estados/payloads. Faltam as demais jornadas hospedadas; nenhum
+      convite real foi enviado.
 - [ ] Validar redaction/erro controlado no Sentry staging. **Bloqueio:** integração staging não
       configurada: a consulta sanitizada do Pages confirmou ausência de `VITE_SENTRY_DSN` no Preview.
       Nenhum valor de DSN foi lido e nenhum evento foi simulado.
