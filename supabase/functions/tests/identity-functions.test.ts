@@ -144,7 +144,7 @@ describe('identity Edge Function contracts', () => {
     });
   });
 
-  it('resends with a fresh link and revokes idempotently without product e-mail', async () => {
+  it('renews an unconfirmed invite link and revokes idempotently without product e-mail', async () => {
     const findActive = vi.fn().mockResolvedValue({
       authUserId: 'auth-user-id',
       emailNormalized: 'jogador@example.test',
@@ -180,7 +180,7 @@ describe('identity Edge Function contracts', () => {
       }),
     );
 
-    expect(generateLink).toHaveBeenCalledWith('jogador@example.test', 'magiclink');
+    expect(generateLink).toHaveBeenCalledWith('jogador@example.test', 'invite');
     expect((await responseBody(resend)).data).toEqual({
       deliveryLink:
         'https://auth.example.test/fresh?redirect_to=https%3A%2F%2Ffeature-mbj-mvp-core.meia-boca-juniors.pages.dev%2Fconvite%3FinvitationId%3Dinvite-id',

@@ -20,7 +20,7 @@ import {
 import { createAcceptanceRepository, createAcceptInvitationHandler } from './accept.ts';
 
 type InvitationOperation = 'CREATE' | 'RESEND' | 'REVOKE';
-type LinkType = 'invite' | 'magiclink';
+type LinkType = 'invite';
 
 interface GeneratedLink {
   actionLink: string;
@@ -164,7 +164,7 @@ export function createAthleteInvitationsHandler(
         const invitation = await dependencies.repository.findActive(athleteId);
         const generated = await dependencies.authAdmin.generateLink(
           invitation.emailNormalized,
-          'magiclink',
+          'invite',
         );
         await dependencies.repository.recordResend?.({
           actorUserId: context.userId,
