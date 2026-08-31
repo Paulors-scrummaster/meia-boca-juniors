@@ -5,6 +5,7 @@ import {
   EdgeFunctionError,
   type IdentitySecurity,
   type SecurityContext,
+  withCors,
 } from '../_shared/security';
 import { createAdminResetPasswordHandler } from '../admin-reset-password/index';
 import { createAcceptInvitationHandler } from '../athlete-invitations/accept';
@@ -36,6 +37,28 @@ async function responseBody(response: Response) {
 }
 
 describe('identity Edge Function contracts', () => {
+  it('allows the public Supabase client headers during an approved CORS preflight', async () => {
+    const origin = 'https://feature-mbj-mvp-core.meia-boca-juniors.pages.dev';
+    const handler = withCors(vi.fn(), new Set([origin]));
+
+    const response = await handler(
+      new Request('https://example.test/functions/v1/athlete-invitations/manage', {
+        headers: {
+          origin,
+          'access-control-request-headers': 'authorization, apikey, content-type, x-client-info',
+          'access-control-request-method': 'POST',
+        },
+        method: 'OPTIONS',
+      }),
+    );
+
+    expect(response.status).toBe(204);
+    expect(response.headers.get('access-control-allow-origin')).toBe(origin);
+    expect(response.headers.get('access-control-allow-headers')?.split(/,\s*/)).toEqual(
+      expect.arrayContaining(['authorization', 'apikey', 'content-type', 'x-client-info']),
+    );
+  });
+
   it('returns a safe unauthenticated failure without provider details', async () => {
     const handler = createAthleteInvitationsHandler({
       authAdmin: { disableUser: vi.fn(), generateLink: vi.fn() },

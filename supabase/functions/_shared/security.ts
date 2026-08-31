@@ -268,7 +268,8 @@ export function withCors(handler: EdgeRequestHandler, allowedOrigins: ReadonlySe
   return async (request: Request): Promise<Response> => {
     const origin = request.headers.get('origin');
     const headers: Record<string, string> = {
-      'access-control-allow-headers': 'authorization, content-type, x-client-info, x-trace-id',
+      'access-control-allow-headers':
+        'authorization, apikey, content-type, x-client-info, x-trace-id',
       'access-control-allow-methods': 'POST, OPTIONS',
       vary: 'Origin',
     };
