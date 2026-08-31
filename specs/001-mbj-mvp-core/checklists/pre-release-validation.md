@@ -36,9 +36,10 @@ staging.
       HTTP 200 e MIME esperado.
 - [ ] Confirmar visualmente título/canonical, navegação por teclado, foco, contraste, touch targets,
       instalação/atualização PWA e preservação de formulário no deployment do novo head. **Bloqueio:**
-      nenhum navegador interativo estava conectado.
+      o runtime do navegador foi consultado novamente e não encontrou navegador conectado.
 - [ ] Inspecionar Cache Storage e rede no preview para confirmar ausência de Auth/Data API e ausência
-      de inicialização OneSignal produtiva. **Bloqueio:** exige navegador interativo.
+      de inicialização OneSignal produtiva. **Bloqueio:** exige navegador interativo; a configuração
+      sanitizada do Pages confirmou `VITE_ONESIGNAL_APP_ID` vazio no escopo Preview.
 
 ## Staging e outros cenários não produtivos
 
@@ -47,10 +48,12 @@ staging.
       acesso anônimo; e o Auth produziu HTTP 429 real na 31ª tentativa sintética. A tabela RAG alheia
       ao MBJ não foi acessada.
 - [ ] Executar jornadas reais de convite, MFA, papéis, RLS, Storage privado, Realtime, notificações e
-      redaction no staging. **Pendente:** T165 está completa, mas não foram criadas credenciais de
-      identidades fictícias autenticáveis nem enviados convites reais.
+      redaction no staging. **Pendente:** o seed criou cinco registros Auth exclusivamente fictícios
+      `.invalid`, mas intencionalmente sem senha conhecida; não existem credenciais de teste
+      autenticáveis e nenhum convite real foi enviado.
 - [ ] Validar redaction/erro controlado no Sentry staging. **Bloqueio:** integração staging não
-      configurada/confirmada; nenhum evento foi simulado.
+      configurada: a consulta sanitizada do Pages confirmou ausência de `VITE_SENTRY_DSN` no Preview.
+      Nenhum valor de DSN foi lido e nenhum evento foi simulado.
 
 ### Cenários pós-merge diferidos
 
