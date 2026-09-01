@@ -87,7 +87,7 @@ cenários staging ainda não foram executados integralmente.
       recuperação, dois atletas inativos, convite revogado e identidade revogada desabilitada. A
       senha perdida da primeira conta Presidente sintética exigiu uma substituta: ela recebeu somente
       `PRESIDENT`, concluiu MFA/AAL2, e a conta anterior teve o papel removido e foi bloqueada até
-      2126. Faltam as verificações hospedadas integrais de matriz RLS, Storage privado, Realtime,
+      2126. Faltam as verificações hospedadas integrais de matriz RLS, Storage privado,
       notificações e redaction; nenhum usuário real foi convidado e nenhum segredo, UUID ou link de
       convite foi registrado.
 
@@ -101,10 +101,14 @@ cenários staging ainda não foram executados integralmente.
       temporária de uma presença fictícia não apareceu na segunda aba sem recarga. O estado foi
       imediatamente restaurado. A correção adicionou a assinatura ao painel e o teste unitário
       dedicado passou (5/5), assim como format, lint, typecheck e build; o Pages publicou o commit
-      `6047864` com sucesso. A repetição hospedada após a publicação ficou pendente porque o
-      controlador autenticado do Chrome encerrou inesperadamente durante a recarga forçada das abas.
-      Essa não é evidência de aprovação: Realtime, Storage comportamental, notificações e redaction
-      continuam pendentes até a nova execução observável.
+      `6047864` com sucesso. Após aplicar a atualização solicitada pela PWA, a repetição hospedada foi
+      concluída em duas sessões autenticadas no preview: a presença fictícia de `Marcos Exemplo` foi
+      alterada temporariamente de `CONFIRMED` para `PENDING`, e a segunda sessão exibiu o novo estado e
+      a explicação sanitizada sem recarga manual. A presença foi então restaurada para `CONFIRMED`, e
+      a segunda sessão também refletiu a restauração sem recarga. As capturas observaram as duas
+      transições e a confirmação de gravação; nenhum identificador técnico, credencial ou dado real
+      foi registrado. O cenário comportamental de Realtime está aprovado. Storage comportamental,
+      matriz RLS hospedada completa, notificações e redaction continuam pendentes.
 - [ ] Validar redaction/erro controlado no Sentry staging. **Bloqueio:** integração staging não
       configurada: a consulta sanitizada do Pages confirmou ausência de `VITE_SENTRY_DSN` no Preview.
       Nenhum valor de DSN foi lido e nenhum evento foi simulado.
