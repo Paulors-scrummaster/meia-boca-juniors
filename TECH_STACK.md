@@ -1,8 +1,8 @@
 # Tech Stack — Aplicativo Oficial Meia Boca Juniors
 
-**Status:** aprovado para o planejamento do MVP  
-**Data:** 2026-08-24  
-**Responsável:** desenvolvedor solo, com SpecKit e Codex  
+**Status:** aprovado para o planejamento do MVP
+**Data:** 2026-08-24
+**Responsável:** desenvolvedor solo, com SpecKit e Codex
 **Base:** Feature Specification do MBJ e decisões do responsável pelo projeto
 
 > A decisão mais recente do responsável substitui a plataforma React Native citada na
