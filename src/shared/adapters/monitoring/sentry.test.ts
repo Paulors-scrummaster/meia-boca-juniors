@@ -29,7 +29,12 @@ describe('Sentry browser adapter', () => {
     const sanitized = sanitizeSentryEvent({
       breadcrumbs: [
         {
-          data: { email: 'player@example.test', route: '/app/matches', token: 'secret' },
+          data: {
+            email: 'player@example.test',
+            route: '/app/matches',
+            token: 'secret',
+            url: 'https://api.example.test/rest/v1/matches?select=id#private',
+          },
           message: 'Falha para player@example.test com token=secret',
         },
       ],
@@ -59,6 +64,9 @@ describe('Sentry browser adapter', () => {
     expect(serialized).not.toContain('informação privada');
     expect(serialized).not.toContain('Bearer secret');
     expect(serialized).not.toContain('token=secret');
+    expect(serialized).not.toContain('?select=id');
+    expect(serialized).not.toContain('#private');
+    expect(sanitized.breadcrumbs?.[0]?.data?.url).toBe('https://api.example.test/rest/v1/matches');
     expect(serialized).toContain('CONFLICT');
     expect(serialized).toContain('ATHLETE');
   });

@@ -19,6 +19,7 @@ const bearerPattern = /bearer\s+[a-z0-9._~+/=-]+/gi;
 const credentialParameterPattern = /([?&#](?:token|code|invite|secret|password)=)[^&#\s]+/gi;
 const inlineCredentialPattern =
   /\b(token|code|invite|secret|password|authorization)\s*[:=]\s*[^\s,;&#]+/gi;
+const urlKeyPattern = /(?:^|_)(?:url|uri)$/i;
 
 function cleanUrl(value: string): string {
   try {
@@ -43,6 +44,9 @@ function cleanText(value: string): string {
 
 function sanitizeValue(value: unknown, key?: string): unknown {
   if (key && sensitiveKeyPattern.test(key)) return undefined;
+  if (key && urlKeyPattern.test(key) && typeof value === 'string') {
+    return cleanUrl(cleanText(value));
+  }
   if (typeof value === 'string') return cleanText(value);
   if (Array.isArray(value)) {
     return value.map((item) => sanitizeValue(item)).filter((item) => item !== undefined);
