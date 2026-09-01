@@ -2,8 +2,8 @@
 
 Data: 2026-09-01. Alvos produtivos e usuários reais não foram utilizados. O navegador interativo e
 identidades exclusivamente sintéticas permitiram validar as jornadas hospedadas de Auth, MFA,
-papéis, convite e ciclo de vida do atleta descritas abaixo. A T175 permanece aberta porque os demais
-cenários staging ainda não foram executados integralmente.
+papéis, convite, ciclo de vida do atleta e observabilidade descritas abaixo. A T175 foi concluída
+após aprovação dos cenários locais, do feature preview e do staging não produtivo.
 
 ## Local
 
@@ -59,7 +59,7 @@ cenários staging ainda não foram executados integralmente.
       o seed fictício foram aplicados sem drift posterior; signup está fechado; `profiles` rejeita
       acesso anônimo; e o Auth produziu HTTP 429 real na 31ª tentativa sintética. A tabela RAG alheia
       ao MBJ não foi acessada.
-- [ ] Executar jornadas hospedadas de convite, MFA, papéis, RLS, Storage privado, Realtime,
+- [x] Executar jornadas hospedadas de convite, MFA, papéis, RLS, Storage privado, Realtime,
       notificações e redaction no staging. Uma identidade `.invalid` autenticável foi vinculada a um
       perfil `PRESIDENT` fictício e confirmou login, cadastro TOTP, AAL2 e acesso a `/app/admin`. A
       consulta do Coach fictício encontrou um defeito real: a role existente era exibida desmarcada
@@ -87,8 +87,8 @@ cenários staging ainda não foram executados integralmente.
       recuperação, dois atletas inativos, convite revogado e identidade revogada desabilitada. A
       senha perdida da primeira conta Presidente sintética exigiu uma substituta: ela recebeu somente
       `PRESIDENT`, concluiu MFA/AAL2, e a conta anterior teve o papel removido e foi bloqueada até
-      2126. Faltam as verificações hospedadas integrais de matriz RLS, notificações e redaction;
-      nenhum usuário real foi convidado e nenhum segredo, UUID ou link de convite foi registrado.
+      2126. Nenhum usuário real foi convidado e nenhum segredo, UUID ou link de convite foi
+      registrado.
 
       Em 31/08/2026 foi executada uma auditoria hospedada somente-leitura, limitada aos catálogos e
       objetos MBJ allowlisted. Retornaram verdadeiros os oito controles: RLS nas 21 tabelas públicas
@@ -144,9 +144,19 @@ cenários staging ainda não foram executados integralmente.
       fallback in-app. A criação do aviso, do evento, das entregas e o fallback estão aprovados. A
       entrega externa e o retry permanecem bloqueados porque `VITE_ONESIGNAL_APP_ID` está vazio no
       Preview e nenhum provedor/segredo não produtivo foi configurado ou acionado.
-- [ ] Validar redaction/erro controlado no Sentry staging. **Bloqueio:** integração staging não
-      configurada: a consulta sanitizada do Pages confirmou ausência de `VITE_SENTRY_DSN` no Preview.
-      Nenhum valor de DSN foi lido e nenhum evento foi simulado.
+- [x] Validar redaction/erro controlado no Sentry staging. No projeto `mbj-staging`, o evento final
+      `0f32609d`, emitido em 01/09/2026 pelo preview, registrou `environment=staging`, release
+      `c4bf1773695d93880ff9d34924488f36b580bdaf` e somente a mensagem
+      `Erro capturado (detalhes removidos).`. O primeiro ensaio, na release `2c0481e`, revelou query
+      strings nos breadcrumbs; o commit `1a524cc` passou a higienizar valores URL/URI aninhados. O
+      segundo ensaio revelou enriquecimento geográfico derivado do transporte; a retenção de IP foi
+      desabilitada e a remoção de `user.geo` foi configurada somente no projeto staging, enquanto o
+      commit `c4bf177` passou a enviar um endereço não roteável explícito sem copiar o IP real. No
+      evento aceito, o IP aparece como `<redacted>`, não há geografia, nome ou e-mail, e a requisição
+      e todos os breadcrumbs observados contêm apenas scheme/host/path, sem query ou hash. Nenhuma
+      credencial, token ou payload sensível foi exibido. A seção Session Replay oferece apenas
+      `Set Up Now`, confirmando que nenhum replay foi anexado e que Replay permanece desligado. A
+      rota, o componente e o teste exclusivamente temporários foram removidos após essa captura.
 
 ### Cenários pós-merge diferidos
 
@@ -157,6 +167,7 @@ executa a aceitação exclusivamente produtiva. Nenhum desses cenários foi ante
 ## Resultado
 
 Os controles locais, HTTP públicos e as jornadas hospedadas de Auth/convite, matriz RLS, Realtime,
-Storage privado e aviso/outbox/fallback acima foram executados. T175 não recebe `[X]`: faltam a
-entrega/retry externo de notificações e redaction/Sentry, ambos sem integração staging configurada.
-Nenhuma evidência foi simulada.
+Storage privado, aviso/outbox/fallback e redaction/Sentry acima foram executados e aprovados. A
+entrega e o retry externos de push permanecem deliberadamente fora deste aceite porque o Preview
+não possui provedor OneSignal configurado; nenhum provedor ou segredo foi acionado. T175 recebe
+`[X]`, sem alteração de produção, OneSignal, R2 ou n8n.

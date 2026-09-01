@@ -28,7 +28,6 @@ import { MatchesPage } from '@/features/matches/pages/MatchesPage';
 import { LineupEditorPage } from '@/features/lineups/pages/LineupEditorPage';
 import { PublishedLineupPage } from '@/features/lineups/pages/PublishedLineupPage';
 import { MvpVotingPage } from '@/features/mvp-voting/pages/MvpVotingPage';
-import { MonitoringAcceptancePage } from '@/features/monitoring/pages/MonitoringAcceptancePage';
 import { NoticesPage } from '@/features/notices/pages/NoticesPage';
 import { PushPermissionCard } from '@/features/notifications/components/PushPermissionCard';
 import { AthleteProfilePage } from '@/features/roster/pages/AthleteProfilePage';
@@ -36,7 +35,6 @@ import { RosterPage } from '@/features/roster/pages/RosterPage';
 import { CreateAthletePage, EditAthletePage } from '@/features/roster/pages/RosterManagementPage';
 import { SeasonRankingsPage } from '@/features/statistics/pages/SeasonRankingsPage';
 import { StatisticsAdminPage } from '@/features/statistics/pages/StatisticsAdminPage';
-import { env } from '@/config/env';
 import { EmptyState, ErrorState } from '@/shared/components/feedback';
 import { LoadingState } from '@/shared/components/feedback';
 import type { Database } from '@/shared/types/database.generated';
@@ -287,14 +285,6 @@ const featureRoutes: RouteObject[] = [
                     element: <Aal2RouteGuard />,
                     children: [
                       { path: 'admin', element: <RoleAdministrationPage /> },
-                      ...(env.VITE_APP_ENV === 'staging'
-                        ? [
-                            {
-                              path: 'admin/monitoring-acceptance',
-                              element: <MonitoringAcceptancePage />,
-                            },
-                          ]
-                        : []),
                       { path: 'admin/roster/new', element: <CreateAthletePage /> },
                       { path: 'admin/roster/:athleteId/edit', element: <EditAthletePage /> },
                       {

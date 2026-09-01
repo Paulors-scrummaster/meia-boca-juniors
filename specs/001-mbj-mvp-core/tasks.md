@@ -322,7 +322,7 @@
 - [X] T172 [P] Document isolated monthly restore verification, Auth continuity limits, row counts, and avatar checksum evidence in `docs/backup-restore.md`
 - [X] T173 [P] Add repository contribution, two-stage release, branch, PR self-review, Definition of Done, and secret/data prohibitions in `CONTRIBUTING.md`
 - [X] T174 Run and record the full role/RLS/privacy/security review checklist against every exposed table, view, RPC, function, log, cache, and deployment secret in `specs/001-mbj-mvp-core/checklists/security-review.md`
-- [ ] T175 Execute the local, staging, feature-preview, and non-production acceptance scenarios from the validation guide and record results or linked defects in `specs/001-mbj-mvp-core/checklists/pre-release-validation.md`
+- [X] T175 Execute the local, staging, feature-preview, and non-production acceptance scenarios from the validation guide and record results or linked defects in `specs/001-mbj-mvp-core/checklists/pre-release-validation.md`
 - [ ] T176 After CI, preview, security review, and Codex-assisted self-review pass, merge the implementation Pull Request into protected `main` without running production migrations; then create and publish `chore/mbj-production-activation` from updated `main` and record the implementation merge SHA in `docs/release-activation.md`
 
 **Checkpoint**: Application code and workflow definitions exist on protected `main`; production data remains unchanged and the active branch is `chore/mbj-production-activation`.
