@@ -64,8 +64,12 @@ function sanitizeValue(value: unknown, key?: string): unknown {
 export function sanitizeSentryEvent(event: Event): Event {
   const sanitized = sanitizeValue(event) as Event;
 
-  if (event.user?.id) sanitized.user = { id: String(event.user.id) };
-  else delete sanitized.user;
+  // An explicit non-routable address prevents Sentry Relay from enriching an otherwise anonymous
+  // browser event with transport-derived geography. The real client address is never copied.
+  sanitized.user = {
+    ...(event.user?.id ? { id: String(event.user.id) } : {}),
+    ip_address: '0.0.0.0',
+  };
 
   if (event.request) {
     const request = (sanitizeValue(event.request) as NonNullable<Event['request']>) ?? {};

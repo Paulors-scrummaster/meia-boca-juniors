@@ -57,12 +57,13 @@ describe('Sentry browser adapter', () => {
     });
     const serialized = JSON.stringify(sanitized);
 
-    expect(sanitized.user).toEqual({ id: 'technical-uuid' });
+    expect(sanitized.user).toEqual({ id: 'technical-uuid', ip_address: '0.0.0.0' });
     expect(sanitized.request?.url).toBe('https://app.test/convite');
     expect(sanitized.request?.headers).toEqual({ 'content-type': 'application/json' });
     expect(serialized).not.toContain('player@example.test');
     expect(serialized).not.toContain('informação privada');
     expect(serialized).not.toContain('Bearer secret');
+    expect(serialized).not.toContain('127.0.0.1');
     expect(serialized).not.toContain('token=secret');
     expect(serialized).not.toContain('?select=id');
     expect(serialized).not.toContain('#private');
