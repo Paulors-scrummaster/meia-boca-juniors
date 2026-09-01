@@ -1,6 +1,6 @@
 # Validação pré-release — T175
 
-Data: 2026-08-31. Alvos produtivos e usuários reais não foram utilizados. O navegador interativo e
+Data: 2026-09-01. Alvos produtivos e usuários reais não foram utilizados. O navegador interativo e
 identidades exclusivamente sintéticas permitiram validar as jornadas hospedadas de Auth, MFA,
 papéis, convite e ciclo de vida do atleta descritas abaixo. A T175 permanece aberta porque os demais
 cenários staging ainda não foram executados integralmente.
@@ -87,9 +87,8 @@ cenários staging ainda não foram executados integralmente.
       recuperação, dois atletas inativos, convite revogado e identidade revogada desabilitada. A
       senha perdida da primeira conta Presidente sintética exigiu uma substituta: ela recebeu somente
       `PRESIDENT`, concluiu MFA/AAL2, e a conta anterior teve o papel removido e foi bloqueada até
-      2126. Faltam as verificações hospedadas integrais de matriz RLS, Storage privado,
-      notificações e redaction; nenhum usuário real foi convidado e nenhum segredo, UUID ou link de
-      convite foi registrado.
+      2126. Faltam as verificações hospedadas integrais de matriz RLS, notificações e redaction;
+      nenhum usuário real foi convidado e nenhum segredo, UUID ou link de convite foi registrado.
 
       Em 31/08/2026 foi executada uma auditoria hospedada somente-leitura, limitada aos catálogos e
       objetos MBJ allowlisted. Retornaram verdadeiros os oito controles: RLS nas 21 tabelas públicas
@@ -107,8 +106,23 @@ cenários staging ainda não foram executados integralmente.
       a explicação sanitizada sem recarga manual. A presença foi então restaurada para `CONFIRMED`, e
       a segunda sessão também refletiu a restauração sem recarga. As capturas observaram as duas
       transições e a confirmação de gravação; nenhum identificador técnico, credencial ou dado real
-      foi registrado. O cenário comportamental de Realtime está aprovado. Storage comportamental,
-      matriz RLS hospedada completa, notificações e redaction continuam pendentes.
+      foi registrado. O cenário comportamental de Realtime está aprovado.
+
+      Em 01/09/2026, o cenário comportamental de Storage privado foi concluído no preview com uma
+      imagem e um atleta exclusivamente sintéticos. O primeiro ensaio detectou que imagens válidas
+      menores que o alvo eram rejeitadas pelo otimizador; a regressão foi coberta e corrigida no
+      commit `c703707`. O segundo ensaio detectou que o retorno do insert era bloqueado pela política
+      de Storage; a migration `20260901000100_allow_avatar_insert_returning.sql` e seus testes foram
+      validados localmente (21/21) e aplicados somente ao staging autorizado, que ficou sem drift. O
+      terceiro ensaio confirmou a gravação privada, mas revelou que o cliente mantinha o avatar sem
+      a URL assinada atualizada; a recarga do registro foi corrigida no commit `d84bb5a`. Por fim, a
+      API criou a URL assinada para o caminho canônico `athletes/<uuid>/avatar.webp`, porém a CSP
+      impedia a renderização. O commit `6747f12` adicionou apenas a origem HTTPS do Supabase ao
+      `img-src`, com teste dedicado de segurança. Após o deploy e uma recarga forçada, o escudo
+      privado apareceu no perfil. Não foi criada URL pública e nenhum caminho real, token ou URL
+      assinada foi registrado. O cenário comportamental de Storage privado está aprovado; a suíte
+      final passou com 113 testes, além de format, lint, typecheck e build. Permanecem pendentes a
+      matriz RLS hospedada completa, notificações e redaction.
 - [ ] Validar redaction/erro controlado no Sentry staging. **Bloqueio:** integração staging não
       configurada: a consulta sanitizada do Pages confirmou ausência de `VITE_SENTRY_DSN` no Preview.
       Nenhum valor de DSN foi lido e nenhum evento foi simulado.
@@ -121,6 +135,6 @@ executa a aceitação exclusivamente produtiva. Nenhum desses cenários foi ante
 
 ## Resultado
 
-Os controles locais, HTTP públicos e as jornadas hospedadas de Auth/convite acima foram executados.
-T175 não recebe `[X]`: faltam os cenários hospedados integrais de RLS, Storage privado, Realtime,
+Os controles locais, HTTP públicos e as jornadas hospedadas de Auth/convite, Realtime e Storage
+privado acima foram executados. T175 não recebe `[X]`: faltam a matriz RLS hospedada completa, as
 notificações e redaction/Sentry. Nenhuma evidência foi simulada.
