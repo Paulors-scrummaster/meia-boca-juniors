@@ -99,6 +99,7 @@ export function AthleteForm({
           shirtName: input.shirtName,
           shirtNumber: input.shirtNumber,
         });
+        saved = await service.getAthlete(saved.id);
       }
 
       if (athlete && values.status !== athlete.status) {

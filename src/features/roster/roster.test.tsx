@@ -7,6 +7,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { createAppQueryClient } from '@/app/providers/QueryProvider';
 import type { Athlete, RosterService } from '@/features/roster/api/roster.service';
 import { AthleteForm } from '@/features/roster/components/AthleteForm';
+import * as avatarOptimization from '@/features/roster/lib/optimize-avatar';
 import { athleteInitials } from '@/features/roster/lib/athlete-initials';
 import {
   calculateSquareCrop,
@@ -205,5 +206,45 @@ describe('roster', () => {
     expect(setAthleteStatus).not.toHaveBeenCalled();
     await user.click(screen.getByRole('button', { name: 'Inativar atleta' }));
     await waitFor(() => expect(setAthleteStatus).toHaveBeenCalledWith(athlete.id, 'INACTIVE'));
+  });
+
+  it('reconsulta a URL assinada após enviar um avatar', async () => {
+    const user = userEvent.setup();
+    const photoPath = `athletes/${athlete.id}/avatar.webp`;
+    const savedWithPhoto = { ...athlete, photo_path: photoPath };
+    const savedWithSignedAvatar = {
+      ...savedWithPhoto,
+      avatar_url: 'https://storage.invalid/signed-avatar',
+    };
+    const updateAthlete = vi
+      .fn()
+      .mockResolvedValueOnce(athlete)
+      .mockResolvedValueOnce(savedWithPhoto);
+    const uploadAvatar = vi.fn().mockResolvedValue(photoPath);
+    const getAthlete = vi.fn().mockResolvedValue(savedWithSignedAvatar);
+    const onSaved = vi.fn();
+    vi.spyOn(avatarOptimization, 'optimizeAvatar').mockResolvedValue(
+      new Blob(['avatar'], { type: 'image/webp' }),
+    );
+
+    const { container } = renderWithQuery(
+      <AthleteForm
+        athlete={athlete}
+        onSaved={onSaved}
+        service={rosterService({ getAthlete, updateAthlete, uploadAvatar })}
+      />,
+    );
+
+    const fileInput = container.querySelector('input[type="file"]');
+    expect(fileInput).toBeInstanceOf(HTMLInputElement);
+    await user.upload(
+      fileInput as HTMLInputElement,
+      new File(['avatar'], 'avatar.png', { type: 'image/png' }),
+    );
+    await user.click(screen.getByRole('button', { name: 'Salvar atleta' }));
+
+    await waitFor(() => expect(uploadAvatar).toHaveBeenCalled());
+    expect(getAthlete).toHaveBeenCalledWith(athlete.id);
+    expect(onSaved).toHaveBeenCalledWith(savedWithSignedAvatar);
   });
 });
