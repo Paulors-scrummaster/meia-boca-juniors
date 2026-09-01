@@ -8,7 +8,7 @@ cenários staging ainda não foram executados integralmente.
 ## Local
 
 - [x] Formatação, lint, TypeScript, bindings gerados e build de produção aprovados.
-- [x] 109 testes unitários aprovados, incluindo Auth, redaction/Sentry, cache offline e contratos dos
+- [x] 113 testes unitários aprovados, incluindo Auth, redaction/Sentry, cache offline e contratos dos
       workflows de backup/release/n8n.
 - [x] Supabase local reinicializado com 26 migrations e seed exclusivamente fictício.
 - [x] Lint do banco aprovado e 353 testes SQL de constraints, RLS e RPC aprovados em 18 arquivos.
@@ -121,8 +121,29 @@ cenários staging ainda não foram executados integralmente.
       `img-src`, com teste dedicado de segurança. Após o deploy e uma recarga forçada, o escudo
       privado apareceu no perfil. Não foi criada URL pública e nenhum caminho real, token ou URL
       assinada foi registrado. O cenário comportamental de Storage privado está aprovado; a suíte
-      final passou com 113 testes, além de format, lint, typecheck e build. Permanecem pendentes a
-      matriz RLS hospedada completa, notificações e redaction.
+      final passou com 113 testes, além de format, lint, typecheck e build.
+
+      Em seguida, a matriz RLS hospedada foi executada somente sobre objetos MBJ allowlisted. Cada
+      cenário usou troca temporária de papel/claims, retornou apenas booleanos e terminou em
+      `ROLLBACK`; nenhuma identidade, role ou linha persistente foi criada ou alterada. Os controles
+      passaram para Anônimo (4/4), Atleta AAL1 (11/11), Técnico AAL1 (7/7), Técnico AAL2 (7/7),
+      Presidente AAL1 (6/6) e Presidente AAL2 (6/6): isolamento de perfil/roles, roster e avisos para
+      contas ativas, sigilo de auditoria/convites, motivos protegidos, rascunhos, visão da comissão,
+      assinaturas e votos próprios, além da elevação correta por MFA. Como não havia um profile
+      persistido em estado `DISABLED`, uma conta ativa foi marcada como desativada apenas dentro de
+      uma transação não confirmada; os oito controles de bloqueio passaram e o `ROLLBACK` restaurou o
+      estado sem exposição para outras sessões. As tabelas internas de outbox continuaram sem grant
+      para clientes. A tabela RAG alheia não foi consultada. A matriz RLS hospedada está aprovada.
+
+      O fluxo hospedado de avisos/outbox também foi exercitado com conteúdo exclusivamente
+      sintético. A UI confirmou a publicação e exibiu o aviso no mural sem erro de console. Uma
+      consulta agregada e sanitizada confirmou exatamente um aviso, um evento `NOTICE_PUBLISHED` e
+      cinco entregas para cinco destinatários sintéticos; todas ficaram `PENDING`, nenhuma ficou
+      `FAILED`/`SKIPPED` e nenhuma chave sensível allowlisted apareceu no payload. A tela de
+      preferências informou corretamente que push está indisponível neste ambiente e preservou o
+      fallback in-app. A criação do aviso, do evento, das entregas e o fallback estão aprovados. A
+      entrega externa e o retry permanecem bloqueados porque `VITE_ONESIGNAL_APP_ID` está vazio no
+      Preview e nenhum provedor/segredo não produtivo foi configurado ou acionado.
 - [ ] Validar redaction/erro controlado no Sentry staging. **Bloqueio:** integração staging não
       configurada: a consulta sanitizada do Pages confirmou ausência de `VITE_SENTRY_DSN` no Preview.
       Nenhum valor de DSN foi lido e nenhum evento foi simulado.
@@ -135,6 +156,7 @@ executa a aceitação exclusivamente produtiva. Nenhum desses cenários foi ante
 
 ## Resultado
 
-Os controles locais, HTTP públicos e as jornadas hospedadas de Auth/convite, Realtime e Storage
-privado acima foram executados. T175 não recebe `[X]`: faltam a matriz RLS hospedada completa, as
-notificações e redaction/Sentry. Nenhuma evidência foi simulada.
+Os controles locais, HTTP públicos e as jornadas hospedadas de Auth/convite, matriz RLS, Realtime,
+Storage privado e aviso/outbox/fallback acima foram executados. T175 não recebe `[X]`: faltam a
+entrega/retry externo de notificações e redaction/Sentry, ambos sem integração staging configurada.
+Nenhuma evidência foi simulada.
