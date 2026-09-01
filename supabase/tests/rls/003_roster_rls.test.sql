@@ -1,6 +1,6 @@
 begin;
 
-select plan(20);
+select plan(21);
 
 insert into auth.users (id, email)
 values
@@ -105,6 +105,12 @@ select lives_ok(
   'President with AAL2 can write a canonical private avatar object'
 );
 select is((select count(*)::integer from storage.objects where bucket_id = 'athlete-avatars'), 1, 'active authenticated users can read linked avatar objects');
+select lives_ok(
+  $$insert into storage.objects (bucket_id, name, owner_id)
+    values ('athlete-avatars', 'athletes/00000000-0000-4000-8000-000000004102/avatar.webp', auth.uid())
+    returning name$$,
+  'President with AAL2 can receive metadata for a newly uploaded canonical avatar'
+);
 select lives_ok(
   $$select public.set_athlete_status(
     '00000000-0000-4000-8000-000000004102', 'INACTIVE', null,
