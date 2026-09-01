@@ -93,12 +93,13 @@ export async function optimizeAvatar(
     let crop = calculateSquareCrop(image.width, image.height);
     const qualities = [0.82, 0.68, 0.54, 0.4];
 
-    while (crop.outputSize >= 256) {
+    while (true) {
       for (const quality of qualities) {
         const output = await adapter.renderSquare(image, crop, quality);
         if (output.size <= maxOutputBytes) return output;
       }
-      crop = { ...crop, outputSize: Math.floor(crop.outputSize * 0.8) };
+      if (crop.outputSize <= 256) break;
+      crop = { ...crop, outputSize: Math.max(256, Math.floor(crop.outputSize * 0.8)) };
     }
   } finally {
     image.close();

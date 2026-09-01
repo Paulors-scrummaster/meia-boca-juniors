@@ -105,6 +105,34 @@ describe('roster', () => {
     expect(renderSquare).toHaveBeenCalledTimes(2);
   });
 
+  it('otimiza imagens quadradas menores que 256 px sem rejeitá-las', async () => {
+    const renderSquare = vi
+      .fn()
+      .mockResolvedValue(new Blob([new Uint8Array(5_000)], { type: 'image/webp' }));
+    const adapter: AvatarImageAdapter = {
+      decode: vi.fn().mockResolvedValue({
+        close: vi.fn(),
+        height: 192,
+        source: {} as CanvasImageSource,
+        width: 192,
+      }),
+      renderSquare,
+    };
+
+    const output = await optimizeAvatar(
+      new File(['image'], 'avatar.png', { type: 'image/png' }),
+      adapter,
+    );
+
+    expect(output.type).toBe('image/webp');
+    expect(output.size).toBe(5_000);
+    expect(renderSquare).toHaveBeenCalledWith(
+      expect.anything(),
+      { height: 192, outputSize: 192, width: 192, x: 0, y: 0 },
+      0.82,
+    );
+  });
+
   it('filtra a lista por texto e estado com apresentação acessível', async () => {
     const user = userEvent.setup();
     const service = rosterService({
