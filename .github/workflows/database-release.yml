@@ -1,0 +1,94 @@
+name: Production database release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mbj-production-database-release
+  cancel-in-progress: false
+
+jobs:
+  request:
+    if: github.ref_name == 'main'
+    runs-on: ubuntu-24.04
+    outputs:
+      request_id: ${{ steps.request.outputs.request_id }}
+    steps:
+      - id: request
+        name: Generate PII-free backup request
+        shell: pwsh
+        run: |
+          "request_id=$([guid]::NewGuid().ToString('D'))" |
+            Out-File $env:GITHUB_OUTPUT -Encoding utf8 -Append
+
+  verified-backup:
+    needs: request
+    permissions:
+      contents: read
+    uses: ./.github/workflows/backup.yml
+    secrets: inherit
+    with:
+      request_id: ${{ needs.request.outputs.request_id }}
+
+  release:
+    needs: verified-backup
+    runs-on: ubuntu-24.04
+    environment: production-release
+    timeout-minutes: 30
+    steps:
+      - name: Enforce verified backup gate
+        shell: pwsh
+        env:
+          BACKUP_ID: ${{ needs.verified-backup.outputs.backup_id }}
+          MANIFEST_SHA256: ${{ needs.verified-backup.outputs.manifest_sha256 }}
+          VERIFICATION_STATUS: ${{ needs.verified-backup.outputs.verification_status }}
+        run: |
+          if ($env:VERIFICATION_STATUS != 'VERIFIED') { throw 'Backup verification gate failed' }
+          if ($env:BACKUP_ID -notmatch '^[0-9a-f]{32}$') { throw 'Backup ID gate failed' }
+          if ($env:MANIFEST_SHA256 -notmatch '^[0-9a-f]{64}$') { throw 'Manifest checksum gate failed' }
+
+      - name: Checkout protected main
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Install locked Supabase CLI
+        run: npm ci --ignore-scripts
+
+      - name: Link production project without logging credentials
+        shell: pwsh
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
+        run: |
+          if ($env:SUPABASE_PROJECT_REF -notmatch '^[a-z0-9]{20}$') { throw 'Invalid production project ref' }
+          npx --no-install supabase link --project-ref $env:SUPABASE_PROJECT_REF --password $env:SUPABASE_DB_PASSWORD
+          if ($LASTEXITCODE -ne 0) { throw 'Supabase link failed' }
+
+      - name: Migration dry run
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: npx --no-install supabase db push --linked --dry-run
+
+      - name: Apply forward migrations
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+        run: npx --no-install supabase db push --linked
+
+      - name: Smoke validate database and Data API
+        shell: pwsh
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+        run: |
+          npx --no-install supabase db lint --linked --fail-on error
+          if ($LASTEXITCODE -ne 0) { throw 'Database lint smoke check failed' }
+          $headers = @{ apikey = $env:SUPABASE_PUBLISHABLE_KEY; Authorization = "Bearer $($env:SUPABASE_PUBLISHABLE_KEY)" }
+          $response = Invoke-WebRequest -Uri "$($env:SUPABASE_URL)/rest/v1/" -Headers $headers -Method Get
+          if ($response.StatusCode -ne 200) { throw 'Data API smoke check failed' }

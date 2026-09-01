@@ -1,0 +1,393 @@
+{
+  "name": "MBJ verified backup orchestrator",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": [1],
+              "triggerAtHour": 3
+            }
+          ]
+        }
+      },
+      "id": "5c33ad21-6817-447e-bcb0-6e4592598c07",
+      "name": "Weekly schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-1200, -160]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mbj-backup-pre-migration",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "4242e210-f17e-4f6a-938f-47b65e6d907e",
+      "name": "Authenticated pre-migration trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-1200, 80]
+    },
+    {
+      "parameters": {
+        "jsCode": "const requestId = crypto.randomUUID();\nreturn [{ json: { requestId, startedAt: new Date().toISOString(), deadlineAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), pollCount: 0 } }];"
+      },
+      "id": "19409bba-b6d4-42d5-8a76-f0cc9d127c31",
+      "name": "Generate request ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-960, -40]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.github.com/repos/Paulors-scrummaster/meia-boca-juniors/actions/workflows/backup.yml/dispatches",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Accept", "value": "application/vnd.github+json" },
+            { "name": "X-GitHub-Api-Version", "value": "2022-11-28" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ ref: 'main', inputs: { request_id: $json.requestId } }) }}",
+        "options": { "timeout": 30000 }
+      },
+      "id": "86f23c04-6795-474a-8d63-d6478c47e1f8",
+      "name": "Dispatch protected main",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-720, -40],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": { "amount": 15, "unit": "seconds" },
+      "id": "81e01493-dbe6-4ba0-98d0-ec3370fb3380",
+      "name": "Wait before correlation",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [-480, -40]
+    },
+    {
+      "parameters": {
+        "url": "https://api.github.com/repos/Paulors-scrummaster/meia-boca-juniors/actions/workflows/backup.yml/runs",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "branch", "value": "main" },
+            { "name": "event", "value": "workflow_dispatch" },
+            { "name": "per_page", "value": "30" }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Accept", "value": "application/vnd.github+json" },
+            { "name": "X-GitHub-Api-Version", "value": "2022-11-28" }
+          ]
+        },
+        "options": { "timeout": 30000 }
+      },
+      "id": "924ce62f-c44b-4971-811d-7f38edff1ca4",
+      "name": "List workflow runs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-240, -40],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $('Generate request ID').first().json;\nconst expectedName = `MBJ backup ${state.requestId}`;\nconst runs = Array.isArray($json.workflow_runs) ? $json.workflow_runs : [];\nconst matches = runs.filter((run) => run.display_title === expectedName && run.head_branch === 'main' && run.event === 'workflow_dispatch' && Date.parse(run.created_at) >= Date.parse(state.startedAt) - 5000);\nif (matches.length !== 1) throw new Error(matches.length === 0 ? 'RUN_NOT_FOUND' : 'RUN_CORRELATION_AMBIGUOUS');\nconst run = matches[0];\nif (new Date() > new Date(state.deadlineAt)) throw new Error('RUN_POLL_TIMEOUT');\nreturn [{ json: { ...state, pollCount: state.pollCount + 1, runId: String(run.id), runStatus: run.status, runConclusion: run.conclusion } }];"
+      },
+      "id": "a67dd3a4-b9e7-45c2-9c46-72073ed3e92b",
+      "name": "Correlate exact run",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [0, -40],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "leftValue": "", "typeValidation": "strict" },
+          "conditions": [
+            {
+              "id": "013ff674-0d55-476f-9608-f7bc0fac4bfd",
+              "leftValue": "={{ $json.runStatus }}",
+              "rightValue": "completed",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "283c24bc-138e-480d-bdd8-65c01a83ae4e",
+      "name": "Run completed",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [240, -40]
+    },
+    {
+      "parameters": { "amount": 30, "unit": "seconds" },
+      "id": "bc925688-5091-4e23-824a-a0741635dc6b",
+      "name": "Wait before polling",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [240, 160]
+    },
+    {
+      "parameters": {
+        "jsCode": "if ($json.runConclusion !== 'success') throw new Error(`RUN_${String($json.runConclusion || 'UNKNOWN').toUpperCase()}`);\nreturn items;"
+      },
+      "id": "564fcae7-15ac-4fed-bb1c-ac6bb41b44e3",
+      "name": "Require successful run",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [480, -120],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/Paulors-scrummaster/meia-boca-juniors/actions/runs/{{ $json.runId }}/artifacts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Accept", "value": "application/vnd.github+json" },
+            { "name": "X-GitHub-Api-Version", "value": "2022-11-28" }
+          ]
+        },
+        "options": { "timeout": 30000 }
+      },
+      "id": "2e4f4d29-e7c0-491d-a8b6-36e508951f61",
+      "name": "List result artifacts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, -120],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $('Correlate exact run').first().json;\nconst expected = `backup-result-${state.requestId}`;\nconst artifacts = Array.isArray($json.artifacts) ? $json.artifacts : [];\nconst matches = artifacts.filter((artifact) => artifact.name === expected && artifact.expired === false);\nif (matches.length !== 1) throw new Error(matches.length === 0 ? 'RESULT_ARTIFACT_MISSING_OR_EXPIRED' : 'RESULT_ARTIFACT_AMBIGUOUS');\nreturn [{ json: { ...state, artifactId: String(matches[0].id) } }];"
+      },
+      "id": "32f7ef0e-a164-4076-9120-fdf6e1d3cd72",
+      "name": "Select exact artifact",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [960, -120],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/Paulors-scrummaster/meia-boca-juniors/actions/artifacts/{{ $json.artifactId }}/zip",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "Accept", "value": "application/vnd.github+json" },
+            { "name": "X-GitHub-Api-Version", "value": "2022-11-28" }
+          ]
+        },
+        "options": {
+          "response": { "response": { "responseFormat": "file", "outputPropertyName": "data" } },
+          "timeout": 30000
+        }
+      },
+      "id": "6b1292fc-4999-40ee-abfa-92e784fc3a8f",
+      "name": "Download exact artifact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, -120],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "decompress",
+        "binaryPropertyName": "data",
+        "outputPrefix": "result_"
+      },
+      "id": "9757bfce-ab6e-48bd-ac5f-63f319fda497",
+      "name": "Extract result artifact",
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [1440, -120],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const state = $('Select exact artifact').first().json;\nconst binaries = items[0].binary || {};\nconst entry = Object.values(binaries).find((value) => value.fileName === 'backup-result.json');\nif (!entry?.data) throw new Error('RESULT_FILE_MISSING');\nlet result;\ntry { result = JSON.parse(Buffer.from(entry.data, 'base64').toString('utf8')); } catch { throw new Error('RESULT_JSON_MALFORMED'); }\nconst sha = /^[0-9a-f]{64}$/;\nconst key = /^backups\\/[0-9]{4}\\/[0-9]{2}\\/[0-9a-f]{32}\\.age$/;\nif (result.contractVersion !== 1 || result.requestId !== state.requestId || String(result.runId) !== state.runId) throw new Error('RESULT_CORRELATION_MISMATCH');\nif (result.status !== 'VERIFIED' || !sha.test(result.manifestSha256) || !key.test(result.encryptedObjectKey) || !/^[0-9a-f]{32}$/.test(result.backupId)) throw new Error('RESULT_NOT_VERIFIED');\nconst verifiedAt = Date.parse(result.verifiedAt);\nif (!Number.isFinite(verifiedAt) || verifiedAt < Date.parse(state.startedAt) - 5000 || verifiedAt > Date.now() + 300000) throw new Error('RESULT_TIMESTAMP_INVALID');\nreturn [{ json: { requestId: state.requestId, runId: state.runId, backupId: result.backupId, manifestSha256: result.manifestSha256, verifiedAt: result.verifiedAt, status: 'VERIFIED' } }];"
+      },
+      "id": "c72b72cc-2bef-4165-9e07-9a8119da6e04",
+      "name": "Validate backup result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1680, -120],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ $vars.MBJ_BACKUP_HEARTBEAT_URL }}",
+        "options": { "timeout": 15000 }
+      },
+      "id": "032bd195-5788-4145-9d83-4a26c6eca731",
+      "name": "Send success heartbeat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1920, -120],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { requestId: $('Validate backup result').first().json.requestId, backupId: $('Validate backup result').first().json.backupId, manifestSha256: $('Validate backup result').first().json.manifestSha256, status: 'VERIFIED' } }}",
+        "options": {}
+      },
+      "id": "cf53b5a6-b13d-4e47-9a0c-8b80e2682f4f",
+      "name": "Return verified result",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [2160, -120]
+    },
+    {
+      "parameters": {
+        "jsCode": "const source = $json.error?.message || $json.message || 'BACKUP_FAIL_CLOSED';\nconst code = String(source).replace(/[^A-Z0-9_.:-]/gi, '_').slice(0, 80);\nreturn [{ json: { event: 'MBJ_BACKUP_FAILED', code, occurredAt: new Date().toISOString() } }];"
+      },
+      "id": "03af6d47-a089-4e22-b816-5321ff53d831",
+      "name": "Build sanitized failure",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1440, 280]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $vars.MBJ_BACKUP_FAILURE_WEBHOOK_URL }}",
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json) }}",
+        "options": { "timeout": 15000 }
+      },
+      "id": "eac26173-b968-4e0a-9e92-b8de0eb7fe4c",
+      "name": "Send failure alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1680, 280]
+    }
+  ],
+  "connections": {
+    "Weekly schedule": {
+      "main": [[{ "node": "Generate request ID", "type": "main", "index": 0 }]]
+    },
+    "Authenticated pre-migration trigger": {
+      "main": [[{ "node": "Generate request ID", "type": "main", "index": 0 }]]
+    },
+    "Generate request ID": {
+      "main": [[{ "node": "Dispatch protected main", "type": "main", "index": 0 }]]
+    },
+    "Dispatch protected main": {
+      "main": [
+        [{ "node": "Wait before correlation", "type": "main", "index": 0 }],
+        [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
+      ]
+    },
+    "Wait before correlation": {
+      "main": [[{ "node": "List workflow runs", "type": "main", "index": 0 }]]
+    },
+    "List workflow runs": {
+      "main": [
+        [{ "node": "Correlate exact run", "type": "main", "index": 0 }],
+        [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
+      ]
+    },
+    "Correlate exact run": {
+      "main": [
+        [{ "node": "Run completed", "type": "main", "index": 0 }],
+        [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
+      ]
+    },
+    "Run completed": {
+      "main": [
+        [{ "node": "Require successful run", "type": "main", "index": 0 }],
+        [{ "node": "Wait before polling", "type": "main", "index": 0 }]
+      ]
+    },
+    "Wait before polling": {
+      "main": [[{ "node": "List workflow runs", "type": "main", "index": 0 }]]
+    },
+    "Require successful run": {
+      "main": [
+        [{ "node": "List result artifacts", "type": "main", "index": 0 }],
+        [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
+      ]
+    },
+    "List result artifacts": {
+      "main": [
+        [{ "node": "Select exact artifact", "type": "main", "index": 0 }],
+        [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
+      ]
+    },
+    "Select exact artifact": {
+      "main": [
+        [{ "node": "Download exact artifact", "type": "main", "index": 0 }],
+        [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
+      ]
+    },
+    "Download exact artifact": {
+      "main": [
+        [{ "node": "Extract result artifact", "type": "main", "index": 0 }],
+        [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
+      ]
+    },
+    "Extract result artifact": {
+      "main": [
+        [{ "node": "Validate backup result", "type": "main", "index": 0 }],
+        [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
+      ]
+    },
+    "Validate backup result": {
+      "main": [
+        [{ "node": "Send success heartbeat", "type": "main", "index": 0 }],
+        [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
+      ]
+    },
+    "Send success heartbeat": {
+      "main": [
+        [{ "node": "Return verified result", "type": "main", "index": 0 }],
+        [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build sanitized failure": {
+      "main": [[{ "node": "Send failure alert", "type": "main", "index": 0 }]]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataErrorExecution": "none",
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": false,
+    "timezone": "America/Sao_Paulo"
+  },
+  "active": false,
+  "versionId": "f3671063-9bcf-4996-a8e5-9a2e018a9d24",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "tags": []
+}
