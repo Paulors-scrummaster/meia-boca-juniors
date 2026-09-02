@@ -36,7 +36,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const requestId = crypto.randomUUID();\nreturn [{ json: { requestId, startedAt: new Date().toISOString(), deadlineAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), pollCount: 0 } }];"
+        "jsCode": "const requestId = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'\n  ? crypto.randomUUID()\n  : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (value) => {\n      const random = Math.floor(Math.random() * 16);\n      const nibble = value === 'x' ? random : (random & 0x3) | 0x8;\n      return nibble.toString(16);\n    });\nreturn [{ json: { requestId, startedAt: new Date().toISOString(), deadlineAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(), pollCount: 0 } }];"
       },
       "id": "19409bba-b6d4-42d5-8a76-f0cc9d127c31",
       "name": "Generate request ID",

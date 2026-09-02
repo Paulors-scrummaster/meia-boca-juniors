@@ -2,9 +2,80 @@
 
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { runInNewContext } from 'node:vm';
 
 const root = resolve(import.meta.dirname, '../..');
 const read = (path: string) => readFileSync(resolve(root, path), 'utf8');
+
+type WorkflowNode = {
+  name: string;
+  parameters: { jsCode?: string };
+};
+
+const n8nWorkflow = JSON.parse(read('ops/n8n/backup-workflow.json')) as {
+  nodes: WorkflowNode[];
+};
+
+const executeCodeNode = (
+  name: string,
+  options: {
+    json?: Record<string, unknown>;
+    items?: Array<Record<string, unknown>>;
+    nodeData?: Record<string, Record<string, unknown>>;
+  } = {},
+) => {
+  const node = n8nWorkflow.nodes.find((candidate) => candidate.name === name);
+  if (!node?.parameters.jsCode) throw new Error(`Code node not found: ${name}`);
+  const nodeData = options.nodeData ?? {};
+
+  return runInNewContext(`(() => { ${node.parameters.jsCode} })()`, {
+    $: (nodeName: string) => ({ first: () => ({ json: nodeData[nodeName] ?? {} }) }),
+    $json: options.json ?? {},
+    Buffer,
+    items: options.items ?? [{ json: options.json ?? {} }],
+  });
+};
+
+const requestId = '12345678-1234-4123-8123-123456789abc';
+const startedAt = '2026-09-02T08:00:00.000Z';
+const runId = '33608576626';
+const correlationState = {
+  requestId,
+  startedAt,
+  deadlineAt: '2099-01-01T00:00:00.000Z',
+  pollCount: 0,
+};
+const matchingRun = {
+  id: runId,
+  display_title: `MBJ backup ${requestId}`,
+  head_branch: 'main',
+  event: 'workflow_dispatch',
+  created_at: startedAt,
+  status: 'completed',
+  conclusion: 'success',
+};
+const artifactState = { ...correlationState, runId };
+const verifiedResult = {
+  contractVersion: 1,
+  requestId,
+  runId,
+  backupId: 'a'.repeat(32),
+  manifestSha256: 'b'.repeat(64),
+  encryptedObjectKey: `backups/2026/09/${'a'.repeat(32)}.age`,
+  verifiedAt: '2026-09-02T08:01:00.000Z',
+  status: 'VERIFIED',
+};
+
+const resultItem = (value: unknown) => ({
+  binary: {
+    result: {
+      fileName: 'backup-result.json',
+      data: Buffer.from(typeof value === 'string' ? value : JSON.stringify(value)).toString(
+        'base64',
+      ),
+    },
+  },
+});
 
 describe('backup automation contracts', () => {
   it('keeps the PowerShell exporter allowlisted, fail-closed, and cleanup-safe', () => {
@@ -76,5 +147,82 @@ describe('backup automation contracts', () => {
     expect(Object.keys(workflow.connections).length).toBeGreaterThan(0);
     expect(workflow.credentials).toBeUndefined();
     expect(serialized).not.toMatch(/ghp_|github_pat_|AKIA|service_role|BEGIN .*PRIVATE KEY/i);
+  });
+
+  it('accepts a verified result correlated to the protected main run', () => {
+    const [output] = executeCodeNode('Validate backup result', {
+      items: [resultItem(verifiedResult)],
+      nodeData: { 'Select exact artifact': artifactState },
+    }) as Array<{ json: Record<string, unknown> }>;
+
+    expect(output?.json).toMatchObject({ requestId, runId, status: 'VERIFIED' });
+  });
+
+  it('fails closed when run polling exceeds its deadline', () => {
+    expect(() =>
+      executeCodeNode('Correlate exact run', {
+        json: { workflow_runs: [matchingRun] },
+        nodeData: {
+          'Generate request ID': { ...correlationState, deadlineAt: '2026-09-02T07:59:59.000Z' },
+        },
+      }),
+    ).toThrow('RUN_POLL_TIMEOUT');
+  });
+
+  it('fails closed when more than one protected main run matches', () => {
+    expect(() =>
+      executeCodeNode('Correlate exact run', {
+        json: { workflow_runs: [matchingRun, { ...matchingRun, id: '33608576627' }] },
+        nodeData: { 'Generate request ID': correlationState },
+      }),
+    ).toThrow('RUN_CORRELATION_AMBIGUOUS');
+  });
+
+  it('fails closed when the exact result artifact is missing or expired', () => {
+    expect(() =>
+      executeCodeNode('Select exact artifact', {
+        json: {
+          artifacts: [{ id: 1, name: `backup-result-${requestId}`, expired: true }],
+        },
+        nodeData: { 'Correlate exact run': artifactState },
+      }),
+    ).toThrow('RESULT_ARTIFACT_MISSING_OR_EXPIRED');
+  });
+
+  it('fails closed when the result request does not match', () => {
+    expect(() =>
+      executeCodeNode('Validate backup result', {
+        items: [
+          resultItem({ ...verifiedResult, requestId: '87654321-4321-4321-8321-cba987654321' }),
+        ],
+        nodeData: { 'Select exact artifact': artifactState },
+      }),
+    ).toThrow('RESULT_CORRELATION_MISMATCH');
+  });
+
+  it('fails closed when the result JSON is malformed', () => {
+    expect(() =>
+      executeCodeNode('Validate backup result', {
+        items: [resultItem('{not-json')],
+        nodeData: { 'Select exact artifact': artifactState },
+      }),
+    ).toThrow('RESULT_JSON_MALFORMED');
+  });
+
+  it('fails closed when the result is not verified', () => {
+    expect(() =>
+      executeCodeNode('Validate backup result', {
+        items: [resultItem({ ...verifiedResult, status: 'FAILED' })],
+        nodeData: { 'Select exact artifact': artifactState },
+      }),
+    ).toThrow('RESULT_NOT_VERIFIED');
+  });
+
+  it('fails closed when the correlated GitHub execution fails', () => {
+    expect(() =>
+      executeCodeNode('Require successful run', {
+        json: { runConclusion: 'failure' },
+      }),
+    ).toThrow('RUN_FAILURE');
   });
 });
