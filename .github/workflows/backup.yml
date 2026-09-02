@@ -72,7 +72,6 @@ jobs:
         run: |
           choco install postgresql17 --version=17.6.0 --yes --no-progress
           if ($LASTEXITCODE -notin 0, 3010) { throw 'PostgreSQL client installation failed' }
-
           # windows-2025 includes a newer AWS CLI MSI. Chocolatey cannot
           # downgrade it in place, so remove that runner-owned installation
           # before installing and verifying the version pinned by this job.
