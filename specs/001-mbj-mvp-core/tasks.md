@@ -333,7 +333,7 @@
 
 **Purpose**: Activate services whose workflows must already exist on the default branch, apply the backup-gated production release, and commit sanitized operational evidence through a second Pull Request.
 
-- [ ] T177 Import and configure `ops/n8n/backup-workflow.json` with a fine-grained GitHub Actions credential in the self-hosted n8n, run success, timeout, ambiguous-run, missing/expired artifact, mismatched request, malformed result, unverified result, and execution-failure tests against the workflow on `main`, and record safe workflow/evidence IDs in `docs/operations.md`
+- [X] T177 Import and configure `ops/n8n/backup-workflow.json` with a fine-grained GitHub Actions credential in the self-hosted n8n, run success, timeout, ambiguous-run, missing/expired artifact, mismatched request, malformed result, unverified result, and execution-failure tests against the workflow on `main`, and record safe workflow/evidence IDs in `docs/operations.md`
 - [ ] T178 Configure Cloudflare Pages production variables, attach `meiabocajuniors.dbidigital.com.br`, redirect the `pages.dev` alias, verify the production PWA/worker/canonical-origin behavior from `main`, and record evidence in `docs/deployment.md`
 - [ ] T179 Trigger and verify the production n8n backup, then execute `.github/workflows/database-release.yml` from `main`, require its backup ID/checksum gate, apply production migrations/Edge Functions, run smoke checks, and record sanitized release evidence in `docs/release-activation.md`
 - [ ] T180 Configure UptimeRobot HTTP/keyword and backup-heartbeat monitors, test both success and alert paths, and record safe evidence in `docs/operations.md`

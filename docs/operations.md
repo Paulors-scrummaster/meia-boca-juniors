@@ -5,7 +5,7 @@ credenciais, payloads de backup e dados pessoais não devem ser copiados para es
 
 ## T177 — Orquestração de backup no n8n
 
-Status: **em validação; não aprovado para produção**.
+Status: **aprovado em staging; workflow mantido inativo até T180**.
 
 ### Configuração segura
 
@@ -31,7 +31,7 @@ Status: **em validação; não aprovado para produção**.
 | Incompatibilidade inicial do Code node | n8n `2877`                                     | Falhou antes do dispatch porque `crypto` não era global; fallback UUID v4 aplicado ao workflow importado e ao JSON versionado. |
 | Falha da execução GitHub               | n8n `2878`; GitHub run `33608576626`           | A correlação em `main` funcionou e `RUN_FAILURE` percorreu o ramo fail-closed, produzindo um único alerta sanitizado.          |
 | Run ambíguo                            | n8n `2879`                                     | Mock com dois runs equivalentes em `main` retornou `RUN_CORRELATION_AMBIGUOUS` no ramo de erro.                                |
-| Sucesso                                | teste automatizado `backup-automation.test.ts` | Contrato `VERIFIED`, request/run IDs, checksum, object key e timestamp aceitos. Validação real pendente da correção em `main`. |
+| Sucesso                                | n8n `2886`; GitHub run `33640922116`           | `VERIFIED` no commit `8946735`; correlação, artifact, upload privado, readback, checksum, retenção e cleanup aprovados.        |
 | Timeout                                | teste automatizado `backup-automation.test.ts` | `RUN_POLL_TIMEOUT`. O relógio reutilizado pelo editor do n8n tornou o mock visual inadequado como evidência.                   |
 | Artefato ausente/expirado              | teste automatizado `backup-automation.test.ts` | `RESULT_ARTIFACT_MISSING_OR_EXPIRED`.                                                                                          |
 | Request divergente                     | teste automatizado `backup-automation.test.ts` | `RESULT_CORRELATION_MISMATCH`.                                                                                                 |
@@ -41,10 +41,15 @@ Status: **em validação; não aprovado para produção**.
 Comando reproduzível: `npm run test:unit -- src/operations/backup-automation.test.ts` — 12 testes
 aprovados em 2026-09-02.
 
-### Gate pendente
+### Evidência final sanitizada
 
-O runner `windows-2025` passou a incluir AWS CLI `2.36.29`. O workflow pinado em `2.28.8` falhou
-porque Chocolatey recusou instalar uma versão anterior. A branch de ativação acrescenta
-`--allow-downgrade`, preservando o pin. T177 só pode ser marcada como concluída depois que essa
-correção estiver em `main`, um backup staging real terminar como `VERIFIED` e os IDs finais forem
-registrados aqui. Nenhuma migração ou configuração de produção foi executada.
+- Request ID: `bd1cdb24-cdcf-488e-965e-87bb04997ba6`
+- Backup ID: `cbe40278bf864700839eeaebece54cac`
+- Manifest SHA-256: `7693fb251b1f40ce1eb8e1f3daf9ff0d1be55097f947ceae0ee387256c671982`
+- Objeto privado: `backups/2026/09/cbe40278bf864700839eeaebece54cac.age`
+- Verificado em: `2026-09-02T14:21:39Z`
+- CI pós-merge: GitHub run `33640446488`, aprovado
+
+O artefato sanitizado foi validado e removido da máquina local após a leitura. O workflow permaneceu
+inativo e com endpoints sintéticos temporários, que serão substituídos na T180. Nenhuma migração ou
+configuração de produção foi executada.
