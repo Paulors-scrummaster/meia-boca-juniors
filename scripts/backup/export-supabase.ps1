@@ -35,6 +35,7 @@ $ProgressPreference = 'SilentlyContinue'
 $AllowedStorageBucket = 'athlete-avatars'
 $AllowedR2Bucket = 'mbj-backups'
 $AllowedR2Prefix = 'backups'
+$AllowedPoolerHost = 'aws-0-us-east-1.pooler.supabase.com'
 $AllowedDatabaseSchemas = @('auth', 'storage')
 $AllowedDatabaseTables = @(
   'private.command_results',
@@ -82,6 +83,33 @@ function Assert-CommandAvailable {
   if (-not (Get-Command -Name $Name -ErrorAction SilentlyContinue)) {
     throw "TOOL_MISSING:$Name"
   }
+}
+
+function Get-BackupDatabaseUrl {
+  param(
+    [Parameter(Mandatory)][string]$DatabaseUrl,
+    [Parameter(Mandatory)][string]$ExpectedProjectRef
+  )
+
+  $escapedRef = [regex]::Escape($ExpectedProjectRef)
+  $escapedPooler = [regex]::Escape($AllowedPoolerHost)
+  $sessionPattern = "^postgres(?:ql)?://postgres\.${escapedRef}:[^@]+@${escapedPooler}:5432/[^#]+$"
+  if ($DatabaseUrl -match $sessionPattern) {
+    return $DatabaseUrl
+  }
+
+  $directPattern = "^(?<scheme>postgres(?:ql)?://)postgres:(?<credential>[^@]+)@db\.${escapedRef}\.supabase\.co:5432/(?<tail>[^#]+)$"
+  if ($DatabaseUrl -notmatch $directPattern) {
+    throw 'DATABASE_URL_HOST_REJECTED'
+  }
+
+  return '{0}postgres.{1}:{2}@{3}:5432/{4}' -f @(
+    $Matches.scheme,
+    $ExpectedProjectRef,
+    $Matches.credential,
+    $AllowedPoolerHost,
+    $Matches.tail
+  )
 }
 
 function Invoke-NativeChecked {
@@ -219,7 +247,9 @@ try {
     throw 'RESULT_PATH_REJECTED'
   }
 
-  $databaseUrl = Assert-EnvironmentValue 'SUPABASE_DB_URL'
+  $databaseUrl = Get-BackupDatabaseUrl `
+    -DatabaseUrl (Assert-EnvironmentValue 'SUPABASE_DB_URL') `
+    -ExpectedProjectRef $ProjectRef
   $serviceRoleKey = Assert-EnvironmentValue 'SUPABASE_SERVICE_ROLE_KEY'
   $r2AccountId = Assert-EnvironmentValue 'R2_ACCOUNT_ID'
   $null = Assert-EnvironmentValue 'AWS_ACCESS_KEY_ID'
