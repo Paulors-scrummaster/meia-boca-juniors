@@ -22,7 +22,6 @@ param(
   [Parameter(Mandatory)]
   [string]$ResultPath,
 
-  [string]$SupabaseCommand = 'supabase',
   [string]$PgDumpCommand = 'pg_dump',
   [string]$AgeCommand = 'age',
   [string]$AwsCommand = 'aws'
@@ -154,9 +153,22 @@ function Export-Database {
   $databaseRoot = Join-Path $Root 'database'
   New-Item -ItemType Directory -Path $databaseRoot | Out-Null
 
-  Invoke-NativeChecked -Command $SupabaseCommand -SafeFailureCode 'DATABASE_ROLES_EXPORT_FAILED' -Arguments @(
-    'db', 'dump', '--db-url', $DatabaseUrl, '--role-only', '--file', (Join-Path $databaseRoot 'roles.sql')
-  )
+  $migrationSource = Join-Path $PSScriptRoot '..\..\supabase\migrations'
+  $customRoleDefinition = Get-ChildItem -LiteralPath $migrationSource -Filter '*.sql' -File |
+    Select-String -Pattern '(?i)\bcreate\s+role\b' -List
+  if ($customRoleDefinition) {
+    throw 'CUSTOM_DATABASE_ROLE_NOT_ALLOWLISTED'
+  }
+
+  # MBJ creates no custom PostgreSQL roles. Supabase-managed roles belong to the
+  # destination platform, while application grants are versioned in migrations.
+  # Keep an explicit restore artifact without copying provider-managed roles or
+  # requiring a Docker-backed provider CLI command.
+  @(
+    '-- MBJ defines no custom PostgreSQL roles.'
+    '-- Supabase-managed roles must be supplied by the isolated restore target.'
+    '-- Application grants are restored from schema-migrations/.'
+  ) | Set-Content -LiteralPath (Join-Path $databaseRoot 'roles.sql') -Encoding utf8NoBOM
 
   $schemaArgs = @('--dbname', $DatabaseUrl, '--schema-only', '--no-owner', '--no-privileges', '--file', (Join-Path $databaseRoot 'schema.sql'))
   $dataArgs = @('--dbname', $DatabaseUrl, '--data-only', '--no-owner', '--no-privileges', '--format=p', '--file', (Join-Path $databaseRoot 'data.sql'))
@@ -172,7 +184,7 @@ function Export-Database {
   Invoke-NativeChecked -Command $PgDumpCommand -Arguments $dataArgs -SafeFailureCode 'DATABASE_DATA_EXPORT_FAILED'
 
   $migrationRoot = Join-Path $Root 'schema-migrations'
-  Copy-Item -LiteralPath (Join-Path $PSScriptRoot '..\..\supabase\migrations') -Destination $migrationRoot -Recurse
+  Copy-Item -LiteralPath $migrationSource -Destination $migrationRoot -Recurse
 }
 
 function Get-StorageEntries {
@@ -257,7 +269,7 @@ try {
   if ($r2AccountId -notmatch '^[0-9a-f]{32}$') { throw 'R2_ACCOUNT_ID_REJECTED' }
 
   $script:ExitCode = 3
-  foreach ($command in @($SupabaseCommand, $PgDumpCommand, $AgeCommand, $AwsCommand, 'tar')) {
+  foreach ($command in @($PgDumpCommand, $AgeCommand, $AwsCommand, 'tar')) {
     Assert-CommandAvailable $command
   }
 
