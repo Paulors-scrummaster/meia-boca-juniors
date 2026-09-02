@@ -72,7 +72,31 @@ jobs:
         run: |
           choco install postgresql17 --version=17.6.0 --yes --no-progress
           if ($LASTEXITCODE -notin 0, 3010) { throw 'PostgreSQL client installation failed' }
-          choco install awscli --version=2.28.8 --allow-downgrade --yes --no-progress
+          # windows-2025 includes a newer AWS CLI MSI. Chocolatey cannot
+          # downgrade it in place, so remove that runner-owned installation
+          # before installing and verifying the version pinned by this job.
+          $uninstallRoots = @(
+            'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\*',
+            'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*'
+          )
+          $awsProducts = @(
+            Get-ItemProperty -Path $uninstallRoots -ErrorAction SilentlyContinue |
+              Where-Object {
+                $_.DisplayName -like 'AWS Command Line Interface*' -and
+                $_.Publisher -like 'Amazon Web Services*'
+              }
+          )
+          if ($awsProducts.Count -gt 1) { throw 'Multiple AWS CLI installations found on runner' }
+          if ($awsProducts.Count -eq 1) {
+            $productCode = $awsProducts[0].PSChildName
+            if ($productCode -notmatch '^\{[0-9A-Fa-f-]{36}\}$') {
+              throw 'AWS CLI runner installation has an unsupported uninstall identifier'
+            }
+            $uninstall = Start-Process -FilePath msiexec.exe -ArgumentList @('/x', $productCode, '/qn', '/norestart') -Wait -PassThru
+            if ($uninstall.ExitCode -notin 0, 3010) { throw 'AWS CLI runner uninstall failed' }
+          }
+
+          choco install awscli --version=2.28.8 --yes --no-progress
           if ($LASTEXITCODE -notin 0, 3010) { throw 'AWS CLI installation failed' }
           $pgBin = 'C:\Program Files\PostgreSQL\17\bin'
           $pgBin | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
