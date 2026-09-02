@@ -117,7 +117,7 @@ service or deployment unit.
   heartbeat, retention confirmation, and failure alerts; it does not require PowerShell, Supabase CLI,
   `age`, or repository access on the n8n host.
 - A reusable GitHub Actions workflow on a pinned Windows runner executes the allowlisted PowerShell
-  backup script with Supabase CLI and `age`, using only GitHub environment secrets, encrypting before
+  backup script with PostgreSQL client tools and `age`, using only GitHub environment secrets, encrypting before
   upload, and deleting plaintext runner artifacts at job completion.
 - n8n supplies a PII-free UUID `request_id`, dispatches the workflow on protected `main`, locates the
   matching run by its request-derived run name, and polls it through a fine-grained repository

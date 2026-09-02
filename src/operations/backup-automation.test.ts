@@ -85,6 +85,9 @@ describe('backup automation contracts', () => {
     expect(script).toContain("$AllowedR2Bucket = 'mbj-backups'");
     expect(script).toContain("$AllowedPoolerHost = 'aws-0-us-east-1.pooler.supabase.com'");
     expect(script).toContain('DATABASE_URL_HOST_REJECTED');
+    expect(script).toContain('-- MBJ defines no custom PostgreSQL roles.');
+    expect(script).toContain('CUSTOM_DATABASE_ROLE_NOT_ALLOWLISTED');
+    expect(script).not.toContain('db dump');
     expect(script).toMatch(/postgres\.\{1\}:\{2\}@\{3\}:5432\/\{4\}/);
     expect(script).toMatch(/\[guid\]\$RequestId/);
     expect(script).toContain('Invoke-PlaintextCleanup');
