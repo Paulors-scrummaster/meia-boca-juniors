@@ -83,6 +83,9 @@ describe('backup automation contracts', () => {
 
     expect(script).toContain("$AllowedStorageBucket = 'athlete-avatars'");
     expect(script).toContain("$AllowedR2Bucket = 'mbj-backups'");
+    expect(script).toContain("$AllowedPoolerHost = 'aws-0-us-east-1.pooler.supabase.com'");
+    expect(script).toContain('DATABASE_URL_HOST_REJECTED');
+    expect(script).toMatch(/postgres\.\{1\}:\{2\}@\{3\}:5432\/\{4\}/);
     expect(script).toMatch(/\[guid\]\$RequestId/);
     expect(script).toContain('Invoke-PlaintextCleanup');
     expect(script).toMatch(/finally\s*\{/);
