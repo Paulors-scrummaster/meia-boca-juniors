@@ -119,6 +119,17 @@ describe('backup automation contracts', () => {
     // A bare SafeFailureCode is no longer the only signal: the secret-free tail
     // of native stderr is surfaced on failure.
     expect(script).toContain('MBJ backup native diagnostic');
+    // `$ErrorActionPreference = 'Stop'` would otherwise promote the first stderr
+    // line a native tool writes under `2>&1` to a terminating NativeCommandError
+    // before the `$LASTEXITCODE` check runs, masking the classified code with the
+    // generic BACKUP_FAILED and failing the backup on zero-exit pg_dump warnings.
+    // The native-call sites localise the preference and restore it in `finally`.
+    expect(script).toMatch(
+      /\$previousErrorActionPreference = \$ErrorActionPreference\s*\r?\n\s*\$ErrorActionPreference = 'Continue'/,
+    );
+    expect(script).toMatch(
+      /finally\s*\{\s*\r?\n\s*\$ErrorActionPreference = \$previousErrorActionPreference/,
+    );
     expect(script).toContain('CUSTOM_DATABASE_ROLE_NOT_ALLOWLISTED');
     expect(script).not.toContain('db dump');
     expect(script).toMatch(/postgres\.\{1\}:\{2\}@\{3\}:5432\/\{4\}/);
