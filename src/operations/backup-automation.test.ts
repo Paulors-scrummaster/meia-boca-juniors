@@ -105,6 +105,14 @@ describe('backup automation contracts', () => {
     expect(script).toContain('DATABASE_TABLE_ALLOWLIST_MALFORMED');
     expect(script).toContain('DATABASE_TABLE_DISCOVERY_FAILED');
     expect(script).toContain('PRE_MIGRATION_NO_APPLICATION_TABLES');
+    // Symmetric pre-migration tolerance for storage: an absent allowlisted
+    // bucket is an empty snapshot, every other HTTP outcome stays fatal with a
+    // classified code instead of the generic BACKUP_FAILED catch-all.
+    expect(script).toContain('function Test-StorageBucketPresent');
+    expect(script).toContain('/storage/v1/bucket/$AllowedStorageBucket');
+    expect(script).toMatch(/\[int\]\$response\.StatusCode -eq 404/);
+    expect(script).toContain('STORAGE_BUCKET_PROBE_FAILED');
+    expect(script).toContain('PRE_MIGRATION_BUCKET_ABSENT');
     // A bare SafeFailureCode is no longer the only signal: the secret-free tail
     // of native stderr is surfaced on failure.
     expect(script).toContain('MBJ backup native diagnostic');
