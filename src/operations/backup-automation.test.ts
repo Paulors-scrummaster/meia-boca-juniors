@@ -161,7 +161,10 @@ describe('backup automation contracts', () => {
 
     expect(workflow).toContain('uses: ./.github/workflows/backup.yml');
     expect(workflow).toContain('secrets: inherit');
-    expect(workflow).toContain("VERIFICATION_STATUS != 'VERIFIED'");
+    expect(workflow).toContain("$env:VERIFICATION_STATUS -ne 'VERIFIED'");
+    // The gate runs under `shell: pwsh`; `!=` is a PowerShell ParserError, so
+    // guard against the invalid operator regressing back into the gate.
+    expect(workflow).not.toMatch(/VERIFICATION_STATUS\s*!=/);
     expect(workflow).toMatch(/MANIFEST_SHA256[\s\S]*\^\[0-9a-f\]\{64\}\$/);
     expect(workflow).toMatch(/supabase db push[^\r\n]*--dry-run/);
     expect(workflow).toMatch(/supabase db push[^\r\n]*--linked/);
