@@ -193,6 +193,14 @@ describe('backup automation contracts', () => {
     expect(workflow).toMatch(/MANIFEST_SHA256[\s\S]*\^\[0-9a-f\]\{64\}\$/);
     expect(workflow).toMatch(/supabase db push[^\r\n]*--dry-run/);
     expect(workflow).toMatch(/supabase db push[^\r\n]*--linked/);
+    // The Data API smoke probe holds only the publishable key, which this schema
+    // grants nothing and which Supabase rejects outright on the PostgREST root.
+    // It must probe a migrated table and assert 401 + 42501 (table present, anon
+    // denied); 404 + PGRST205 then means the migrations never landed.
+    expect(workflow).toMatch(/\/rest\/v1\/allowed_formations\?select=code&limit=1/);
+    expect(workflow).toContain('-SkipHttpErrorCheck');
+    expect(workflow).toMatch(/\$status -ne 401 -or \$code -ne '42501'/);
+    expect(workflow).not.toMatch(/Invoke-WebRequest -Uri "\$\(\$env:SUPABASE_URL\)\/rest\/v1\/"/);
   });
 
   it('exports an importable n8n definition without embedded credentials', () => {

@@ -89,6 +89,24 @@ jobs:
         run: |
           npx --no-install supabase db lint --linked --fail-on error
           if ($LASTEXITCODE -ne 0) { throw 'Database lint smoke check failed' }
+          # The publishable key is deliberately powerless in this schema: the
+          # migrations grant nothing to `anon`, and Supabase restricts the
+          # PostgREST root (/rest/v1/) to secret API keys. Probe a migrated table
+          # instead and assert the one response that proves the Data API is
+          # serving the migrated schema with anon correctly denied:
+          #   401 + 42501    table exists, anon holds no grant  (expected)
+          #   404 + PGRST205 table missing, migrations did not land
+          #   5xx/transport  Data API down
           $headers = @{ apikey = $env:SUPABASE_PUBLISHABLE_KEY; Authorization = "Bearer $($env:SUPABASE_PUBLISHABLE_KEY)" }
-          $response = Invoke-WebRequest -Uri "$($env:SUPABASE_URL)/rest/v1/" -Headers $headers -Method Get
-          if ($response.StatusCode -ne 200) { throw 'Data API smoke check failed' }
+          $uri = "$($env:SUPABASE_URL)/rest/v1/allowed_formations?select=code&limit=1"
+          try {
+            $response = Invoke-WebRequest -Uri $uri -Headers $headers -Method Get -SkipHttpErrorCheck
+          } catch {
+            throw "Data API smoke check failed: $($_.Exception.GetType().Name)"
+          }
+          $status = [int]$response.StatusCode
+          # Only the fixed PostgREST error token is ever echoed, never the body.
+          $code = if ([string]$response.Content -match '"code"\s*:\s*"([A-Z0-9]+)"') { $Matches[1] } else { 'none' }
+          if ($status -ne 401 -or $code -ne '42501') {
+            throw "Data API smoke check failed: http-status=$status postgrest-code=$code"
+          }
