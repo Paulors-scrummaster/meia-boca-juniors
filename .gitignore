@@ -12,6 +12,9 @@ test-results/
 blob-report/
 playwright/.cache/
 
+# MCP / agent browser session artifacts (snapshots, screenshots, console logs)
+.playwright-mcp/
+
 # Local environment and secrets
 .env
 .env.*
