@@ -362,7 +362,7 @@ function Get-StorageEntries {
   do {
     $body = @{ prefix = $Prefix; limit = 100; offset = $offset; sortBy = @{ column = 'name'; order = 'asc' } } | ConvertTo-Json -Depth 4 -Compress
     try {
-      $page = @(Invoke-RestMethod -Method Post -Uri "$BaseUrl/storage/v1/object/list/$AllowedStorageBucket" -Headers $Headers -ContentType 'application/json' -Body $body)
+      $response = Invoke-RestMethod -Method Post -Uri "$BaseUrl/storage/v1/object/list/$AllowedStorageBucket" -Headers $Headers -ContentType 'application/json' -Body $body
     }
     catch {
       # Mirror Test-StorageBucketPresent: a non-2xx or transport failure here is
@@ -373,6 +373,12 @@ function Get-StorageEntries {
       Write-Warning ("MBJ backup native diagnostic [STORAGE_LIST_FAILED]: http-status={0}" -f ($status ?? 'none'))
       throw 'STORAGE_LIST_FAILED'
     }
+    # An empty listing comes back as `[]`, which Invoke-RestMethod surfaces as
+    # $null. Wrapping that directly in @() yields a one-element array holding
+    # $null, and Set-StrictMode then turns the caller's `$entry.name` into a fatal
+    # RuntimeException. Drop empty elements so this returns only real entries and
+    # the page-size check below stays honest.
+    $page = @($response | Where-Object { $null -ne $_ })
     $entries += $page
     $offset += $page.Count
   } while ($page.Count -eq 100)
