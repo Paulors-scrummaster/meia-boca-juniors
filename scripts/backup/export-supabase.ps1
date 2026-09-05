@@ -294,6 +294,29 @@ function Export-Database {
   Copy-Item -LiteralPath $migrationSource -Destination $migrationRoot -Recurse
 }
 
+function Test-StorageBucketPresent {
+  param(
+    [Parameter(Mandatory)][string]$BaseUrl,
+    [Parameter(Mandatory)][hashtable]$Headers
+  )
+
+  try {
+    $null = Invoke-RestMethod -Method Get -Uri "$BaseUrl/storage/v1/bucket/$AllowedStorageBucket" `
+      -Headers $Headers -ContentType 'application/json'
+    return $true
+  }
+  catch {
+    $response = $null
+    try { $response = $_.Exception.Response } catch { $response = $null }
+    if ($response -and [int]$response.StatusCode -eq 404) {
+      return $false
+    }
+    # Auth failures, 5xx, and transport errors must stay fatal with a classified
+    # code rather than collapsing into the generic BACKUP_FAILED catch-all.
+    throw 'STORAGE_BUCKET_PROBE_FAILED'
+  }
+}
+
 function Get-StorageEntries {
   param(
     [Parameter(Mandatory)][string]$BaseUrl,
@@ -322,6 +345,16 @@ function Export-Storage {
   New-Item -ItemType Directory -Path $storageRoot | Out-Null
   $baseUrl = "https://$ProjectRef.supabase.co"
   $headers = @{ Authorization = "Bearer $ServiceRoleKey"; apikey = $ServiceRoleKey }
+
+  # T179 runs this backup before database-release.yml seeds storage, so the
+  # allowlisted bucket does not exist yet. Treat an absent bucket as an empty
+  # storage tree (the directory above is the snapshot); once the bucket is
+  # created the crawl below runs unchanged.
+  if (-not (Test-StorageBucketPresent -BaseUrl $baseUrl -Headers $headers)) {
+    Write-Warning "MBJ backup notice [PRE_MIGRATION_BUCKET_ABSENT]: '$AllowedStorageBucket' does not exist yet; capturing an empty storage tree"
+    return
+  }
+
   $pending = [Collections.Generic.Queue[string]]::new()
   $pending.Enqueue('')
 
