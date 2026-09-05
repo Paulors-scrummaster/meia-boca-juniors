@@ -135,6 +135,11 @@ describe('backup automation contracts', () => {
     // raw Invoke-RestMethod / Invoke-WebRequest exception under BACKUP_FAILED.
     expect(script).toContain('STORAGE_LIST_FAILED');
     expect(script).toContain('STORAGE_OBJECT_FETCH_FAILED');
+    // An existing-but-empty bucket lists as `[]`, which Invoke-RestMethod returns
+    // as $null; @($null) is a one-element array holding $null and Set-StrictMode
+    // makes the crawl's `$entry.name` a fatal RuntimeException. Empty elements are
+    // dropped so a page holds only real entries.
+    expect(script).toMatch(/\$page = @\(\$response \| Where-Object \{ \$null -ne \$_ \}\)/);
     // And an unclassified raw exception still reports the failure stage plus a
     // secret-scrubbed exception type, message, and script stack trace.
     expect(script).toContain('MBJ backup diagnostic [BACKUP_FAILED]: stage=');
