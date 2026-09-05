@@ -23,6 +23,7 @@ param(
   [string]$ResultPath,
 
   [string]$PgDumpCommand = 'pg_dump',
+  [string]$PsqlCommand = 'psql',
   [string]$AgeCommand = 'age',
   [string]$AwsCommand = 'aws'
 )
@@ -34,7 +35,13 @@ $ProgressPreference = 'SilentlyContinue'
 $AllowedStorageBucket = 'athlete-avatars'
 $AllowedR2Bucket = 'mbj-backups'
 $AllowedR2Prefix = 'backups'
-$AllowedPoolerHost = 'aws-0-us-east-1.pooler.supabase.com'
+# Any Supabase Session pooler endpoint is acceptable. The pooler fleet hostname is
+# region- and capacity-dependent (aws-0-<region>, aws-1-<region>, ...), so match the
+# shape rather than pinning one host. Direct db.<ref>.supabase.co has no IPv4 route
+# from GitHub-hosted runners; SUPABASE_DB_POOLER_HOST supplies the rewrite target for
+# a direct URL, defaulting to the historically pinned host for backward compatibility.
+$AllowedPoolerHostPattern = '^aws-[0-9]+-[a-z0-9-]+\.pooler\.supabase\.com$'
+$DefaultPoolerHost = 'aws-0-us-east-1.pooler.supabase.com'
 $AllowedDatabaseSchemas = @('auth', 'storage')
 $AllowedDatabaseTables = @(
   'private.command_results',
@@ -67,6 +74,7 @@ $script:ExitCode = 1
 $script:PlaintextRoot = $null
 $script:EncryptedPath = $null
 $script:VerificationPath = $null
+$script:NativeDiagnostic = $null
 
 function Assert-EnvironmentValue {
   param([Parameter(Mandatory)][string]$Name)
@@ -91,23 +99,42 @@ function Get-BackupDatabaseUrl {
   )
 
   $escapedRef = [regex]::Escape($ExpectedProjectRef)
-  $escapedPooler = [regex]::Escape($AllowedPoolerHost)
-  $sessionPattern = "^postgres(?:ql)?://postgres\.${escapedRef}:[^@]+@${escapedPooler}:5432/[^#]+$"
+
+  # Preferred: Session pooler, project-scoped user, port 5432, any pooler host.
+  $sessionPattern = "^postgres(?:ql)?://postgres\.${escapedRef}:[^@/]+@aws-[0-9]+-[a-z0-9-]+\.pooler\.supabase\.com:5432/[^#?]+$"
   if ($DatabaseUrl -match $sessionPattern) {
     return $DatabaseUrl
   }
 
-  $directPattern = "^(?<scheme>postgres(?:ql)?://)postgres:(?<credential>[^@]+)@db\.${escapedRef}\.supabase\.co:5432/(?<tail>[^#]+)$"
+  # Transaction pooler (6543) cannot serve pg_dump; reject it with a distinct code
+  # instead of letting pg_dump fail opaquely later.
+  if ($DatabaseUrl -match "^postgres(?:ql)?://postgres\.${escapedRef}:[^@/]+@aws-[0-9]+-[a-z0-9-]+\.pooler\.supabase\.com:6543/") {
+    throw 'DATABASE_URL_TRANSACTION_POOLER_REJECTED'
+  }
+
+  $directPattern = "^(?<scheme>postgres(?:ql)?://)postgres:(?<credential>[^@/]+)@db\.${escapedRef}\.supabase\.co:5432/(?<tail>[^#?]+)$"
   if ($DatabaseUrl -notmatch $directPattern) {
     throw 'DATABASE_URL_HOST_REJECTED'
   }
+  # Capture before any further regex evaluation clobbers the automatic $Matches.
+  $directScheme = $Matches.scheme
+  $directCredential = $Matches.credential
+  $directTail = $Matches.tail
+
+  $poolerHost = [Environment]::GetEnvironmentVariable('SUPABASE_DB_POOLER_HOST')
+  if ([string]::IsNullOrWhiteSpace($poolerHost)) {
+    $poolerHost = $DefaultPoolerHost
+  }
+  if ($poolerHost -notmatch $AllowedPoolerHostPattern) {
+    throw 'DATABASE_URL_POOLER_HOST_REJECTED'
+  }
 
   return '{0}postgres.{1}:{2}@{3}:5432/{4}' -f @(
-    $Matches.scheme,
+    $directScheme,
     $ExpectedProjectRef,
-    $Matches.credential,
-    $AllowedPoolerHost,
-    $Matches.tail
+    $directCredential,
+    $poolerHost,
+    $directTail
   )
 }
 
@@ -118,15 +145,48 @@ function Invoke-NativeChecked {
     [Parameter(Mandatory)][string]$SafeFailureCode
   )
 
+  $script:NativeDiagnostic = $null
+  $stderrTail = [System.Collections.Generic.List[string]]::new()
   & $Command @Arguments 2>&1 | ForEach-Object {
     $line = [string]$_
-    if ($line -notmatch '(?i)(password|authorization|secret|token|postgres(?:ql)?://|service.role)') {
+    $isSensitive = $line -match '(?i)(password|authorization|secret|token|postgres(?:ql)?://|service.role)'
+    if (-not $isSensitive) {
       Write-Verbose $line
+      if ($line.Trim()) {
+        # Keep a bounded, secret-free tail so a bare SafeFailureCode is no longer
+        # the only signal in CI when the native tool fails for an unclassified
+        # reason. Sensitive lines are withheld here exactly as they are above.
+        $stderrTail.Add($line)
+        if ($stderrTail.Count -gt 40) { $stderrTail.RemoveAt(0) }
+      }
+    }
+    if (-not $script:NativeDiagnostic) {
+      # Classify against a static allowlist of provider-independent phrases so the
+      # thrown code names the failure class without echoing any connection detail.
+      # Runs on sensitive lines too: only the fixed category token is ever kept.
+      $script:NativeDiagnostic = switch -Regex ($line) {
+        '(?i)Tenant or user not found' { 'POOLER_TENANT_OR_USER_NOT_FOUND'; break }
+        '(?i)password authentication failed' { 'PASSWORD_AUTHENTICATION_FAILED'; break }
+        '(?i)no pg_hba\.conf entry' { 'PG_HBA_NO_ENTRY'; break }
+        '(?i)could not translate host name' { 'HOST_NAME_RESOLUTION_FAILED'; break }
+        '(?i)could not connect to server|connection refused|connection timed out|timeout expired|no route to host' { 'CONNECTION_FAILED'; break }
+        '(?i)server version mismatch|aborting because of server version' { 'SERVER_VERSION_MISMATCH'; break }
+        '(?i)permission denied for' { 'PERMISSION_DENIED'; break }
+        '(?i)SSL .*error|could not initiate SSL' { 'SSL_ERROR'; break }
+        '(?i)no matching tables were found' { 'NO_MATCHING_TABLES'; break }
+        default { $null }
+      }
     }
   }
   if ($LASTEXITCODE -ne 0) {
-    throw $SafeFailureCode
+    $code = if ($script:NativeDiagnostic) { '{0}:{1}' -f $SafeFailureCode, $script:NativeDiagnostic } else { $SafeFailureCode }
+    if ($stderrTail.Count -gt 0) {
+      Write-Warning ("MBJ backup native diagnostic [{0}]:`n{1}" -f $code, ($stderrTail -join "`n"))
+    }
+    $script:NativeDiagnostic = $null
+    throw $code
   }
+  $script:NativeDiagnostic = $null
 }
 
 function Get-FileRecord {
@@ -142,6 +202,39 @@ function Get-FileRecord {
     bytes = $item.Length
     sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $item.FullName).Hash.ToLowerInvariant()
   }
+}
+
+function Get-PresentAllowlistedTables {
+  param(
+    [Parameter(Mandatory)][string]$DatabaseUrl,
+    [Parameter(Mandatory)][string[]]$Candidates
+  )
+
+  $pairs = foreach ($candidate in $Candidates) {
+    if ($candidate -notmatch '^[a-z_]+\.[a-z_]+$') { throw 'DATABASE_TABLE_ALLOWLIST_MALFORMED' }
+    $parts = $candidate.Split('.', 2)
+    "('{0}','{1}')" -f $parts[0], $parts[1]
+  }
+  $discoveryQuery = @"
+SET statement_timeout = '30s';
+SELECT table_schema || '.' || table_name
+FROM information_schema.tables
+WHERE (table_schema, table_name) IN ($($pairs -join ', '))
+  AND table_type = 'BASE TABLE'
+ORDER BY 1;
+"@
+
+  # Dedicated read-only probe. psql stderr is withheld (it can echo the conninfo
+  # URI); only a classified code escapes on failure.
+  $raw = & $PsqlCommand $DatabaseUrl '--no-align' '--tuples-only' '--quiet' '--no-psqlrc' `
+    '--set' 'ON_ERROR_STOP=1' '--command' $discoveryQuery 2>&1
+  if ($LASTEXITCODE -ne 0) {
+    throw 'DATABASE_TABLE_DISCOVERY_FAILED'
+  }
+
+  $discovered = @($raw | ForEach-Object { ([string]$_).Trim() } | Where-Object { $_ })
+  # Intersect with the static allowlist: discovery output can never widen scope.
+  return @($Candidates | Where-Object { $discovered -contains $_ })
 }
 
 function Export-Database {
@@ -176,10 +269,24 @@ function Export-Database {
     $schemaArgs += @('--schema', $schema)
     $dataArgs += @('--schema', $schema)
   }
-  foreach ($table in $AllowedDatabaseTables) {
+
+  # T179 runs this backup against freshly activated production BEFORE
+  # database-release.yml applies the 25 migrations, so the allowlisted
+  # public.*/private.* tables (and the private schema itself) do not exist yet.
+  # pg_dump aborts when none of its --table patterns resolve. Pin --table only
+  # for allowlisted tables that currently exist; the managed auth/storage
+  # schemas above still yield a real pre-migration snapshot for the release gate.
+  # Once the migrations land, every allowlisted table is present and the argument
+  # set matches the previous behaviour exactly.
+  $presentTables = @(Get-PresentAllowlistedTables -DatabaseUrl $DatabaseUrl -Candidates $AllowedDatabaseTables)
+  foreach ($table in $presentTables) {
     $schemaArgs += @('--table', $table)
     $dataArgs += @('--table', $table)
   }
+  if ($presentTables.Count -eq 0) {
+    Write-Warning 'MBJ backup notice [PRE_MIGRATION_NO_APPLICATION_TABLES]: dumping managed auth/storage schemas only'
+  }
+
   Invoke-NativeChecked -Command $PgDumpCommand -Arguments $schemaArgs -SafeFailureCode 'DATABASE_SCHEMA_EXPORT_FAILED'
   Invoke-NativeChecked -Command $PgDumpCommand -Arguments $dataArgs -SafeFailureCode 'DATABASE_DATA_EXPORT_FAILED'
 
@@ -269,7 +376,7 @@ try {
   if ($r2AccountId -notmatch '^[0-9a-f]{32}$') { throw 'R2_ACCOUNT_ID_REJECTED' }
 
   $script:ExitCode = 3
-  foreach ($command in @($PgDumpCommand, $AgeCommand, $AwsCommand, 'tar')) {
+  foreach ($command in @($PgDumpCommand, $PsqlCommand, $AgeCommand, $AwsCommand, 'tar')) {
     Assert-CommandAvailable $command
   }
 
