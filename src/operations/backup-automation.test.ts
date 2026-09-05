@@ -83,9 +83,31 @@ describe('backup automation contracts', () => {
 
     expect(script).toContain("$AllowedStorageBucket = 'athlete-avatars'");
     expect(script).toContain("$AllowedR2Bucket = 'mbj-backups'");
-    expect(script).toContain("$AllowedPoolerHost = 'aws-0-us-east-1.pooler.supabase.com'");
+    expect(script).toContain(
+      "$AllowedPoolerHostPattern = '^aws-[0-9]+-[a-z0-9-]+\\.pooler\\.supabase\\.com$'",
+    );
+    expect(script).toContain("$DefaultPoolerHost = 'aws-0-us-east-1.pooler.supabase.com'");
     expect(script).toContain('DATABASE_URL_HOST_REJECTED');
+    expect(script).toContain('DATABASE_URL_TRANSACTION_POOLER_REJECTED');
+    expect(script).toContain('DATABASE_URL_POOLER_HOST_REJECTED');
     expect(script).toContain('-- MBJ defines no custom PostgreSQL roles.');
+    // Pre-migration production: pin --table only for allowlisted tables that
+    // already exist, discovered via a dedicated read-only psql probe whose
+    // output can only narrow the static allowlist, never widen it.
+    expect(script).toContain("$PsqlCommand = 'psql'");
+    expect(script).toMatch(/\$PgDumpCommand,\s*\$PsqlCommand,\s*\$AgeCommand/);
+    expect(script).toContain('function Get-PresentAllowlistedTables');
+    expect(script).toContain('information_schema.tables');
+    expect(script).toContain("table_type = 'BASE TABLE'");
+    expect(script).toMatch(
+      /\$Candidates\s*\|\s*Where-Object\s*\{\s*\$discovered -contains \$_\s*\}/,
+    );
+    expect(script).toContain('DATABASE_TABLE_ALLOWLIST_MALFORMED');
+    expect(script).toContain('DATABASE_TABLE_DISCOVERY_FAILED');
+    expect(script).toContain('PRE_MIGRATION_NO_APPLICATION_TABLES');
+    // A bare SafeFailureCode is no longer the only signal: the secret-free tail
+    // of native stderr is surfaced on failure.
+    expect(script).toContain('MBJ backup native diagnostic');
     expect(script).toContain('CUSTOM_DATABASE_ROLE_NOT_ALLOWLISTED');
     expect(script).not.toContain('db dump');
     expect(script).toMatch(/postgres\.\{1\}:\{2\}@\{3\}:5432\/\{4\}/);
