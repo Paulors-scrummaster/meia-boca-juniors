@@ -301,18 +301,26 @@ function Test-StorageBucketPresent {
   )
 
   try {
-    $null = Invoke-RestMethod -Method Get -Uri "$BaseUrl/storage/v1/bucket/$AllowedStorageBucket" `
-      -Headers $Headers -ContentType 'application/json'
+    $null = Invoke-RestMethod -Method Get -Uri "$BaseUrl/storage/v1/bucket/$AllowedStorageBucket" -Headers $Headers
     return $true
   }
   catch {
-    $response = $null
-    try { $response = $_.Exception.Response } catch { $response = $null }
-    if ($response -and [int]$response.StatusCode -eq 404) {
+    $status = $null
+    try { $status = [int]$_.Exception.Response.StatusCode } catch { $status = $null }
+    $body = ''
+    try { $body = [string]$_.ErrorDetails.Message } catch { $body = '' }
+
+    # storage-api reports a missing bucket as HTTP 404 on newer releases and as
+    # HTTP 400 wrapping {"statusCode":"404","message":"Bucket not found"} on
+    # older ones. Either shape means "not created yet".
+    if ($status -eq 404 -or $body -match '(?i)(bucket not found|"statusCode"\s*:\s*"?404"?)') {
       return $false
     }
-    # Auth failures, 5xx, and transport errors must stay fatal with a classified
-    # code rather than collapsing into the generic BACKUP_FAILED catch-all.
+
+    # Anything else (401/403 auth, 5xx, transport) stays fatal with a classified
+    # code instead of the generic BACKUP_FAILED catch-all. The numeric status is
+    # safe to surface; the response body is withheld.
+    Write-Warning ("MBJ backup native diagnostic [STORAGE_BUCKET_PROBE_FAILED]: http-status={0}" -f ($status ?? 'none'))
     throw 'STORAGE_BUCKET_PROBE_FAILED'
   }
 }
