@@ -361,7 +361,18 @@ function Get-StorageEntries {
   $entries = @()
   do {
     $body = @{ prefix = $Prefix; limit = 100; offset = $offset; sortBy = @{ column = 'name'; order = 'asc' } } | ConvertTo-Json -Depth 4 -Compress
-    $page = @(Invoke-RestMethod -Method Post -Uri "$BaseUrl/storage/v1/object/list/$AllowedStorageBucket" -Headers $Headers -ContentType 'application/json' -Body $body)
+    try {
+      $page = @(Invoke-RestMethod -Method Post -Uri "$BaseUrl/storage/v1/object/list/$AllowedStorageBucket" -Headers $Headers -ContentType 'application/json' -Body $body)
+    }
+    catch {
+      # Mirror Test-StorageBucketPresent: a non-2xx or transport failure here is
+      # otherwise a raw Invoke-RestMethod exception that collapses to the generic
+      # BACKUP_FAILED. Surface the numeric status; withhold the response body.
+      $status = $null
+      try { $status = [int]$_.Exception.Response.StatusCode } catch { $status = $null }
+      Write-Warning ("MBJ backup native diagnostic [STORAGE_LIST_FAILED]: http-status={0}" -f ($status ?? 'none'))
+      throw 'STORAGE_LIST_FAILED'
+    }
     $entries += $page
     $offset += $page.Count
   } while ($page.Count -eq 100)
@@ -409,7 +420,15 @@ function Export-Storage {
       $destination = Join-Path $storageRoot ($objectKey.Replace('/', [IO.Path]::DirectorySeparatorChar))
       New-Item -ItemType Directory -Path (Split-Path -Parent $destination) -Force | Out-Null
       $encoded = ($objectKey.Split('/') | ForEach-Object { [uri]::EscapeDataString($_) }) -join '/'
-      Invoke-WebRequest -Method Get -Uri "$baseUrl/storage/v1/object/authenticated/$AllowedStorageBucket/$encoded" -Headers $headers -OutFile $destination
+      try {
+        Invoke-WebRequest -Method Get -Uri "$baseUrl/storage/v1/object/authenticated/$AllowedStorageBucket/$encoded" -Headers $headers -OutFile $destination
+      }
+      catch {
+        $status = $null
+        try { $status = [int]$_.Exception.Response.StatusCode } catch { $status = $null }
+        Write-Warning ("MBJ backup native diagnostic [STORAGE_OBJECT_FETCH_FAILED]: http-status={0}" -f ($status ?? 'none'))
+        throw 'STORAGE_OBJECT_FETCH_FAILED'
+      }
     }
   }
 }
@@ -542,6 +561,26 @@ try {
 } catch {
   $safeCode = if ($_.Exception.Message -match '^[A-Z0-9_:.-]+$') { $_.Exception.Message } else { 'BACKUP_FAILED' }
   Write-Error "MBJ backup failed [$safeCode]" -ErrorAction Continue
+  if ($safeCode -eq 'BACKUP_FAILED') {
+    # An unclassified raw exception otherwise leaves CI with nothing but the
+    # generic code. Surface the failure stage ($script:ExitCode: 2 config,
+    # 3 tools, 10 Export-Database, 20 Export-Storage, 30 archive/encrypt,
+    # 40 upload, 41 read-back, 50 retention, 90 finalise) plus the exception
+    # type and a secret-scrubbed message and script stack trace.
+    $sensitive = '(?i)(password|authorization|secret|token|apikey|postgres(?:ql)?://|service.role|bearer\s)'
+    $scrub = {
+      param([string]$Text)
+      if ([string]::IsNullOrEmpty($Text)) { return '' }
+      ($Text -split "`r?`n" | Where-Object { $_ -notmatch $sensitive }) -join "`n"
+    }
+    Write-Error (
+      "MBJ backup diagnostic [BACKUP_FAILED]: stage={0} type={1}`nmessage={2}`nstack={3}" -f `
+        $script:ExitCode,
+      $_.Exception.GetType().FullName,
+      (& $scrub $_.Exception.Message),
+      (& $scrub $_.ScriptStackTrace)
+    ) -ErrorAction Continue
+  }
 } finally {
   try {
     Invoke-PlaintextCleanup

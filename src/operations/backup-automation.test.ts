@@ -130,6 +130,15 @@ describe('backup automation contracts', () => {
     expect(script).toMatch(
       /finally\s*\{\s*\r?\n\s*\$ErrorActionPreference = \$previousErrorActionPreference/,
     );
+    // The storage crawl runs once the bucket exists: an HTTP failure in the list
+    // or object fetch is classified with an http-status instead of surfacing as a
+    // raw Invoke-RestMethod / Invoke-WebRequest exception under BACKUP_FAILED.
+    expect(script).toContain('STORAGE_LIST_FAILED');
+    expect(script).toContain('STORAGE_OBJECT_FETCH_FAILED');
+    // And an unclassified raw exception still reports the failure stage plus a
+    // secret-scrubbed exception type, message, and script stack trace.
+    expect(script).toContain('MBJ backup diagnostic [BACKUP_FAILED]: stage=');
+    expect(script).toMatch(/\$_\.ScriptStackTrace/);
     expect(script).toContain('CUSTOM_DATABASE_ROLE_NOT_ALLOWLISTED');
     expect(script).not.toContain('db dump');
     expect(script).toMatch(/postgres\.\{1\}:\{2\}@\{3\}:5432\/\{4\}/);
