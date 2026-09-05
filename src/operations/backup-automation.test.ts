@@ -110,8 +110,11 @@ describe('backup automation contracts', () => {
     // classified code instead of the generic BACKUP_FAILED catch-all.
     expect(script).toContain('function Test-StorageBucketPresent');
     expect(script).toContain('/storage/v1/bucket/$AllowedStorageBucket');
-    expect(script).toMatch(/\[int\]\$response\.StatusCode -eq 404/);
+    // Missing bucket = HTTP 404, or HTTP 400 wrapping a "404 / Bucket not found" body.
+    expect(script).toMatch(/\$status -eq 404 -or \$body -match/);
+    expect(script).toMatch(/bucket not found/i);
     expect(script).toContain('STORAGE_BUCKET_PROBE_FAILED');
+    expect(script).toContain('http-status=');
     expect(script).toContain('PRE_MIGRATION_BUCKET_ABSENT');
     // A bare SafeFailureCode is no longer the only signal: the secret-free tail
     // of native stderr is surfaced on failure.
