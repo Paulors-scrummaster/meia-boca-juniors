@@ -46,7 +46,7 @@ jobs:
           MANIFEST_SHA256: ${{ needs.verified-backup.outputs.manifest_sha256 }}
           VERIFICATION_STATUS: ${{ needs.verified-backup.outputs.verification_status }}
         run: |
-          if ($env:VERIFICATION_STATUS != 'VERIFIED') { throw 'Backup verification gate failed' }
+          if ($env:VERIFICATION_STATUS -ne 'VERIFIED') { throw 'Backup verification gate failed' }
           if ($env:BACKUP_ID -notmatch '^[0-9a-f]{32}$') { throw 'Backup ID gate failed' }
           if ($env:MANIFEST_SHA256 -notmatch '^[0-9a-f]{64}$') { throw 'Manifest checksum gate failed' }
 
