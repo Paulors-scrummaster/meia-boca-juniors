@@ -83,9 +83,67 @@ describe('backup automation contracts', () => {
 
     expect(script).toContain("$AllowedStorageBucket = 'athlete-avatars'");
     expect(script).toContain("$AllowedR2Bucket = 'mbj-backups'");
-    expect(script).toContain("$AllowedPoolerHost = 'aws-0-us-east-1.pooler.supabase.com'");
+    expect(script).toContain(
+      "$AllowedPoolerHostPattern = '^aws-[0-9]+-[a-z0-9-]+\\.pooler\\.supabase\\.com$'",
+    );
+    expect(script).toContain("$DefaultPoolerHost = 'aws-0-us-east-1.pooler.supabase.com'");
     expect(script).toContain('DATABASE_URL_HOST_REJECTED');
+    expect(script).toContain('DATABASE_URL_TRANSACTION_POOLER_REJECTED');
+    expect(script).toContain('DATABASE_URL_POOLER_HOST_REJECTED');
     expect(script).toContain('-- MBJ defines no custom PostgreSQL roles.');
+    // Pre-migration production: pin --table only for allowlisted tables that
+    // already exist, discovered via a dedicated read-only psql probe whose
+    // output can only narrow the static allowlist, never widen it.
+    expect(script).toContain("$PsqlCommand = 'psql'");
+    expect(script).toMatch(/\$PgDumpCommand,\s*\$PsqlCommand,\s*\$AgeCommand/);
+    expect(script).toContain('function Get-PresentAllowlistedTables');
+    expect(script).toContain('information_schema.tables');
+    expect(script).toContain("table_type = 'BASE TABLE'");
+    expect(script).toMatch(
+      /\$Candidates\s*\|\s*Where-Object\s*\{\s*\$discovered -contains \$_\s*\}/,
+    );
+    expect(script).toContain('DATABASE_TABLE_ALLOWLIST_MALFORMED');
+    expect(script).toContain('DATABASE_TABLE_DISCOVERY_FAILED');
+    expect(script).toContain('PRE_MIGRATION_NO_APPLICATION_TABLES');
+    // Symmetric pre-migration tolerance for storage: an absent allowlisted
+    // bucket is an empty snapshot, every other HTTP outcome stays fatal with a
+    // classified code instead of the generic BACKUP_FAILED catch-all.
+    expect(script).toContain('function Test-StorageBucketPresent');
+    expect(script).toContain('/storage/v1/bucket/$AllowedStorageBucket');
+    // Missing bucket = HTTP 404, or HTTP 400 wrapping a "404 / Bucket not found" body.
+    expect(script).toMatch(/\$status -eq 404 -or \$body -match/);
+    expect(script).toMatch(/bucket not found/i);
+    expect(script).toContain('STORAGE_BUCKET_PROBE_FAILED');
+    expect(script).toContain('http-status=');
+    expect(script).toContain('PRE_MIGRATION_BUCKET_ABSENT');
+    // A bare SafeFailureCode is no longer the only signal: the secret-free tail
+    // of native stderr is surfaced on failure.
+    expect(script).toContain('MBJ backup native diagnostic');
+    // `$ErrorActionPreference = 'Stop'` would otherwise promote the first stderr
+    // line a native tool writes under `2>&1` to a terminating NativeCommandError
+    // before the `$LASTEXITCODE` check runs, masking the classified code with the
+    // generic BACKUP_FAILED and failing the backup on zero-exit pg_dump warnings.
+    // The native-call sites localise the preference and restore it in `finally`.
+    expect(script).toMatch(
+      /\$previousErrorActionPreference = \$ErrorActionPreference\s*\r?\n\s*\$ErrorActionPreference = 'Continue'/,
+    );
+    expect(script).toMatch(
+      /finally\s*\{\s*\r?\n\s*\$ErrorActionPreference = \$previousErrorActionPreference/,
+    );
+    // The storage crawl runs once the bucket exists: an HTTP failure in the list
+    // or object fetch is classified with an http-status instead of surfacing as a
+    // raw Invoke-RestMethod / Invoke-WebRequest exception under BACKUP_FAILED.
+    expect(script).toContain('STORAGE_LIST_FAILED');
+    expect(script).toContain('STORAGE_OBJECT_FETCH_FAILED');
+    // An existing-but-empty bucket lists as `[]`, which Invoke-RestMethod returns
+    // as $null; @($null) is a one-element array holding $null and Set-StrictMode
+    // makes the crawl's `$entry.name` a fatal RuntimeException. Empty elements are
+    // dropped so a page holds only real entries.
+    expect(script).toMatch(/\$page = @\(\$response \| Where-Object \{ \$null -ne \$_ \}\)/);
+    // And an unclassified raw exception still reports the failure stage plus a
+    // secret-scrubbed exception type, message, and script stack trace.
+    expect(script).toContain('MBJ backup diagnostic [BACKUP_FAILED]: stage=');
+    expect(script).toMatch(/\$_\.ScriptStackTrace/);
     expect(script).toContain('CUSTOM_DATABASE_ROLE_NOT_ALLOWLISTED');
     expect(script).not.toContain('db dump');
     expect(script).toMatch(/postgres\.\{1\}:\{2\}@\{3\}:5432\/\{4\}/);
@@ -128,10 +186,21 @@ describe('backup automation contracts', () => {
 
     expect(workflow).toContain('uses: ./.github/workflows/backup.yml');
     expect(workflow).toContain('secrets: inherit');
-    expect(workflow).toContain("VERIFICATION_STATUS != 'VERIFIED'");
+    expect(workflow).toContain("$env:VERIFICATION_STATUS -ne 'VERIFIED'");
+    // The gate runs under `shell: pwsh`; `!=` is a PowerShell ParserError, so
+    // guard against the invalid operator regressing back into the gate.
+    expect(workflow).not.toMatch(/VERIFICATION_STATUS\s*!=/);
     expect(workflow).toMatch(/MANIFEST_SHA256[\s\S]*\^\[0-9a-f\]\{64\}\$/);
     expect(workflow).toMatch(/supabase db push[^\r\n]*--dry-run/);
     expect(workflow).toMatch(/supabase db push[^\r\n]*--linked/);
+    // The Data API smoke probe holds only the publishable key, which this schema
+    // grants nothing and which Supabase rejects outright on the PostgREST root.
+    // It must probe a migrated table and assert 401 + 42501 (table present, anon
+    // denied); 404 + PGRST205 then means the migrations never landed.
+    expect(workflow).toMatch(/\/rest\/v1\/allowed_formations\?select=code&limit=1/);
+    expect(workflow).toContain('-SkipHttpErrorCheck');
+    expect(workflow).toMatch(/\$status -ne 401 -or \$code -ne '42501'/);
+    expect(workflow).not.toMatch(/Invoke-WebRequest -Uri "\$\(\$env:SUPABASE_URL\)\/rest\/v1\/"/);
   });
 
   it('exports an importable n8n definition without embedded credentials', () => {

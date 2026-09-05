@@ -23,6 +23,7 @@ param(
   [string]$ResultPath,
 
   [string]$PgDumpCommand = 'pg_dump',
+  [string]$PsqlCommand = 'psql',
   [string]$AgeCommand = 'age',
   [string]$AwsCommand = 'aws'
 )
@@ -34,7 +35,13 @@ $ProgressPreference = 'SilentlyContinue'
 $AllowedStorageBucket = 'athlete-avatars'
 $AllowedR2Bucket = 'mbj-backups'
 $AllowedR2Prefix = 'backups'
-$AllowedPoolerHost = 'aws-0-us-east-1.pooler.supabase.com'
+# Any Supabase Session pooler endpoint is acceptable. The pooler fleet hostname is
+# region- and capacity-dependent (aws-0-<region>, aws-1-<region>, ...), so match the
+# shape rather than pinning one host. Direct db.<ref>.supabase.co has no IPv4 route
+# from GitHub-hosted runners; SUPABASE_DB_POOLER_HOST supplies the rewrite target for
+# a direct URL, defaulting to the historically pinned host for backward compatibility.
+$AllowedPoolerHostPattern = '^aws-[0-9]+-[a-z0-9-]+\.pooler\.supabase\.com$'
+$DefaultPoolerHost = 'aws-0-us-east-1.pooler.supabase.com'
 $AllowedDatabaseSchemas = @('auth', 'storage')
 $AllowedDatabaseTables = @(
   'private.command_results',
@@ -67,6 +74,7 @@ $script:ExitCode = 1
 $script:PlaintextRoot = $null
 $script:EncryptedPath = $null
 $script:VerificationPath = $null
+$script:NativeDiagnostic = $null
 
 function Assert-EnvironmentValue {
   param([Parameter(Mandatory)][string]$Name)
@@ -91,23 +99,42 @@ function Get-BackupDatabaseUrl {
   )
 
   $escapedRef = [regex]::Escape($ExpectedProjectRef)
-  $escapedPooler = [regex]::Escape($AllowedPoolerHost)
-  $sessionPattern = "^postgres(?:ql)?://postgres\.${escapedRef}:[^@]+@${escapedPooler}:5432/[^#]+$"
+
+  # Preferred: Session pooler, project-scoped user, port 5432, any pooler host.
+  $sessionPattern = "^postgres(?:ql)?://postgres\.${escapedRef}:[^@/]+@aws-[0-9]+-[a-z0-9-]+\.pooler\.supabase\.com:5432/[^#?]+$"
   if ($DatabaseUrl -match $sessionPattern) {
     return $DatabaseUrl
   }
 
-  $directPattern = "^(?<scheme>postgres(?:ql)?://)postgres:(?<credential>[^@]+)@db\.${escapedRef}\.supabase\.co:5432/(?<tail>[^#]+)$"
+  # Transaction pooler (6543) cannot serve pg_dump; reject it with a distinct code
+  # instead of letting pg_dump fail opaquely later.
+  if ($DatabaseUrl -match "^postgres(?:ql)?://postgres\.${escapedRef}:[^@/]+@aws-[0-9]+-[a-z0-9-]+\.pooler\.supabase\.com:6543/") {
+    throw 'DATABASE_URL_TRANSACTION_POOLER_REJECTED'
+  }
+
+  $directPattern = "^(?<scheme>postgres(?:ql)?://)postgres:(?<credential>[^@/]+)@db\.${escapedRef}\.supabase\.co:5432/(?<tail>[^#?]+)$"
   if ($DatabaseUrl -notmatch $directPattern) {
     throw 'DATABASE_URL_HOST_REJECTED'
   }
+  # Capture before any further regex evaluation clobbers the automatic $Matches.
+  $directScheme = $Matches.scheme
+  $directCredential = $Matches.credential
+  $directTail = $Matches.tail
+
+  $poolerHost = [Environment]::GetEnvironmentVariable('SUPABASE_DB_POOLER_HOST')
+  if ([string]::IsNullOrWhiteSpace($poolerHost)) {
+    $poolerHost = $DefaultPoolerHost
+  }
+  if ($poolerHost -notmatch $AllowedPoolerHostPattern) {
+    throw 'DATABASE_URL_POOLER_HOST_REJECTED'
+  }
 
   return '{0}postgres.{1}:{2}@{3}:5432/{4}' -f @(
-    $Matches.scheme,
+    $directScheme,
     $ExpectedProjectRef,
-    $Matches.credential,
-    $AllowedPoolerHost,
-    $Matches.tail
+    $directCredential,
+    $poolerHost,
+    $directTail
   )
 }
 
@@ -118,14 +145,63 @@ function Invoke-NativeChecked {
     [Parameter(Mandatory)][string]$SafeFailureCode
   )
 
-  & $Command @Arguments 2>&1 | ForEach-Object {
-    $line = [string]$_
-    if ($line -notmatch '(?i)(password|authorization|secret|token|postgres(?:ql)?://|service.role)') {
-      Write-Verbose $line
+  $script:NativeDiagnostic = $null
+  $stderrTail = [System.Collections.Generic.List[string]]::new()
+
+  # Script scope sets $ErrorActionPreference = 'Stop'. Under 'Stop' the first
+  # stderr line a native tool writes through `2>&1` is promoted to a terminating
+  # NativeCommandError before the $LASTEXITCODE check below can run. That masks
+  # the classified SafeFailureCode and the sanitized stderr tail with the generic
+  # BACKUP_FAILED catch-all, and it fails the whole backup on pg_dump warnings
+  # that still exit zero (the Supabase auth/storage schemas routinely emit
+  # dependency-loop notices). Localise the preference so native output stays data;
+  # every `throw` below still terminates regardless of the preference.
+  $previousErrorActionPreference = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    & $Command @Arguments 2>&1 | ForEach-Object {
+      $line = [string]$_
+      $isSensitive = $line -match '(?i)(password|authorization|secret|token|postgres(?:ql)?://|service.role)'
+      if (-not $isSensitive) {
+        Write-Verbose $line
+        if ($line.Trim()) {
+          # Keep a bounded, secret-free tail so a bare SafeFailureCode is no longer
+          # the only signal in CI when the native tool fails for an unclassified
+          # reason. Sensitive lines are withheld here exactly as they are above.
+          $stderrTail.Add($line)
+          if ($stderrTail.Count -gt 40) { $stderrTail.RemoveAt(0) }
+        }
+      }
+      if (-not $script:NativeDiagnostic) {
+        # Classify against a static allowlist of provider-independent phrases so the
+        # thrown code names the failure class without echoing any connection detail.
+        # Runs on sensitive lines too: only the fixed category token is ever kept.
+        $script:NativeDiagnostic = switch -Regex ($line) {
+          '(?i)Tenant or user not found' { 'POOLER_TENANT_OR_USER_NOT_FOUND'; break }
+          '(?i)password authentication failed' { 'PASSWORD_AUTHENTICATION_FAILED'; break }
+          '(?i)no pg_hba\.conf entry' { 'PG_HBA_NO_ENTRY'; break }
+          '(?i)could not translate host name' { 'HOST_NAME_RESOLUTION_FAILED'; break }
+          '(?i)could not connect to server|connection refused|connection timed out|timeout expired|no route to host' { 'CONNECTION_FAILED'; break }
+          '(?i)server version mismatch|aborting because of server version' { 'SERVER_VERSION_MISMATCH'; break }
+          '(?i)permission denied for' { 'PERMISSION_DENIED'; break }
+          '(?i)SSL .*error|could not initiate SSL' { 'SSL_ERROR'; break }
+          '(?i)no matching tables were found' { 'NO_MATCHING_TABLES'; break }
+          default { $null }
+        }
+      }
     }
+    if ($LASTEXITCODE -ne 0) {
+      $code = if ($script:NativeDiagnostic) { '{0}:{1}' -f $SafeFailureCode, $script:NativeDiagnostic } else { $SafeFailureCode }
+      if ($stderrTail.Count -gt 0) {
+        Write-Warning ("MBJ backup native diagnostic [{0}]:`n{1}" -f $code, ($stderrTail -join "`n"))
+      }
+      $script:NativeDiagnostic = $null
+      throw $code
+    }
+    $script:NativeDiagnostic = $null
   }
-  if ($LASTEXITCODE -ne 0) {
-    throw $SafeFailureCode
+  finally {
+    $ErrorActionPreference = $previousErrorActionPreference
   }
 }
 
@@ -142,6 +218,48 @@ function Get-FileRecord {
     bytes = $item.Length
     sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $item.FullName).Hash.ToLowerInvariant()
   }
+}
+
+function Get-PresentAllowlistedTables {
+  param(
+    [Parameter(Mandatory)][string]$DatabaseUrl,
+    [Parameter(Mandatory)][string[]]$Candidates
+  )
+
+  $pairs = foreach ($candidate in $Candidates) {
+    if ($candidate -notmatch '^[a-z_]+\.[a-z_]+$') { throw 'DATABASE_TABLE_ALLOWLIST_MALFORMED' }
+    $parts = $candidate.Split('.', 2)
+    "('{0}','{1}')" -f $parts[0], $parts[1]
+  }
+  $discoveryQuery = @"
+SET statement_timeout = '30s';
+SELECT table_schema || '.' || table_name
+FROM information_schema.tables
+WHERE (table_schema, table_name) IN ($($pairs -join ', '))
+  AND table_type = 'BASE TABLE'
+ORDER BY 1;
+"@
+
+  # Dedicated read-only probe. psql stderr is withheld (it can echo the conninfo
+  # URI); only a classified code escapes on failure. As in Invoke-NativeChecked,
+  # localise $ErrorActionPreference so a stderr line under `2>&1` cannot pre-empt
+  # the $LASTEXITCODE check with a generic terminating NativeCommandError.
+  $previousErrorActionPreference = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    $raw = & $PsqlCommand $DatabaseUrl '--no-align' '--tuples-only' '--quiet' '--no-psqlrc' `
+      '--set' 'ON_ERROR_STOP=1' '--command' $discoveryQuery 2>&1
+  }
+  finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+  }
+  if ($LASTEXITCODE -ne 0) {
+    throw 'DATABASE_TABLE_DISCOVERY_FAILED'
+  }
+
+  $discovered = @($raw | ForEach-Object { ([string]$_).Trim() } | Where-Object { $_ })
+  # Intersect with the static allowlist: discovery output can never widen scope.
+  return @($Candidates | Where-Object { $discovered -contains $_ })
 }
 
 function Export-Database {
@@ -176,15 +294,60 @@ function Export-Database {
     $schemaArgs += @('--schema', $schema)
     $dataArgs += @('--schema', $schema)
   }
-  foreach ($table in $AllowedDatabaseTables) {
+
+  # T179 runs this backup against freshly activated production BEFORE
+  # database-release.yml applies the 25 migrations, so the allowlisted
+  # public.*/private.* tables (and the private schema itself) do not exist yet.
+  # pg_dump aborts when none of its --table patterns resolve. Pin --table only
+  # for allowlisted tables that currently exist; the managed auth/storage
+  # schemas above still yield a real pre-migration snapshot for the release gate.
+  # Once the migrations land, every allowlisted table is present and the argument
+  # set matches the previous behaviour exactly.
+  $presentTables = @(Get-PresentAllowlistedTables -DatabaseUrl $DatabaseUrl -Candidates $AllowedDatabaseTables)
+  foreach ($table in $presentTables) {
     $schemaArgs += @('--table', $table)
     $dataArgs += @('--table', $table)
   }
+  if ($presentTables.Count -eq 0) {
+    Write-Warning 'MBJ backup notice [PRE_MIGRATION_NO_APPLICATION_TABLES]: dumping managed auth/storage schemas only'
+  }
+
   Invoke-NativeChecked -Command $PgDumpCommand -Arguments $schemaArgs -SafeFailureCode 'DATABASE_SCHEMA_EXPORT_FAILED'
   Invoke-NativeChecked -Command $PgDumpCommand -Arguments $dataArgs -SafeFailureCode 'DATABASE_DATA_EXPORT_FAILED'
 
   $migrationRoot = Join-Path $Root 'schema-migrations'
   Copy-Item -LiteralPath $migrationSource -Destination $migrationRoot -Recurse
+}
+
+function Test-StorageBucketPresent {
+  param(
+    [Parameter(Mandatory)][string]$BaseUrl,
+    [Parameter(Mandatory)][hashtable]$Headers
+  )
+
+  try {
+    $null = Invoke-RestMethod -Method Get -Uri "$BaseUrl/storage/v1/bucket/$AllowedStorageBucket" -Headers $Headers
+    return $true
+  }
+  catch {
+    $status = $null
+    try { $status = [int]$_.Exception.Response.StatusCode } catch { $status = $null }
+    $body = ''
+    try { $body = [string]$_.ErrorDetails.Message } catch { $body = '' }
+
+    # storage-api reports a missing bucket as HTTP 404 on newer releases and as
+    # HTTP 400 wrapping {"statusCode":"404","message":"Bucket not found"} on
+    # older ones. Either shape means "not created yet".
+    if ($status -eq 404 -or $body -match '(?i)(bucket not found|"statusCode"\s*:\s*"?404"?)') {
+      return $false
+    }
+
+    # Anything else (401/403 auth, 5xx, transport) stays fatal with a classified
+    # code instead of the generic BACKUP_FAILED catch-all. The numeric status is
+    # safe to surface; the response body is withheld.
+    Write-Warning ("MBJ backup native diagnostic [STORAGE_BUCKET_PROBE_FAILED]: http-status={0}" -f ($status ?? 'none'))
+    throw 'STORAGE_BUCKET_PROBE_FAILED'
+  }
 }
 
 function Get-StorageEntries {
@@ -198,7 +361,24 @@ function Get-StorageEntries {
   $entries = @()
   do {
     $body = @{ prefix = $Prefix; limit = 100; offset = $offset; sortBy = @{ column = 'name'; order = 'asc' } } | ConvertTo-Json -Depth 4 -Compress
-    $page = @(Invoke-RestMethod -Method Post -Uri "$BaseUrl/storage/v1/object/list/$AllowedStorageBucket" -Headers $Headers -ContentType 'application/json' -Body $body)
+    try {
+      $response = Invoke-RestMethod -Method Post -Uri "$BaseUrl/storage/v1/object/list/$AllowedStorageBucket" -Headers $Headers -ContentType 'application/json' -Body $body
+    }
+    catch {
+      # Mirror Test-StorageBucketPresent: a non-2xx or transport failure here is
+      # otherwise a raw Invoke-RestMethod exception that collapses to the generic
+      # BACKUP_FAILED. Surface the numeric status; withhold the response body.
+      $status = $null
+      try { $status = [int]$_.Exception.Response.StatusCode } catch { $status = $null }
+      Write-Warning ("MBJ backup native diagnostic [STORAGE_LIST_FAILED]: http-status={0}" -f ($status ?? 'none'))
+      throw 'STORAGE_LIST_FAILED'
+    }
+    # An empty listing comes back as `[]`, which Invoke-RestMethod surfaces as
+    # $null. Wrapping that directly in @() yields a one-element array holding
+    # $null, and Set-StrictMode then turns the caller's `$entry.name` into a fatal
+    # RuntimeException. Drop empty elements so this returns only real entries and
+    # the page-size check below stays honest.
+    $page = @($response | Where-Object { $null -ne $_ })
     $entries += $page
     $offset += $page.Count
   } while ($page.Count -eq 100)
@@ -215,6 +395,16 @@ function Export-Storage {
   New-Item -ItemType Directory -Path $storageRoot | Out-Null
   $baseUrl = "https://$ProjectRef.supabase.co"
   $headers = @{ Authorization = "Bearer $ServiceRoleKey"; apikey = $ServiceRoleKey }
+
+  # T179 runs this backup before database-release.yml seeds storage, so the
+  # allowlisted bucket does not exist yet. Treat an absent bucket as an empty
+  # storage tree (the directory above is the snapshot); once the bucket is
+  # created the crawl below runs unchanged.
+  if (-not (Test-StorageBucketPresent -BaseUrl $baseUrl -Headers $headers)) {
+    Write-Warning "MBJ backup notice [PRE_MIGRATION_BUCKET_ABSENT]: '$AllowedStorageBucket' does not exist yet; capturing an empty storage tree"
+    return
+  }
+
   $pending = [Collections.Generic.Queue[string]]::new()
   $pending.Enqueue('')
 
@@ -236,7 +426,15 @@ function Export-Storage {
       $destination = Join-Path $storageRoot ($objectKey.Replace('/', [IO.Path]::DirectorySeparatorChar))
       New-Item -ItemType Directory -Path (Split-Path -Parent $destination) -Force | Out-Null
       $encoded = ($objectKey.Split('/') | ForEach-Object { [uri]::EscapeDataString($_) }) -join '/'
-      Invoke-WebRequest -Method Get -Uri "$baseUrl/storage/v1/object/authenticated/$AllowedStorageBucket/$encoded" -Headers $headers -OutFile $destination
+      try {
+        Invoke-WebRequest -Method Get -Uri "$baseUrl/storage/v1/object/authenticated/$AllowedStorageBucket/$encoded" -Headers $headers -OutFile $destination
+      }
+      catch {
+        $status = $null
+        try { $status = [int]$_.Exception.Response.StatusCode } catch { $status = $null }
+        Write-Warning ("MBJ backup native diagnostic [STORAGE_OBJECT_FETCH_FAILED]: http-status={0}" -f ($status ?? 'none'))
+        throw 'STORAGE_OBJECT_FETCH_FAILED'
+      }
     }
   }
 }
@@ -269,7 +467,7 @@ try {
   if ($r2AccountId -notmatch '^[0-9a-f]{32}$') { throw 'R2_ACCOUNT_ID_REJECTED' }
 
   $script:ExitCode = 3
-  foreach ($command in @($PgDumpCommand, $AgeCommand, $AwsCommand, 'tar')) {
+  foreach ($command in @($PgDumpCommand, $PsqlCommand, $AgeCommand, $AwsCommand, 'tar')) {
     Assert-CommandAvailable $command
   }
 
@@ -369,6 +567,26 @@ try {
 } catch {
   $safeCode = if ($_.Exception.Message -match '^[A-Z0-9_:.-]+$') { $_.Exception.Message } else { 'BACKUP_FAILED' }
   Write-Error "MBJ backup failed [$safeCode]" -ErrorAction Continue
+  if ($safeCode -eq 'BACKUP_FAILED') {
+    # An unclassified raw exception otherwise leaves CI with nothing but the
+    # generic code. Surface the failure stage ($script:ExitCode: 2 config,
+    # 3 tools, 10 Export-Database, 20 Export-Storage, 30 archive/encrypt,
+    # 40 upload, 41 read-back, 50 retention, 90 finalise) plus the exception
+    # type and a secret-scrubbed message and script stack trace.
+    $sensitive = '(?i)(password|authorization|secret|token|apikey|postgres(?:ql)?://|service.role|bearer\s)'
+    $scrub = {
+      param([string]$Text)
+      if ([string]::IsNullOrEmpty($Text)) { return '' }
+      ($Text -split "`r?`n" | Where-Object { $_ -notmatch $sensitive }) -join "`n"
+    }
+    Write-Error (
+      "MBJ backup diagnostic [BACKUP_FAILED]: stage={0} type={1}`nmessage={2}`nstack={3}" -f `
+        $script:ExitCode,
+      $_.Exception.GetType().FullName,
+      (& $scrub $_.Exception.Message),
+      (& $scrub $_.ScriptStackTrace)
+    ) -ErrorAction Continue
+  }
 } finally {
   try {
     Invoke-PlaintextCleanup
