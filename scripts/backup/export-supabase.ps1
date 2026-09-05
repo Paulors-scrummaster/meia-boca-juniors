@@ -147,46 +147,62 @@ function Invoke-NativeChecked {
 
   $script:NativeDiagnostic = $null
   $stderrTail = [System.Collections.Generic.List[string]]::new()
-  & $Command @Arguments 2>&1 | ForEach-Object {
-    $line = [string]$_
-    $isSensitive = $line -match '(?i)(password|authorization|secret|token|postgres(?:ql)?://|service.role)'
-    if (-not $isSensitive) {
-      Write-Verbose $line
-      if ($line.Trim()) {
-        # Keep a bounded, secret-free tail so a bare SafeFailureCode is no longer
-        # the only signal in CI when the native tool fails for an unclassified
-        # reason. Sensitive lines are withheld here exactly as they are above.
-        $stderrTail.Add($line)
-        if ($stderrTail.Count -gt 40) { $stderrTail.RemoveAt(0) }
+
+  # Script scope sets $ErrorActionPreference = 'Stop'. Under 'Stop' the first
+  # stderr line a native tool writes through `2>&1` is promoted to a terminating
+  # NativeCommandError before the $LASTEXITCODE check below can run. That masks
+  # the classified SafeFailureCode and the sanitized stderr tail with the generic
+  # BACKUP_FAILED catch-all, and it fails the whole backup on pg_dump warnings
+  # that still exit zero (the Supabase auth/storage schemas routinely emit
+  # dependency-loop notices). Localise the preference so native output stays data;
+  # every `throw` below still terminates regardless of the preference.
+  $previousErrorActionPreference = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    & $Command @Arguments 2>&1 | ForEach-Object {
+      $line = [string]$_
+      $isSensitive = $line -match '(?i)(password|authorization|secret|token|postgres(?:ql)?://|service.role)'
+      if (-not $isSensitive) {
+        Write-Verbose $line
+        if ($line.Trim()) {
+          # Keep a bounded, secret-free tail so a bare SafeFailureCode is no longer
+          # the only signal in CI when the native tool fails for an unclassified
+          # reason. Sensitive lines are withheld here exactly as they are above.
+          $stderrTail.Add($line)
+          if ($stderrTail.Count -gt 40) { $stderrTail.RemoveAt(0) }
+        }
+      }
+      if (-not $script:NativeDiagnostic) {
+        # Classify against a static allowlist of provider-independent phrases so the
+        # thrown code names the failure class without echoing any connection detail.
+        # Runs on sensitive lines too: only the fixed category token is ever kept.
+        $script:NativeDiagnostic = switch -Regex ($line) {
+          '(?i)Tenant or user not found' { 'POOLER_TENANT_OR_USER_NOT_FOUND'; break }
+          '(?i)password authentication failed' { 'PASSWORD_AUTHENTICATION_FAILED'; break }
+          '(?i)no pg_hba\.conf entry' { 'PG_HBA_NO_ENTRY'; break }
+          '(?i)could not translate host name' { 'HOST_NAME_RESOLUTION_FAILED'; break }
+          '(?i)could not connect to server|connection refused|connection timed out|timeout expired|no route to host' { 'CONNECTION_FAILED'; break }
+          '(?i)server version mismatch|aborting because of server version' { 'SERVER_VERSION_MISMATCH'; break }
+          '(?i)permission denied for' { 'PERMISSION_DENIED'; break }
+          '(?i)SSL .*error|could not initiate SSL' { 'SSL_ERROR'; break }
+          '(?i)no matching tables were found' { 'NO_MATCHING_TABLES'; break }
+          default { $null }
+        }
       }
     }
-    if (-not $script:NativeDiagnostic) {
-      # Classify against a static allowlist of provider-independent phrases so the
-      # thrown code names the failure class without echoing any connection detail.
-      # Runs on sensitive lines too: only the fixed category token is ever kept.
-      $script:NativeDiagnostic = switch -Regex ($line) {
-        '(?i)Tenant or user not found' { 'POOLER_TENANT_OR_USER_NOT_FOUND'; break }
-        '(?i)password authentication failed' { 'PASSWORD_AUTHENTICATION_FAILED'; break }
-        '(?i)no pg_hba\.conf entry' { 'PG_HBA_NO_ENTRY'; break }
-        '(?i)could not translate host name' { 'HOST_NAME_RESOLUTION_FAILED'; break }
-        '(?i)could not connect to server|connection refused|connection timed out|timeout expired|no route to host' { 'CONNECTION_FAILED'; break }
-        '(?i)server version mismatch|aborting because of server version' { 'SERVER_VERSION_MISMATCH'; break }
-        '(?i)permission denied for' { 'PERMISSION_DENIED'; break }
-        '(?i)SSL .*error|could not initiate SSL' { 'SSL_ERROR'; break }
-        '(?i)no matching tables were found' { 'NO_MATCHING_TABLES'; break }
-        default { $null }
+    if ($LASTEXITCODE -ne 0) {
+      $code = if ($script:NativeDiagnostic) { '{0}:{1}' -f $SafeFailureCode, $script:NativeDiagnostic } else { $SafeFailureCode }
+      if ($stderrTail.Count -gt 0) {
+        Write-Warning ("MBJ backup native diagnostic [{0}]:`n{1}" -f $code, ($stderrTail -join "`n"))
       }
-    }
-  }
-  if ($LASTEXITCODE -ne 0) {
-    $code = if ($script:NativeDiagnostic) { '{0}:{1}' -f $SafeFailureCode, $script:NativeDiagnostic } else { $SafeFailureCode }
-    if ($stderrTail.Count -gt 0) {
-      Write-Warning ("MBJ backup native diagnostic [{0}]:`n{1}" -f $code, ($stderrTail -join "`n"))
+      $script:NativeDiagnostic = $null
+      throw $code
     }
     $script:NativeDiagnostic = $null
-    throw $code
   }
-  $script:NativeDiagnostic = $null
+  finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+  }
 }
 
 function Get-FileRecord {
@@ -225,9 +241,18 @@ ORDER BY 1;
 "@
 
   # Dedicated read-only probe. psql stderr is withheld (it can echo the conninfo
-  # URI); only a classified code escapes on failure.
-  $raw = & $PsqlCommand $DatabaseUrl '--no-align' '--tuples-only' '--quiet' '--no-psqlrc' `
-    '--set' 'ON_ERROR_STOP=1' '--command' $discoveryQuery 2>&1
+  # URI); only a classified code escapes on failure. As in Invoke-NativeChecked,
+  # localise $ErrorActionPreference so a stderr line under `2>&1` cannot pre-empt
+  # the $LASTEXITCODE check with a generic terminating NativeCommandError.
+  $previousErrorActionPreference = $ErrorActionPreference
+  $ErrorActionPreference = 'Continue'
+  try {
+    $raw = & $PsqlCommand $DatabaseUrl '--no-align' '--tuples-only' '--quiet' '--no-psqlrc' `
+      '--set' 'ON_ERROR_STOP=1' '--command' $discoveryQuery 2>&1
+  }
+  finally {
+    $ErrorActionPreference = $previousErrorActionPreference
+  }
   if ($LASTEXITCODE -ne 0) {
     throw 'DATABASE_TABLE_DISCOVERY_FAILED'
   }
