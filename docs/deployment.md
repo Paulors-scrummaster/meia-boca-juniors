@@ -10,7 +10,7 @@ misturar dados entre ambientes. A ativação produtiva continua separada conform
 | Local         | Vite em `127.0.0.1`         | Supabase local              | seed fictício                 | adaptador de falha  | desativado              |
 | Preview de PR | Cloudflare Pages preview    | Supabase staging            | somente fictícios             | produção desativada | Sentry staging opcional |
 | Staging       | alias não canônico do Pages | projeto Supabase staging    | somente fictícios             | produção desativada | Sentry staging          |
-| Produção      | domínio canônico após T178  | projeto Supabase production | dados reais somente após T179 | OneSignal canônico  | Sentry production       |
+| Produção      | domínio canônico ativo      | projeto Supabase production | dados reais somente após T179 | fail-closed         | desativado sem DSN      |
 
 O preview nunca recebe URL, chave, project ref, banco, Storage ou secrets do projeto de produção.
 
@@ -25,8 +25,9 @@ O preview nunca recebe URL, chave, project ref, banco, Storage ou secrets do pro
 - Versão Node: `24` por `NODE_VERSION=24`.
 - Diretório raiz: raiz do repositório.
 - O projeto deve usar integração Git; Direct Upload não satisfaz o fluxo de previews do PR.
-- Deploy produtivo permanece desativado durante T166. O filtro de preview aceita somente
-  `feature/mbj-mvp-core`; produção, domínio personalizado e DNS continuam adiados para T178.
+- Deploy produtivo permaneceu desativado durante T166. Em T178, deployments da branch `main` foram
+  habilitados sem alterar o filtro de preview, que continua aceitando somente
+  `feature/mbj-mvp-core`.
 
 Não existe `404.html` na raiz. Assim, o serving do Pages aplica fallback SPA para rotas profundas.
 Validar uma rota como `/app/matches` por acesso direto e recarga. Os caminhos
@@ -93,15 +94,21 @@ Executar no deployment associado ao PR #183:
 9. confirmar que OneSignal produtivo não inicializa;
 10. confirmar que todas as URLs/chaves públicas apontam somente para staging e dados são fictícios.
 
-## Domínio canônico e produção — adiado
+## Domínio canônico e produção
 
-Somente T178, depois do merge e na branch `chore/mbj-production-activation`, pode:
+T178, executada depois do merge e na branch `chore/mbj-production-activation`:
 
-- configurar variáveis produtivas do Pages;
-- anexar `meiabocajuniors.dbidigital.com.br`;
-- redirecionar aliases `pages.dev` preservando path e query;
-- ativar OneSignal no domínio canônico;
-- validar PWA/worker/canonical origin em produção.
+- configurou no Pages somente `NODE_VERSION`, `VITE_APP_ENV`, `VITE_CLUB_DEPLOYMENT_ID`,
+  `VITE_SUPABASE_URL` e `VITE_SUPABASE_PUBLISHABLE_KEY` no escopo Production;
+- anexou e ativou `meiabocajuniors.dbidigital.com.br` por CNAME protegido pela Cloudflare;
+- ativou HTTP 301 apenas no alias produtivo `meia-boca-juniors.pages.dev`, com correspondência de
+  subcaminho e preservação de path/query, sem incluir subdomínios, previews de branch ou URLs de
+  deployment;
+- validou PWA, workers, fallback SPA e canonical origin no deployment de `main`.
+
+`VITE_ONESIGNAL_APP_ID` e `VITE_SENTRY_DSN` permaneceram ausentes. Assim, push e monitoramento
+produtivos continuam fail-closed; T178 não leu nem alterou OneSignal, Sentry, R2, n8n ou dados do
+Supabase. A presença do worker estático isolado do OneSignal não inicializa push sem App ID.
 
 T166 não altera DNS, não promove preview e não publica variáveis produtivas.
 
@@ -151,3 +158,24 @@ executado.
 No head de implementação acima, Cloudflare Pages e os dois conjuntos de checks `Required`, frontend, banco e
 Playwright foram aprovados. Home, rota profunda, manifesto e os dois workers foram consultados após o
 deploy e retornaram HTTP 200 com MIME esperado.
+
+## Evidência sanitizada T178
+
+Validação executada em 2026-09-02 no projeto Pages `meia-boca-juniors`:
+
+| Controle               | Evidência segura                                                                                                                             |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Deployment produtivo   | branch `main`, commit `894673522b4c3d189b54038a287058b3805f7f24`, deployment `514824c6-b158-450d-b797-e20eab8e71a4`, etapa `deploy` aprovada |
+| Variáveis Production   | cinco nomes públicos esperados presentes; URL/chave apontam para `sclxmrondkegopyokdym`; valores não foram registrados                       |
+| Domínio canônico       | `https://meiabocajuniors.dbidigital.com.br/`, status e validação Pages `active`                                                              |
+| Alias produtivo        | regra `MBJ pages.dev para dominio canonico`, lista `mbj_pages_dev_canonical`, ativa com HTTP 301                                             |
+| Path/query             | `/test/path?mbj_t178=1` redirecionou para o mesmo path/query no domínio canônico                                                             |
+| SPA e headers          | home e acesso direto a `/app/matches` retornaram HTTP 200 com HTML; CSP e cache policy presentes                                             |
+| PWA                    | manifesto JSON válido (`name=Meia Boca Juniors`, `start_url=/`, `scope=/`, `display=standalone`, ícone maskable)                             |
+| Workers                | `/sw.js` e `/push/onesignal/OneSignalSDKWorker.js` retornaram JavaScript, não fallback HTML                                                  |
+| Isolamento de ambiente | bundle contém somente o project ref production e `mbj-production`; project ref staging ausente                                               |
+| Source maps            | bundle não contém `sourceMappingURL`; tentativa de `.js.map` retornou apenas fallback HTML, sem campo `sources`                              |
+| Browser                | home e rota profunda carregaram no domínio canônico com título e conteúdo público esperados                                                  |
+
+O banco production continuou vazio e sem migrations do MBJ durante esta validação; sua ativação
+permanece bloqueada pela T179. Nenhuma identidade foi criada e nenhum dado produtivo foi consultado.

@@ -61,4 +61,6 @@ HTTP 429 real não foi repetido em production vazio; a evidência controlada per
 - CSP restringe script externo ao SDK OneSignal aprovado e conexões aos provedores necessários.
 - `frame-ancestors 'none'`, HSTS, `nosniff`, no-referrer e Permissions Policy reduzem superfície.
 - API/Auth Supabase nunca entram no cache do Service Worker.
-- Domínio canônico, variáveis produtivas e redirects permanecem bloqueados até T178.
+- Em T178, o domínio canônico, as cinco variáveis públicas mínimas e o redirect 301 do alias
+  produtivo foram ativados. OneSignal e Sentry permanecem fail-closed sem App ID/DSN, e nenhuma
+  credencial foi documentada.

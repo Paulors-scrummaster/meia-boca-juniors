@@ -12,6 +12,9 @@ test-results/
 blob-report/
 playwright/.cache/
 
+# MCP / agent browser session artifacts (snapshots, screenshots, console logs)
+.playwright-mcp/
+
 # Local environment and secrets
 .env
 .env.*
@@ -51,6 +54,11 @@ supabase/.env.*
 .codex/
 .idea/
 .vscode/
+
+# Browser/MCP session debugging artifacts (repo-root scratch only)
+/*.png
+/*.jpeg
+/vdi3-workflow.json
 
 # Operating-system files
 .DS_Store

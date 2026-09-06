@@ -216,7 +216,16 @@ describe('backup automation contracts', () => {
     expect(names).toContain('Correlate exact run');
     expect(names).toContain('Validate backup result');
     expect(names).toContain('Send failure alert');
-    expect(names).toContain('Send success heartbeat');
+    // No success heartbeat: absence of a backup is covered outside n8n by
+    // .github/workflows/backup-freshness.yml, and the failure branch is the
+    // only outbound signal.
+    expect(names).not.toContain('Send success heartbeat');
+    expect(serialized).not.toContain('MBJ_BACKUP_HEARTBEAT_URL');
+    // The artifact download is split so GitHub's 302 to Azure Blob Storage is
+    // fetched without the GitHub Authorization header (avoids 401).
+    expect(names).toContain('Resolve artifact URL');
+    expect(names).toContain('Download artifact zip');
+    expect(names).not.toContain('Download exact artifact');
     expect(serialized).toContain('run.display_title === expectedName');
     expect(serialized).not.toContain('run.name === expectedName');
     expect(Object.keys(workflow.connections).length).toBeGreaterThan(0);

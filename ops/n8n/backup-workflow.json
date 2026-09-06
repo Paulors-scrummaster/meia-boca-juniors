@@ -204,15 +204,31 @@
           ]
         },
         "options": {
-          "response": { "response": { "responseFormat": "file", "outputPropertyName": "data" } },
+          "redirect": { "redirect": { "followRedirects": false } },
+          "response": { "response": { "fullResponse": true, "neverError": true } },
           "timeout": 30000
         }
       },
       "id": "6b1292fc-4999-40ee-abfa-92e784fc3a8f",
-      "name": "Download exact artifact",
+      "name": "Resolve artifact URL",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1200, -120],
+      "position": [1120, -120],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.headers.location }}",
+        "options": {
+          "response": { "response": { "responseFormat": "file", "outputPropertyName": "data" } },
+          "timeout": 60000
+        }
+      },
+      "id": "b7f21c3a-1a2b-4c3d-8e4f-000000000a02",
+      "name": "Download artifact zip",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1320, -120],
       "onError": "continueErrorOutput"
     },
     {
@@ -241,18 +257,6 @@
     },
     {
       "parameters": {
-        "url": "={{ $vars.MBJ_BACKUP_HEARTBEAT_URL }}",
-        "options": { "timeout": 15000 }
-      },
-      "id": "032bd195-5788-4145-9d83-4a26c6eca731",
-      "name": "Send success heartbeat",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [1920, -120],
-      "onError": "continueErrorOutput"
-    },
-    {
-      "parameters": {
         "respondWith": "json",
         "responseBody": "={{ { requestId: $('Validate backup result').first().json.requestId, backupId: $('Validate backup result').first().json.backupId, manifestSha256: $('Validate backup result').first().json.manifestSha256, status: 'VERIFIED' } }}",
         "options": {}
@@ -265,7 +269,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const source = $json.error?.message || $json.message || 'BACKUP_FAIL_CLOSED';\nconst code = String(source).replace(/[^A-Z0-9_.:-]/gi, '_').slice(0, 80);\nreturn [{ json: { event: 'MBJ_BACKUP_FAILED', code, occurredAt: new Date().toISOString() } }];"
+        "jsCode": "const KNOWN = /^(RUN_[A-Z_]+|RESULT_[A-Z_]+|DISPATCH_[A-Z_]+|BACKUP_FAIL_CLOSED)$/;\nconst raw = String($json?.error?.message ?? $json?.message ?? 'BACKUP_FAIL_CLOSED');\nlet code = raw.trim().toUpperCase().replace(/[^A-Z0-9_]+/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '').slice(0, 48);\nif (!KNOWN.test(code)) code = 'UNCLASSIFIED';\nlet stage = 'UNKNOWN';\nif (/^DISPATCH_/.test(code)) stage = 'DISPATCH';\nelse if (code === 'RUN_POLL_TIMEOUT') stage = 'RUN_POLL';\nelse if (/^(RUN_NOT_FOUND|RUN_CORRELATION_)/.test(code)) stage = 'RUN_CORRELATION';\nelse if (/^RUN_/.test(code)) stage = 'RUN_EXECUTION';\nelse if (/^RESULT_ARTIFACT_/.test(code)) stage = 'RESULT_ARTIFACT';\nelse if (/^RESULT_/.test(code)) stage = 'RESULT_VALIDATION';\nconst HINTS = {\n  DISPATCH: 'Falha ao disparar o backup.yml no GitHub Actions; verificar a credencial e a conectividade do n8n.',\n  RUN_CORRELATION: 'Nenhuma run correspondente foi localizada; verificar se o dispatch chegou ao GitHub Actions.',\n  RUN_POLL: 'A run excedeu o prazo de polling; inspecionar o backup.yml no GitHub antes de qualquer migracao.',\n  RUN_EXECUTION: 'A run do backup.yml terminou sem sucesso; abrir a run no GitHub para identificar a causa.',\n  RESULT_ARTIFACT: 'O artefato backup-result esta ausente ou expirado; reexecutar o backup.',\n  RESULT_VALIDATION: 'Artefato de backup invalido ou nao verificado; conferir a run do GitHub antes de qualquer migracao.',\n  UNKNOWN: 'Falha nao classificada no orquestrador de backup; inspecionar a execucao do n8n.',\n};\nconst pick = (fn) => { try { const v = fn(); return v == null ? null : v; } catch { return null; } };\nconst requestId = pick(() => $('Generate request ID').first().json.requestId);\nconst runId = pick(() => $('Correlate exact run').first().json.runId);\nconst repository = 'Paulors-scrummaster/meia-boca-juniors';\nconst runUrl = runId ? `https://github.com/${repository}/actions/runs/${runId}` : null;\nconst trigger = $execution?.mode === 'trigger' ? 'schedule' : $execution?.mode === 'webhook' ? 'pre_migration' : 'manual';\nconst n8nExecutionId = String($execution?.id ?? '') || null;\nconst summary = `MBJ weekly backup FAILED \\u2014 stage ${stage}, code ${code}` + (requestId ? `, request ${requestId}` : '') + (runId ? `, run ${runId}` : '');\nreturn [{ json: {\n  event: 'MBJ_BACKUP_FAILED',\n  schemaVersion: 1,\n  source: 'mbj-verified-backup-orchestrator',\n  severity: 'critical',\n  title: 'Falha no backup semanal do MBJ',\n  occurredAt: new Date().toISOString(),\n  trigger,\n  stage,\n  code,\n  remediationHint: HINTS[stage] || HINTS.UNKNOWN,\n  requestId,\n  runId,\n  runUrl,\n  repository,\n  n8nExecutionId,\n  summary,\n} }];"
       },
       "id": "03af6d47-a089-4e22-b816-5321ff53d831",
       "name": "Build sanitized failure",
@@ -344,11 +348,17 @@
     },
     "Select exact artifact": {
       "main": [
-        [{ "node": "Download exact artifact", "type": "main", "index": 0 }],
+        [{ "node": "Resolve artifact URL", "type": "main", "index": 0 }],
         [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
       ]
     },
-    "Download exact artifact": {
+    "Resolve artifact URL": {
+      "main": [
+        [{ "node": "Download artifact zip", "type": "main", "index": 0 }],
+        [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
+      ]
+    },
+    "Download artifact zip": {
       "main": [
         [{ "node": "Extract result artifact", "type": "main", "index": 0 }],
         [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
@@ -361,12 +371,6 @@
       ]
     },
     "Validate backup result": {
-      "main": [
-        [{ "node": "Send success heartbeat", "type": "main", "index": 0 }],
-        [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
-      ]
-    },
-    "Send success heartbeat": {
       "main": [
         [{ "node": "Return verified result", "type": "main", "index": 0 }],
         [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
