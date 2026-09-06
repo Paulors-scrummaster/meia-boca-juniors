@@ -56,7 +56,7 @@ season at a time with preserved historical seasons, low concurrency, and a modul
 | Domain Integrity and Historical Preservation | PASS | Foreign keys, unique constraints, checks, soft deletion/anonymization, immutable audit records, transactional commands, lineup revisions, and voting rounds preserve consistent history. |
 | MVP Simplicity and Controlled Scope | PASS | One React PWA, one Supabase project per environment, one repository, no ORM or extra queue/cache service, and White-Label configuration limited to build-time identity. |
 | Automated Quality Gates | PASS | The remote starts with a neutral bootstrap `main`; the existing local feature merges that remote bootstrap history before publication, so project commits reach `main` through a CI/self-reviewed implementation PR. Production activation evidence is then committed and reviewed through a second protected operational PR. Unit, component, database/RLS, and E2E coverage are assigned by risk. |
-| Resilience, Privacy, and Operability | PASS | Offline cache uses an explicit allowlist and user/version key; writes are blocked offline; external integrations fail gracefully; logs are sanitized; encrypted backups target private R2 with four verified sets; UptimeRobot monitors the canonical app and backup heartbeat. |
+| Resilience, Privacy, and Operability | PASS | Offline cache uses an explicit allowlist and user/version key; writes are blocked offline; external integrations fail gracefully; logs are sanitized; encrypted backups target private R2 with four verified sets; UptimeRobot monitors the canonical app and a scheduled `backup-freshness.yml` check fails on a missing or stale verified backup. |
 
 No gate exception or unjustified complexity is required.
 

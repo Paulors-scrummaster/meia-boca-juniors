@@ -332,11 +332,17 @@ client-only throttling is bypassable; raw-IP logging expands privacy exposure.
 ## 19. External production and backup monitoring
 
 **Decision**: Use UptimeRobot Free for a 5-minute HTTP/keyword monitor of the canonical production URL
-and a heartbeat monitor completed by the weekly n8n backup workflow. Alerts go to the project owner.
+with alerts to the project owner. Because the UptimeRobot Free plan no longer offers heartbeat/cron
+monitors, backup absence is instead covered by a scheduled `.github/workflows/backup-freshness.yml`
+check on `main` that fails (surfacing GitHub's native failed-run notification to the owner) when the
+newest `success` run of `backup.yml` on `main` is missing or older than the weekly cadence plus slack.
 
-**Rationale**: An external monitor can detect an unavailable webapp or stalled backup independently of
-Cloudflare, Supabase, n8n, and Sentry application reporting, while staying inside the zero-cost target.
+**Rationale**: An external monitor can detect an unavailable webapp independently of Cloudflare,
+Supabase, n8n, and Sentry application reporting, while staying inside the zero-cost target. The
+GitHub-side freshness check catches a weekly n8n schedule that never fires, which the in-workflow
+failure alert cannot.
 [UptimeRobot free-plan monitoring](https://help.uptimerobot.com/en/articles/11604710-who-should-use-uptimerobot-s-free-plan)
 
 **Alternatives considered**: Cloudflare standalone Health Checks are not included in the Free plan;
-an n8n-only check cannot alert when the self-hosted n8n instance itself is unavailable.
+an n8n-only check cannot alert when the self-hosted n8n instance itself is unavailable; an
+UptimeRobot heartbeat is no longer available on the Free plan.
