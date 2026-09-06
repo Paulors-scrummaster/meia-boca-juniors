@@ -39,10 +39,15 @@ export function MfaPage({ service = createAuthService(supabase) }: MfaPageProps)
       .getMfaFactors()
       .then(async (factors) => {
         if (!active) return;
-        const existing = factors.find((factor) => factor.status === 'verified') ?? factors[0];
-        if (existing) {
-          setFactorId(existing.factorId);
+        const verified = factors.find((factor) => factor.status === 'verified');
+        if (verified) {
+          setFactorId(verified.factorId);
           return;
+        }
+        // Um fator pendente guarda um segredo que só existiu na tela que o gerou: reaproveitá-lo
+        // deixaria o usuário sem QR Code e sem código válido. Descartamos antes de recomeçar.
+        for (const pending of factors) {
+          await service.unenrollMfa(pending.factorId);
         }
         const nextEnrollment = await service.enrollMfa('MBJ');
         if (active) {
