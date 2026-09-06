@@ -55,6 +55,11 @@ supabase/.env.*
 .idea/
 .vscode/
 
+# Browser/MCP session debugging artifacts (repo-root scratch only)
+/*.png
+/*.jpeg
+/vdi3-workflow.json
+
 # Operating-system files
 .DS_Store
 Thumbs.db
