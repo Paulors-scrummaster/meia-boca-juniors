@@ -234,6 +234,52 @@ O advisor do Supabase reporta RLS desabilitada em `private.rate_limit_counters`,
 Data API (apenas `public` e `graphql_public`), portanto não há exposição real ao papel `anon`; as
 tabelas são de uso interno das funções. Registrado aqui porque o advisor continuará reportando.
 
-### Escopo não executado
+## T180 — Monitoramento externo e ativação do orquestrador
 
-T180 (UptimeRobot), T181 (aceitação de produção) e T182 (PR operacional) **não** foram iniciadas.
+Data: 2026-09-06. Status: **T180 fechada.** Evidência completa em `docs/operations.md`, seção "T180".
+
+- Monitor UptimeRobot HTTP/keyword `803921970` do domínio canônico, intervalo 5 min, alerta por
+  e-mail ao dono, `Up`.
+- `.github/workflows/backup-freshness.yml` em `main` cobre a ausência de backup (o plano Free do
+  UptimeRobot não oferece heartbeat/cron); testado `PASS` (run `33995476467`) e `FAIL`
+  (run `33995494312`).
+- Payload de alerta sanitizado (15 campos allowlistados, sem heartbeat de sucesso) — commit
+  `858a1fd`.
+- Bug de download de artefato do orquestrador corrigido (302 do GitHub → Azure com header
+  `Authorization` reenviado): nó único dividido em `Resolve artifact URL` + `Download artifact zip`
+  — commit `9ac683b`; instância `VdI3a4KywhCSemU9` e `ops/n8n/backup-workflow.json` em paridade.
+- Execução verificada em produção: n8n exec `#2906`, GitHub run `34029273889`, `status VERIFIED`,
+  `backup_id` `235b55f087dd42259783a903d89c086f`. O orquestrador `VdI3a4KywhCSemU9` foi então
+  marcado como **Active** (agenda semanal, segundas 03:00). O ID `oIdZumg59fEUKDYP` citado na
+  seção T177 pertence agora ao workflow receptor separado.
+- Incidente registrado: um loop de webhook em ~2026-09-06 00:16–00:57 UTC disparou ~9 backups de
+  produção não planejados (`backup.yml` runs `33998524921`…`34002386008`), todos `VERIFIED` e
+  não-destrutivos; retenção manteve quatro conjuntos. Quebrado desativando o orquestrador e movendo
+  o receptor para workflow separado.
+
+## T181 — Aceitação de produção
+
+Data: 2026-09-06. Status: **T181 fechada.** Detalhe em
+`specs/001-mbj-mvp-core/checklists/production-activation-validation.md`.
+
+- Aprovados: alias `pages.dev` respondendo `301` com caminho/query preservados; MIME, fallback SPA e
+  cabeçalhos de segurança do domínio canônico; prompt de atualização PWA opcional e não destrutivo;
+  ausência de `.map` recuperável e de `//# sourceMappingURL` no bundle de produção; monitor
+  UptimeRobot com o caminho de alerta de indisponibilidade testado ponta a ponta (incidente
+  `354986164260080559`, e-mails de queda e recuperação ao dono com log `SUCCESS`).
+- Pendências rastreadas, não bloqueantes: issue `#198` (PWA sem guarda `beforeunload`/rascunho para
+  atualização explícita), issue `#199` (push iOS não validado — sem dispositivo Apple), issue `#200`
+  (Sentry de produção não configurado — cenários de release/PII/source maps no Sentry adiados; a
+  metade "nenhum `.map` recuperável" está satisfeita de forma independente).
+
+## T182 — Pull Request operacional
+
+Data: 2026-09-06. Status: **em andamento.**
+
+- Branch: `chore/mbj-production-activation`, a partir do merge de implementação
+  `8f4ce45e625ad47b60abe7f5728e0fc19233bdf4`.
+- Nenhuma migration, Edge Function ou configuração de produção é executada por este PR; T179 já
+  aplicou e verificou a release de produção. Este PR entrega somente a evidência operacional
+  sanitizada de T177–T181.
+- Issue `#200` (Sentry de produção) fica aceita como acompanhamento pós-merge, não bloqueia este PR.
+- Pull Request: _a registrar após a abertura._
