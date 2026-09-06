@@ -204,15 +204,31 @@
           ]
         },
         "options": {
-          "response": { "response": { "responseFormat": "file", "outputPropertyName": "data" } },
+          "redirect": { "redirect": { "followRedirects": false } },
+          "response": { "response": { "fullResponse": true, "neverError": true } },
           "timeout": 30000
         }
       },
       "id": "6b1292fc-4999-40ee-abfa-92e784fc3a8f",
-      "name": "Download exact artifact",
+      "name": "Resolve artifact URL",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [1200, -120],
+      "position": [1120, -120],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.headers.location }}",
+        "options": {
+          "response": { "response": { "responseFormat": "file", "outputPropertyName": "data" } },
+          "timeout": 60000
+        }
+      },
+      "id": "b7f21c3a-1a2b-4c3d-8e4f-000000000a02",
+      "name": "Download artifact zip",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1320, -120],
       "onError": "continueErrorOutput"
     },
     {
@@ -332,11 +348,17 @@
     },
     "Select exact artifact": {
       "main": [
-        [{ "node": "Download exact artifact", "type": "main", "index": 0 }],
+        [{ "node": "Resolve artifact URL", "type": "main", "index": 0 }],
         [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
       ]
     },
-    "Download exact artifact": {
+    "Resolve artifact URL": {
+      "main": [
+        [{ "node": "Download artifact zip", "type": "main", "index": 0 }],
+        [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
+      ]
+    },
+    "Download artifact zip": {
       "main": [
         [{ "node": "Extract result artifact", "type": "main", "index": 0 }],
         [{ "node": "Build sanitized failure", "type": "main", "index": 0 }]
