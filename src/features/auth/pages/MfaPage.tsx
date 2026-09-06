@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ShieldCheck } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -24,9 +24,18 @@ interface MfaPageProps {
   service?: AuthService;
 }
 
-export function MfaPage({ service = createAuthService(supabase) }: MfaPageProps) {
+export function MfaPage({ service: providedService }: MfaPageProps) {
   const auth = useAuth();
   const navigate = useNavigate();
+  // O default `createAuthService(supabase)` produziria um objeto novo a cada render, e o efeito
+  // abaixo depende da identidade dele. Uma única instância vive enquanto o componente viver.
+  const [service] = useState<AuthService>(() => providedService ?? createAuthService(supabase));
+  // O preparo cria um fator no servidor, então precisa acontecer exatamente uma vez por montagem,
+  // mesmo que o efeito seja reexecutado (StrictMode, por exemplo).
+  const preparedRef = useRef(false);
+  // Rearmado a cada execução do efeito: sob StrictMode a primeira é limpa antes de a promessa
+  // resolver, e sem isso o resultado do preparo seria descartado e a tela ficaria carregando.
+  const mountedRef = useRef(true);
   const [factorId, setFactorId] = useState<string | null>(null);
   const [enrollment, setEnrollment] = useState<MfaEnrollmentResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,11 +43,16 @@ export function MfaPage({ service = createAuthService(supabase) }: MfaPageProps)
   const form = useForm<MfaForm>({ defaultValues: { code: '' }, resolver: zodResolver(schema) });
 
   useEffect(() => {
-    let active = true;
+    mountedRef.current = true;
+    const teardown = () => {
+      mountedRef.current = false;
+    };
+    if (preparedRef.current) return teardown;
+    preparedRef.current = true;
     void service
       .getMfaFactors()
       .then(async (factors) => {
-        if (!active) return;
+        if (!mountedRef.current) return;
         const verified = factors.find((factor) => factor.status === 'verified');
         if (verified) {
           setFactorId(verified.factorId);
@@ -50,16 +64,14 @@ export function MfaPage({ service = createAuthService(supabase) }: MfaPageProps)
           await service.unenrollMfa(pending.factorId);
         }
         const nextEnrollment = await service.enrollMfa('MBJ');
-        if (active) {
+        if (mountedRef.current) {
           setEnrollment(nextEnrollment);
           setFactorId(nextEnrollment.factorId);
         }
       })
-      .catch((cause: unknown) => active && setError(mapToAppError(cause).message))
-      .finally(() => active && setLoading(false));
-    return () => {
-      active = false;
-    };
+      .catch((cause: unknown) => mountedRef.current && setError(mapToAppError(cause).message))
+      .finally(() => mountedRef.current && setLoading(false));
+    return teardown;
   }, [service]);
 
   const submit = form.handleSubmit(async ({ code }) => {
