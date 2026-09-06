@@ -274,7 +274,8 @@ Data: 2026-09-06. Status: **T181 fechada.** Detalhe em
 
 ## T182 — Pull Request operacional
 
-Data: 2026-09-06. Status: **em andamento.**
+Data: 2026-09-06. Status: **T182 concluída.** PR operacional mesclado na `main` protegida via merge
+commit `fd5eb6b`; a branch `chore/mbj-production-activation` foi removida.
 
 - Branch: `chore/mbj-production-activation`, a partir do merge de implementação
   `8f4ce45e625ad47b60abe7f5728e0fc19233bdf4`.
@@ -284,5 +285,8 @@ Data: 2026-09-06. Status: **em andamento.**
 - Issue `#200` (Sentry de produção) fica aceita como acompanhamento pós-merge, não bloqueia este PR.
 - Pull Request: `#201`
   (`https://github.com/Paulors-scrummaster/meia-boca-juniors/pull/201`),
-  `chore/mbj-production-activation` → `main`.
-- Merge para `main` protegida pendente de CI verde e da auto-revisão assistida registrada no PR.
+  `chore/mbj-production-activation` → `main`, mesclado em 2026-09-06T15:39:23Z.
+- CI verde (Frontend quality, Database security, Browser journeys, Required) no head `62b41c7`;
+  auto-revisão assistida registrada no PR; merge commit `fd5eb6b`.
+- Bookkeeping (`tasks.md` T182 `[X]` e este status) fechado pelo PR de follow-up
+  `chore/t182-bookkeeping`.
