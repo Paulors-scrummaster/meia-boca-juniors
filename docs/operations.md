@@ -138,3 +138,101 @@ foi quebrado desativando o orquestrador e movendo o receptor de alerta para um w
 
 Após a execução verificada, `VdI3a4KywhCSemU9` foi marcado como **Active**, habilitando o agendamento
 semanal. Nenhuma migração ou outra configuração de produção foi executada neste lote.
+
+## T-BOOT — Carga inicial de produção e bootstrap do Presidente
+
+Executada em 2026-09-06 diretamente em produção (`us-east-1`, PG 17.6, 27 migrations), com o banco
+partindo de zero linhas em todas as tabelas. Nenhuma migration nova foi criada: são dados
+operacionais, não schema. Identidades, e-mails, senhas e UUIDs de pessoas ficam fora do repositório
+por decisão explícita — este registro contém apenas contagens e IDs técnicos não-pessoais.
+
+### O que foi gravado
+
+| Tabela              | Linhas | Conteúdo                                                                |
+| ------------------- | ------ | ----------------------------------------------------------------------- |
+| `public.profiles`   | 2      | Presidente e um atleta                                                  |
+| `public.user_roles` | 2      | um `PRESIDENT`, um `ATHLETE`                                            |
+| `public.seasons`    | 1      | ano 2026, `is_active = true`, id `5e2d4e1a-d837-4a2b-a790-8d8f3b37f606` |
+| `public.athletes`   | 17     | todos `ACTIVE`, camisas 1–17 distintas, sem foto                        |
+| `public.audit_logs` | 19     | 1 `ROLE_ASSIGNED`, 17 `ATHLETE_CREATED`, 1 `ATHLETE_LINKED`             |
+
+Dos 17 atletas, 1 tem conta vinculada (`user_id`) e 16 permanecem com `user_id = null`, prontos para
+o convite normal em `/app/roster/:athleteId` sem recadastro.
+
+### Método de bootstrap do Presidente
+
+`public.user_roles` só aceita INSERT de um `PRESIDENT` com AAL2 já existente, `public.profiles` não
+tem policy de INSERT, e `create_identity_invite()` exige um Presidente ativo — o primeiro Presidente
+é, por construção, inalcançável pelo app. O bootstrap foi feito com duas escritas `service_role`
+pontuais, revisadas antes da execução:
+
+1. conta Auth criada no Supabase Dashboard pelo responsável (senha definida por ele, nunca versionada
+   nem transmitida a terceiros);
+2. `insert into public.profiles` + `insert into public.user_roles (…, 'PRESIDENT', assigned_by = ele
+mesmo)`.
+
+O trigger `private.audit_role_change()` só grava quando `auth.uid()` existe; sob `service_role` ele
+passa em silêncio, então a linha de auditoria correspondente foi inserida explicitamente.
+
+O TOTP não é semeado: o Presidente faz o enrollment sozinho em `/mfa` no primeiro acesso, e só então
+alcança `/app/admin`.
+
+### Vínculo do atleta com conta
+
+Feito por escrita `service_role` equivalente ao que `accept_athlete_invitation()` produz — `profiles`,
+`user_roles('ATHLETE')` e `athletes.user_id` — porque o fluxo real de convite estava indisponível (ver
+pendência abaixo). O resultado é indistinguível de um convite resgatado, e não interfere nos convites
+futuros dos demais atletas.
+
+### Estatísticas de 2026
+
+O `season_rankings_view` deriva gols, assistências e craques exclusivamente de consolidações de
+partida válidas. A planilha histórica de 2026 foi tratada como referência externa: o ranking nasce
+zerado e passa a acumular a partir da primeira partida real consolidada no app. Back-fill sintético
+foi avaliado e recusado — `guard_match_consolidation_immutability` e `guard_match_goal_immutability`
+rejeitam UPDATE/DELETE, o que tornaria o histórico fabricado permanente.
+
+### Edge Functions: identidade publicada, notificações pendentes
+
+Produção não tinha nenhuma Edge Function publicada (`list_edge_functions` vazio), o que impedia
+convites, reset de senha e notificações. As duas funções de identidade foram publicadas:
+
+| Função                 | Status            | `verify_jwt` |
+| ---------------------- | ----------------- | ------------ |
+| `athlete-invitations`  | ACTIVE, version 1 | `false`      |
+| `admin-reset-password` | ACTIVE, version 1 | `false`      |
+
+`dispatch-notifications` e `push-identity` seguem **não publicadas** por decisão explícita: dependem de
+`ONESIGNAL_APP_ID`, `ONESIGNAL_REST_API_KEY`, `ONESIGNAL_IDENTITY_VERIFICATION_KEY` e
+`NOTIFICATION_DISPATCH_SECRET`, ainda ausentes do secret store. Push não dispara até isso ser
+resolvido; nada mais é afetado.
+
+#### Armadilha de empacotamento
+
+`supabase functions deploy` **não** envia o `deno.json` automaticamente. Sem ele o bundler falha com
+`Relative import path "@supabase/supabase-js" not prefixed with / or ./ or ../`, porque
+`_shared/security.ts` usa bare specifier resolvido pelo import map. O deploy exige a flag explícita, e
+o mesmo vale para as duas funções de notificação quando forem publicadas:
+
+```
+supabase functions deploy athlete-invitations admin-reset-password   --project-ref <ref> --use-api --import-map supabase/functions/deno.json
+```
+
+#### Variáveis de ambiente
+
+`CANONICAL_ORIGIN` e `ALLOWED_ORIGINS` passaram a existir no secret store apontando para o domínio
+canônico. Não são segredo, mas são obrigatórias: `athlete-invitations` lê `CANONICAL_ORIGIN` no boot
+do módulo e falha inteira sem ela, e `configuredOrigins()` cai no default `localhost:5173`, o que faz
+o CORS recusar o domínio de produção. `SUPABASE_URL`, `SUPABASE_ANON_KEY` e
+`SUPABASE_SERVICE_ROLE_KEY` são injetadas pela plataforma.
+
+#### Smoke test sanitizado
+
+Antes das variáveis: `athlete-invitations` respondia HTTP 500 (falha de boot) e
+`admin-reset-password` HTTP 403 (origem recusada) — os dois sintomas previstos. Depois:
+
+- `OPTIONS` com o Origin canônico: **204** nas duas, com `access-control-allow-origin` ecoando o
+  domínio canônico;
+- `OPTIONS` com origem fora da allowlist: **403**;
+- `POST` sem `Authorization`: **401** com corpo `{"error":{"code":"UNAUTHENTICATED",…}}`, confirmando
+  que o corpo da função executa e a autorização responde.
