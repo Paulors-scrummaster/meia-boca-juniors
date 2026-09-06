@@ -33,6 +33,9 @@ export function MfaPage({ service: providedService }: MfaPageProps) {
   // O preparo cria um fator no servidor, então precisa acontecer exatamente uma vez por montagem,
   // mesmo que o efeito seja reexecutado (StrictMode, por exemplo).
   const preparedRef = useRef(false);
+  // Rearmado a cada execução do efeito: sob StrictMode a primeira é limpa antes de a promessa
+  // resolver, e sem isso o resultado do preparo seria descartado e a tela ficaria carregando.
+  const mountedRef = useRef(true);
   const [factorId, setFactorId] = useState<string | null>(null);
   const [enrollment, setEnrollment] = useState<MfaEnrollmentResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -40,13 +43,16 @@ export function MfaPage({ service: providedService }: MfaPageProps) {
   const form = useForm<MfaForm>({ defaultValues: { code: '' }, resolver: zodResolver(schema) });
 
   useEffect(() => {
-    if (preparedRef.current) return;
+    mountedRef.current = true;
+    const teardown = () => {
+      mountedRef.current = false;
+    };
+    if (preparedRef.current) return teardown;
     preparedRef.current = true;
-    let active = true;
     void service
       .getMfaFactors()
       .then(async (factors) => {
-        if (!active) return;
+        if (!mountedRef.current) return;
         const verified = factors.find((factor) => factor.status === 'verified');
         if (verified) {
           setFactorId(verified.factorId);
@@ -58,16 +64,14 @@ export function MfaPage({ service: providedService }: MfaPageProps) {
           await service.unenrollMfa(pending.factorId);
         }
         const nextEnrollment = await service.enrollMfa('MBJ');
-        if (active) {
+        if (mountedRef.current) {
           setEnrollment(nextEnrollment);
           setFactorId(nextEnrollment.factorId);
         }
       })
-      .catch((cause: unknown) => active && setError(mapToAppError(cause).message))
-      .finally(() => active && setLoading(false));
-    return () => {
-      active = false;
-    };
+      .catch((cause: unknown) => mountedRef.current && setError(mapToAppError(cause).message))
+      .finally(() => mountedRef.current && setLoading(false));
+    return teardown;
   }, [service]);
 
   const submit = form.handleSubmit(async ({ code }) => {

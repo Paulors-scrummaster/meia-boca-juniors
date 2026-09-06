@@ -1,6 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { StrictMode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -50,16 +51,17 @@ const authenticated: AuthContextValue = {
   },
 };
 
-function renderMfaRoute() {
-  return render(
+function renderMfaRoute({ strict = false }: { strict?: boolean } = {}) {
+  const tree = (
     <QueryClientProvider client={createAppQueryClient()}>
       <AuthContext.Provider value={authenticated}>
         <MemoryRouter initialEntries={['/mfa']}>
           <MfaPage />
         </MemoryRouter>
       </AuthContext.Provider>
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
+  return render(strict ? <StrictMode>{tree}</StrictMode> : tree);
 }
 
 describe('preparo do TOTP na rota real', () => {
@@ -94,6 +96,16 @@ describe('preparo do TOTP na rota real', () => {
     expect(enrollMfa).toHaveBeenCalledTimes(1);
     expect(unenrollMfa).not.toHaveBeenCalled();
     expect(createdServices).toHaveLength(1);
+  });
+
+  it('conclui o preparo sob StrictMode, que executa o efeito duas vezes', async () => {
+    renderMfaRoute({ strict: true });
+
+    // A montagem dupla limpa o primeiro efeito antes de a promessa resolver. Se o resultado for
+    // descartado junto, a tela fica presa em "Preparando…" e o formulário nunca aparece.
+    expect(await screen.findByAltText('QR Code para configurar o autenticador')).toBeVisible();
+    expect(screen.getByLabelText('Código de 6 números')).toBeVisible();
+    expect(enrollMfa).toHaveBeenCalledTimes(1);
   });
 
   it('descarta o fator pendente uma única vez antes de gerar o QR Code', async () => {
