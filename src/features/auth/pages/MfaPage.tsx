@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ShieldCheck } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
@@ -24,9 +24,15 @@ interface MfaPageProps {
   service?: AuthService;
 }
 
-export function MfaPage({ service = createAuthService(supabase) }: MfaPageProps) {
+export function MfaPage({ service: providedService }: MfaPageProps) {
   const auth = useAuth();
   const navigate = useNavigate();
+  // O default `createAuthService(supabase)` produziria um objeto novo a cada render, e o efeito
+  // abaixo depende da identidade dele. Uma única instância vive enquanto o componente viver.
+  const [service] = useState<AuthService>(() => providedService ?? createAuthService(supabase));
+  // O preparo cria um fator no servidor, então precisa acontecer exatamente uma vez por montagem,
+  // mesmo que o efeito seja reexecutado (StrictMode, por exemplo).
+  const preparedRef = useRef(false);
   const [factorId, setFactorId] = useState<string | null>(null);
   const [enrollment, setEnrollment] = useState<MfaEnrollmentResult | null>(null);
   const [loading, setLoading] = useState(true);
@@ -34,6 +40,8 @@ export function MfaPage({ service = createAuthService(supabase) }: MfaPageProps)
   const form = useForm<MfaForm>({ defaultValues: { code: '' }, resolver: zodResolver(schema) });
 
   useEffect(() => {
+    if (preparedRef.current) return;
+    preparedRef.current = true;
     let active = true;
     void service
       .getMfaFactors()
