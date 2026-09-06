@@ -282,4 +282,7 @@ Data: 2026-09-06. Status: **em andamento.**
   aplicou e verificou a release de produção. Este PR entrega somente a evidência operacional
   sanitizada de T177–T181.
 - Issue `#200` (Sentry de produção) fica aceita como acompanhamento pós-merge, não bloqueia este PR.
-- Pull Request: _a registrar após a abertura._
+- Pull Request: `#201`
+  (`https://github.com/Paulors-scrummaster/meia-boca-juniors/pull/201`),
+  `chore/mbj-production-activation` → `main`.
+- Merge para `main` protegida pendente de CI verde e da auto-revisão assistida registrada no PR.
