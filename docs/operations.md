@@ -192,10 +192,47 @@ zerado e passa a acumular a partir da primeira partida real consolidada no app. 
 foi avaliado e recusado — `guard_match_consolidation_immutability` e `guard_match_goal_immutability`
 rejeitam UPDATE/DELETE, o que tornaria o histórico fabricado permanente.
 
-### Pendência bloqueante: Edge Functions não publicadas
+### Edge Functions: identidade publicada, notificações pendentes
 
-`list_edge_functions` retorna vazio em produção. `athlete-invitations`, `admin-reset-password`,
-`dispatch-notifications` e `push-identity` existem no repositório mas nunca foram publicadas. Enquanto
-isso durar, o Presidente não consegue convidar atletas, redefinir senhas nem disparar notificações.
-Publicar as quatro e conferir `ALLOWED_ORIGINS` / `CANONICAL_ORIGIN` no secret store é pré-requisito
-para o primeiro convite real.
+Produção não tinha nenhuma Edge Function publicada (`list_edge_functions` vazio), o que impedia
+convites, reset de senha e notificações. As duas funções de identidade foram publicadas:
+
+| Função                 | Status            | `verify_jwt` |
+| ---------------------- | ----------------- | ------------ |
+| `athlete-invitations`  | ACTIVE, version 1 | `false`      |
+| `admin-reset-password` | ACTIVE, version 1 | `false`      |
+
+`dispatch-notifications` e `push-identity` seguem **não publicadas** por decisão explícita: dependem de
+`ONESIGNAL_APP_ID`, `ONESIGNAL_REST_API_KEY`, `ONESIGNAL_IDENTITY_VERIFICATION_KEY` e
+`NOTIFICATION_DISPATCH_SECRET`, ainda ausentes do secret store. Push não dispara até isso ser
+resolvido; nada mais é afetado.
+
+#### Armadilha de empacotamento
+
+`supabase functions deploy` **não** envia o `deno.json` automaticamente. Sem ele o bundler falha com
+`Relative import path "@supabase/supabase-js" not prefixed with / or ./ or ../`, porque
+`_shared/security.ts` usa bare specifier resolvido pelo import map. O deploy exige a flag explícita, e
+o mesmo vale para as duas funções de notificação quando forem publicadas:
+
+```
+supabase functions deploy athlete-invitations admin-reset-password   --project-ref <ref> --use-api --import-map supabase/functions/deno.json
+```
+
+#### Variáveis de ambiente
+
+`CANONICAL_ORIGIN` e `ALLOWED_ORIGINS` passaram a existir no secret store apontando para o domínio
+canônico. Não são segredo, mas são obrigatórias: `athlete-invitations` lê `CANONICAL_ORIGIN` no boot
+do módulo e falha inteira sem ela, e `configuredOrigins()` cai no default `localhost:5173`, o que faz
+o CORS recusar o domínio de produção. `SUPABASE_URL`, `SUPABASE_ANON_KEY` e
+`SUPABASE_SERVICE_ROLE_KEY` são injetadas pela plataforma.
+
+#### Smoke test sanitizado
+
+Antes das variáveis: `athlete-invitations` respondia HTTP 500 (falha de boot) e
+`admin-reset-password` HTTP 403 (origem recusada) — os dois sintomas previstos. Depois:
+
+- `OPTIONS` com o Origin canônico: **204** nas duas, com `access-control-allow-origin` ecoando o
+  domínio canônico;
+- `OPTIONS` com origem fora da allowlist: **403**;
+- `POST` sem `Authorization`: **401** com corpo `{"error":{"code":"UNAUTHENTICATED",…}}`, confirmando
+  que o corpo da função executa e a autorização responde.
