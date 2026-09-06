@@ -31,6 +31,7 @@ function service(overrides: Partial<AuthService> = {}): AuthService {
     setRole: vi.fn(),
     signInWithPassword: vi.fn(),
     signOut: vi.fn(),
+    unenrollMfa: vi.fn().mockResolvedValue(undefined),
     ...overrides,
   };
 }
@@ -231,6 +232,59 @@ describe('fluxos de identidade', () => {
     await user.type(screen.getByLabelText('Código de 6 números'), '123456');
     await user.click(screen.getByRole('button', { name: 'Verificar código' }));
     expect(auth.challengeMfa).toHaveBeenCalledWith('factor-1', '123456');
+    expect(await screen.findByText('aal2 confirmado')).toBeInTheDocument();
+  });
+
+  it('descarta fator TOTP pendente e apresenta um QR Code novo', async () => {
+    const auth = service({
+      enrollMfa: vi.fn().mockResolvedValue({
+        factorId: 'factor-novo',
+        qrCode: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"/>',
+        secret: 'MBJTESTSECRET',
+        uri: 'otpauth://totp/MBJ',
+      }),
+      getMfaFactors: vi
+        .fn()
+        .mockResolvedValue([
+          { factorId: 'factor-pendente', friendlyName: 'MBJ', status: 'unverified' },
+        ]),
+    });
+    renderWithAuth(
+      <Routes>
+        <Route path="/mfa" element={<MfaPage service={auth} />} />
+      </Routes>,
+      '/mfa',
+    );
+
+    expect(await screen.findByAltText('QR Code para configurar o autenticador')).toBeVisible();
+    expect(auth.unenrollMfa).toHaveBeenCalledWith('factor-pendente');
+    expect(auth.enrollMfa).toHaveBeenCalledWith('MBJ');
+  });
+
+  it('reaproveita fator TOTP verificado sem gerar novo QR Code', async () => {
+    const user = userEvent.setup();
+    const auth = service({
+      challengeMfa: vi.fn().mockResolvedValue(undefined),
+      getMfaFactors: vi
+        .fn()
+        .mockResolvedValue([
+          { factorId: 'factor-verificado', friendlyName: 'MBJ', status: 'verified' },
+        ]),
+    });
+    renderWithAuth(
+      <Routes>
+        <Route path="/mfa" element={<MfaPage service={auth} />} />
+        <Route path="/app/admin" element={<p>aal2 confirmado</p>} />
+      </Routes>,
+      '/mfa',
+    );
+
+    await user.type(await screen.findByLabelText('Código de 6 números'), '123456');
+    expect(screen.queryByAltText('QR Code para configurar o autenticador')).not.toBeInTheDocument();
+    expect(auth.enrollMfa).not.toHaveBeenCalled();
+    expect(auth.unenrollMfa).not.toHaveBeenCalled();
+    await user.click(screen.getByRole('button', { name: 'Verificar código' }));
+    expect(auth.challengeMfa).toHaveBeenCalledWith('factor-verificado', '123456');
     expect(await screen.findByText('aal2 confirmado')).toBeInTheDocument();
   });
 });

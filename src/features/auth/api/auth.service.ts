@@ -68,6 +68,7 @@ export interface AuthService {
   setRole(input: { assigned: boolean; role: AppRole; userId: string }): Promise<AppRole[]>;
   signInWithPassword(input: SignInInput): Promise<AuthenticatedSession>;
   signOut(): Promise<void>;
+  unenrollMfa(factorId: string): Promise<void>;
 }
 
 interface FunctionEnvelope<T> {
@@ -190,6 +191,11 @@ export function createAuthService(client: SupabaseClient<Database>): AuthService
         secret: data.totp.secret,
         uri: data.totp.uri,
       };
+    },
+
+    async unenrollMfa(factorId) {
+      const { error } = await client.auth.mfa.unenroll({ factorId });
+      await requireNoError(error);
     },
 
     async getMfaFactors() {
