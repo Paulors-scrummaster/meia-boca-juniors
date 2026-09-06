@@ -114,6 +114,10 @@ jobs:
           MBJ_BACKUP_ENVIRONMENT: ${{ vars.MBJ_BACKUP_ENVIRONMENT }}
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
           SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          # Optional. Only consulted when SUPABASE_DB_URL is a direct connection
+          # string that must be rewritten to the Session pooler; unset when
+          # SUPABASE_DB_URL already carries the pooler host.
+          SUPABASE_DB_POOLER_HOST: ${{ vars.SUPABASE_DB_POOLER_HOST }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_PROJECT_REF: ${{ vars.SUPABASE_PROJECT_REF }}
           REQUEST_ID: ${{ inputs.request_id }}

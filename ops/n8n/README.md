@@ -6,16 +6,19 @@ ou valor de credencial deve ser adicionado ao JSON exportado.
 
 ## Fronteira de execução
 
-O n8n orquestra agenda semanal, disparo pré-migração autenticado, correlação, polling, heartbeat e
-alerta. Ele não clona o repositório, não executa PowerShell e não recebe acesso a Supabase, R2 ou à
+O n8n orquestra agenda semanal, disparo pré-migração autenticado, correlação, polling e alerta em
+falha. Ele não clona o repositório, não executa PowerShell e não recebe acesso a Supabase, R2 ou à
 chave privada `age`. O runner efêmero `windows-2025` do GitHub Actions instala as versões fixadas,
 executa `scripts/backup/export-supabase.ps1`, criptografa antes do upload e limpa plaintext em
 `finally`.
 
 ```text
 n8n -> GitHub Actions em main -> Supabase staging/production -> age -> R2 privado
-  \-> valida execução + artefato sanitizado -> heartbeat ou alerta
+  \-> valida execução + artefato sanitizado -> só alerta em falha
 ```
+
+A ausência de backup (agenda semanal que nunca dispara) é coberta fora do n8n por
+`.github/workflows/backup-freshness.yml` em `main`; não há heartbeat de sucesso.
 
 ## Credencial GitHub mínima
 
@@ -45,6 +48,7 @@ O job reutilizável usa o GitHub Environment `backup`, com aprovação quando ap
 | secret | `R2_SECRET_ACCESS_KEY` | credencial limitada ao bucket |
 | variable | `SUPABASE_PROJECT_REF` | ref público allowlisted do alvo |
 | variable | `MBJ_BACKUP_ENVIRONMENT` | `staging` ou `production` |
+| variable | `SUPABASE_DB_POOLER_HOST` | opcional; host do Session Pooler usado só quando `SUPABASE_DB_URL` é a conexão direta e precisa ser reescrita. Deixar vazio quando `SUPABASE_DB_URL` já é a URI do pooler |
 
 O token R2 deve possuir somente Object Read & Write no bucket privado `mbj-backups`; não deve poder
 criar/excluir buckets, alterar domínio, CORS, lifecycle, Workers, DNS ou WAF. O bucket e a credencial
@@ -61,23 +65,25 @@ não são provisionados por este lote porque o acesso R2 ainda não foi autoriza
 5. Valida todos os campos de `backup-result.json` conforme
    `specs/001-mbj-mvp-core/contracts/backup-automation.md`.
 6. Somente `VERIFIED`, com request/run correspondentes, checksum válido, chave sob `backups/` e
-   timestamp da execução, pode confirmar sucesso e enviar heartbeat.
+   timestamp da execução, pode confirmar sucesso.
 
 O artefato tem retenção de um dia e não contém dump, manifesto, objeto Storage, signed URL, log,
 credencial ou dado pessoal.
 
-## Retenção, heartbeat e alerta
+## Retenção e alerta
 
 O script do runner mantém as quatro cópias criptografadas verificadas mais recentes e só remove uma
-quinta depois do upload atual passar por `HeadObject` e readback SHA-256. O heartbeat do UptimeRobot é
-enviado pelo n8n apenas depois da validação do artefato. Toda condição fail-closed usa o webhook de
-falha configurado em `MBJ_BACKUP_FAILURE_WEBHOOK_URL` e nunca inclui resposta do provedor, segredo ou
+quinta depois do upload atual passar por `HeadObject` e readback SHA-256. Não há heartbeat de
+sucesso: a detecção de ausência de backup fica com `.github/workflows/backup-freshness.yml` em
+`main`, que falha (e dispara a notificação nativa do GitHub para o dono) quando a run `success` mais
+recente de `backup.yml` está ausente ou obsoleta. Toda condição fail-closed do orquestrador entrega
+um payload sanitizado ao webhook de falha do operador e nunca inclui resposta do provedor, segredo ou
 conteúdo do backup.
 
-Variáveis n8n esperadas, configuradas fora do export:
-
-- `MBJ_BACKUP_HEARTBEAT_URL`;
-- `MBJ_BACKUP_FAILURE_WEBHOOK_URL`.
+O n8n Community não tem Variables (`$vars`), então o export mantém
+`{{ $vars.MBJ_BACKUP_FAILURE_WEBHOOK_URL }}` apenas como contrato de projeto; na instância real a URL
+HTTPS do operador (com token) é gravada diretamente no nó `Send failure alert`, como configuração de
+instância, nunca em Git, docs ou log. `MBJ_BACKUP_HEARTBEAT_URL` foi aposentada.
 
 ## Contingência local
 
