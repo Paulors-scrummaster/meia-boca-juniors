@@ -337,7 +337,7 @@
 - [X] T178 Configure Cloudflare Pages production variables, attach `meiabocajuniors.dbidigital.com.br`, redirect the `pages.dev` alias, verify the production PWA/worker/canonical-origin behavior from `main`, and record evidence in `docs/deployment.md`
 - [X] T179 Trigger and verify the production n8n backup, then execute `.github/workflows/database-release.yml` from `main`, require its backup ID/checksum gate, apply production migrations/Edge Functions, run smoke checks, and record sanitized release evidence in `docs/release-activation.md`
 - [X] T180 Configure UptimeRobot HTTP/keyword and backup-heartbeat monitors, test both success and alert paths, and record safe evidence in `docs/operations.md`
-- [ ] T181 Execute the production-only acceptance scenarios from the validation guide and record results or linked defects in `specs/001-mbj-mvp-core/checklists/production-activation-validation.md`
+- [X] T181 Execute the production-only acceptance scenarios from the validation guide and record results or linked defects in `specs/001-mbj-mvp-core/checklists/production-activation-validation.md`
 - [ ] T182 Open the `chore/mbj-production-activation` Pull Request, record its URL in `docs/release-activation.md`, commit that final evidence update, require passing CI and Codex-assisted self-review, and merge the operational PR into protected `main`
 
 ---
