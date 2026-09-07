@@ -150,7 +150,7 @@ export function LineupEditor({
 
       <div
         aria-label="Editor visual do campo tático"
-        className="relative min-h-96 overflow-hidden rounded-[2rem] border-4 border-white/80 bg-emerald-700 shadow-inner"
+        className="relative min-h-96 overflow-hidden rounded-[2rem] border-4 border-pitch-line bg-pitch shadow-inner"
         onPointerMove={(event) => {
           if (event.buttons !== 1) return;
           const athleteId = event.currentTarget.dataset.dragging;
@@ -173,11 +173,14 @@ export function LineupEditor({
         }}
         onPointerUp={(event) => delete event.currentTarget.dataset.dragging}
       >
-        <div aria-hidden="true" className="absolute inset-x-0 top-1/2 border-t-2 border-white/70" />
+        <div
+          aria-hidden="true"
+          className="absolute inset-x-0 top-1/2 border-t-2 border-pitch-line"
+        />
         {starters.map((player) => (
           <button
             aria-label={`Posicionar ${playerName(athletes, player.athleteId)}. Use as setas para mover.`}
-            className="absolute min-h-11 min-w-11 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-primary px-2 text-xs font-black text-primary-foreground shadow-lg focus:outline-none focus:ring-4 focus:ring-secondary"
+            className="absolute min-h-11 min-w-11 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-pitch-foreground bg-primary px-2 text-xs font-black text-primary-foreground shadow-lg focus:outline-none focus:ring-4 focus:ring-secondary"
             key={player.athleteId}
             onKeyDown={(event) => {
               const delta = event.shiftKey ? 5 : 2;

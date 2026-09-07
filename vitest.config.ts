@@ -10,7 +10,11 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    include: ['src/**/*.{test,spec}.{ts,tsx}', 'supabase/functions/tests/**/*.{test,spec}.ts'],
+    include: [
+      'src/**/*.{test,spec}.{ts,tsx}',
+      'tests/unit/**/*.{test,spec}.{ts,tsx}',
+      'supabase/functions/tests/**/*.{test,spec}.ts',
+    ],
     maxWorkers: 1,
     setupFiles: ['./src/test/setup.ts'],
     env: {

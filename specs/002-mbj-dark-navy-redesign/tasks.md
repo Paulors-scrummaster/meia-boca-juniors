@@ -179,29 +179,29 @@ e erro de validação; abrir um diálogo modal e confirmar véu escuro.
 
 ### Estados compartilhados
 
-- [ ] T062 [US4] Substituir o véu `bg-foreground/50` pelo token `overlay` a 60% nos **dois** lugares onde ele aparece: `src/shared/components/feedback.tsx:85` (`ConfirmationDialog`) e `src/features/statistics/components/ReopenMatchDialog.tsx:109` — no tema escuro `foreground` é branco e produziria véu branco sobre a interface (E-09)
-- [ ] T063 [US4] Dar representação visual ao tom `success` em `ToastRegion` de `src/shared/components/feedback.tsx`, que hoje renderiza igual a texto comum, e mapear `info` ao token correspondente (E-11)
-- [ ] T064 [US4] Revisar `LoadingState`, `EmptyState` e `ErrorState` em `src/shared/components/feedback.tsx` para superfícies e bordas do tema escuro
-- [ ] T065 [P] [US4] Substituir em `src/features/offline/components/OfflineIndicator.tsx` o trio fixo `bg-amber-50`, `border-amber-300` e `text-amber-950` pela superfície, borda e texto do token `warning`
-- [ ] T066 [P] [US4] Substituir em `src/features/attendance/components/RefusalReasonModal.tsx` o véu `bg-black/55` pelo token `overlay` a 60%
-- [ ] T067 [P] [US4] Revisar `src/features/notifications/components/PendingActionsBanner.tsx`, `src/features/notifications/components/PushPermissionCard.tsx` e `src/app/components/PwaUpdatePrompt.tsx` para os tokens de estado
-- [ ] T068 [P] [US4] Definir o padrão de elemento desabilitado (FR-007, E-03) em `src/shared/components/OnlineActionGuard.tsx` e no aviso de escrita bloqueada, mantendo-os perceptíveis contra o fundo
+- [X] T062 [US4] Substituir o véu `bg-foreground/50` pelo token `overlay` a 60% nos **dois** lugares onde ele aparece: `src/shared/components/feedback.tsx:85` (`ConfirmationDialog`) e `src/features/statistics/components/ReopenMatchDialog.tsx:109` — no tema escuro `foreground` é branco e produziria véu branco sobre a interface (E-09)
+- [X] T063 [US4] Dar representação visual ao tom `success` em `ToastRegion` de `src/shared/components/feedback.tsx`, que hoje renderiza igual a texto comum, e mapear `info` ao token correspondente (E-11)
+- [X] T064 [US4] Revisar `LoadingState`, `EmptyState` e `ErrorState` em `src/shared/components/feedback.tsx` para superfícies e bordas do tema escuro
+- [X] T065 [P] [US4] Substituir em `src/features/offline/components/OfflineIndicator.tsx` o trio fixo `bg-amber-50`, `border-amber-300` e `text-amber-950` pela superfície, borda e texto do token `warning`
+- [X] T066 [P] [US4] Substituir em `src/features/attendance/components/RefusalReasonModal.tsx` o véu `bg-black/55` pelo token `overlay` a 60%
+- [X] T067 [P] [US4] Revisar `src/features/notifications/components/PendingActionsBanner.tsx`, `src/features/notifications/components/PushPermissionCard.tsx` e `src/app/components/PwaUpdatePrompt.tsx` para os tokens de estado
+- [X] T068 [P] [US4] Definir o padrão de elemento desabilitado (FR-007, E-03) em `src/shared/components/OnlineActionGuard.tsx` e no aviso de escrita bloqueada, mantendo-os perceptíveis contra o fundo
 
 ### Superfícies de conteúdo
 
-- [ ] T069 [P] [US4] Aplicar superfície, borda e realce de hover/ativo/foco aos cards de `src/features/roster/pages/RosterPage.tsx` e `src/features/roster/pages/AthleteProfilePage.tsx`
-- [ ] T070 [P] [US4] Corrigir em `src/features/roster/components/AthleteAvatar.tsx` a colisão entre `bg-primary` e `ring-secondary`, que no tema Dark Navy tornam fundo e anel ambos dourados e fazem o anel desaparecer: trocar o fundo para superfície navy (`card` ou `elevated`) e manter o anel dourado, espelhando a composição do escudo — campo azul com contorno dourado — e mantendo as iniciais legíveis
-- [ ] T071 [P] [US4] Aplicar o tema aos cards e formulários de `src/features/matches/pages/MatchesPage.tsx`, `src/features/matches/pages/MatchDetailPage.tsx` e `src/features/matches/components/MatchForm.tsx`
-- [ ] T072 [P] [US4] Aplicar o tema a `src/features/attendance/components/CallUpManager.tsx`, `src/features/attendance/components/PresenceResponsePanel.tsx` e `src/features/attendance/pages/AttendanceDashboardPage.tsx`
-- [ ] T073 [P] [US4] Substituir `bg-emerald-700` pelo token `pitch` e converter as marcações do campo em `src/features/lineups/components/LineupEditor.tsx` e `src/features/lineups/components/PublishedLineup.tsx`: `border-white` sólido passa a `pitch-foreground`; `border-white/70` e `border-white/80` passam ao token sólido `pitch-line`, preservando a hierarquia visual sem usar opacidades fora do conjunto fechado de FR-003b
-- [ ] T074 [P] [US4] Aplicar o tema a `src/features/lineups/components/FormationSelector.tsx`, `src/features/lineups/pages/LineupEditorPage.tsx` e `src/features/lineups/pages/PublishedLineupPage.tsx`, confirmando que `bg-destructive/10` e `bg-primary/10` (FormationSelector:59 e :66) já estão conformes ao conjunto de opacidades de FR-003b
-- [ ] T075 [P] [US4] Aplicar o tema às tabelas e destaques de `src/features/statistics/pages/SeasonRankingsPage.tsx`, `src/features/statistics/pages/StatisticsAdminPage.tsx`, `src/features/statistics/components/ConsolidationForm.tsx` e `src/features/statistics/components/ReopenMatchDialog.tsx`, normalizando `border-destructive/30` (ReopenMatchDialog:80) para 40%
-- [ ] T076 [P] [US4] Aplicar o tema a `src/features/notices/pages/NoticesPage.tsx` e `src/features/mvp-voting/pages/MvpVotingPage.tsx`
-- [ ] T077 [P] [US4] Aplicar o tema a `src/features/auth/components/RoleManager.tsx`, `src/features/auth/components/InvitationManager.tsx`, `src/features/roster/components/AthleteForm.tsx` e `src/features/roster/pages/RosterManagementPage.tsx`
+- [X] T069 [P] [US4] Aplicar superfície, borda e realce de hover/ativo/foco aos cards de `src/features/roster/pages/RosterPage.tsx` e `src/features/roster/pages/AthleteProfilePage.tsx`
+- [X] T070 [P] [US4] Corrigir em `src/features/roster/components/AthleteAvatar.tsx` a colisão entre `bg-primary` e `ring-secondary`, que no tema Dark Navy tornam fundo e anel ambos dourados e fazem o anel desaparecer: trocar o fundo para superfície navy (`card` ou `elevated`) e manter o anel dourado, espelhando a composição do escudo — campo azul com contorno dourado — e mantendo as iniciais legíveis
+- [X] T071 [P] [US4] Aplicar o tema aos cards e formulários de `src/features/matches/pages/MatchesPage.tsx`, `src/features/matches/pages/MatchDetailPage.tsx` e `src/features/matches/components/MatchForm.tsx`
+- [X] T072 [P] [US4] Aplicar o tema a `src/features/attendance/components/CallUpManager.tsx`, `src/features/attendance/components/PresenceResponsePanel.tsx` e `src/features/attendance/pages/AttendanceDashboardPage.tsx`
+- [X] T073 [P] [US4] Substituir `bg-emerald-700` pelo token `pitch` e converter as marcações do campo em `src/features/lineups/components/LineupEditor.tsx` e `src/features/lineups/components/PublishedLineup.tsx`: `border-white` sólido passa a `pitch-foreground`; `border-white/70` e `border-white/80` passam ao token sólido `pitch-line`, preservando a hierarquia visual sem usar opacidades fora do conjunto fechado de FR-003b
+- [X] T074 [P] [US4] Aplicar o tema a `src/features/lineups/components/FormationSelector.tsx`, `src/features/lineups/pages/LineupEditorPage.tsx` e `src/features/lineups/pages/PublishedLineupPage.tsx`, confirmando que `bg-destructive/10` e `bg-primary/10` (FormationSelector:59 e :66) já estão conformes ao conjunto de opacidades de FR-003b
+- [X] T075 [P] [US4] Aplicar o tema às tabelas e destaques de `src/features/statistics/pages/SeasonRankingsPage.tsx`, `src/features/statistics/pages/StatisticsAdminPage.tsx`, `src/features/statistics/components/ConsolidationForm.tsx` e `src/features/statistics/components/ReopenMatchDialog.tsx`, normalizando `border-destructive/30` (ReopenMatchDialog:80) para 40%
+- [X] T076 [P] [US4] Aplicar o tema a `src/features/notices/pages/NoticesPage.tsx` e `src/features/mvp-voting/pages/MvpVotingPage.tsx`
+- [X] T077 [P] [US4] Aplicar o tema a `src/features/auth/components/RoleManager.tsx`, `src/features/auth/components/InvitationManager.tsx`, `src/features/roster/components/AthleteForm.tsx` e `src/features/roster/pages/RosterManagementPage.tsx`
 
 ### Verificação da story
 
-- [ ] T078 [US4] Criar em `tests/unit/` a varredura estática que percorre `src/` e falha ao encontrar utilitário de cor da paleta padrão do Tailwind ou cor literal, excetuando `src/index.css`, `src/config/club.config.ts` e o contêiner do QR Code em `MfaPage.tsx`, conforme a camada 1 de `contracts/theme-verification.md`
+- [X] T078 [US4] Criar em `tests/unit/` a varredura estática que percorre `src/` e falha ao encontrar utilitário de cor da paleta padrão do Tailwind ou cor literal, excetuando `src/index.css`, `src/config/club.config.ts` e o contêiner do QR Code em `MfaPage.tsx`, conforme a camada 1 de `contracts/theme-verification.md`
 
 **Checkpoint**: todas as quatro user stories completas e independentes.
 

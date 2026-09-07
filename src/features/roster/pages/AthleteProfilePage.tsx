@@ -46,7 +46,7 @@ export function AthleteProfilePage({
       >
         <ArrowLeft aria-hidden="true" className="h-5 w-5" /> Voltar ao elenco
       </Link>
-      <section className="rounded-3xl border bg-card p-6 shadow-lg sm:p-8">
+      <section className="rounded-3xl border bg-card p-6 shadow-lg transition-colors focus-within:border-primary hover:border-primary sm:p-8">
         <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
           <AthleteAvatar
             className="h-24 w-24 text-2xl"

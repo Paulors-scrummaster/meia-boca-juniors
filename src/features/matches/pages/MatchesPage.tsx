@@ -115,7 +115,10 @@ function MatchSection({
       ) : (
         <ul className="grid gap-4 md:grid-cols-2">
           {matches.map((match) => (
-            <li className="rounded-2xl border bg-card p-5 shadow-sm" key={match.id}>
+            <li
+              className="rounded-2xl border bg-card p-5 shadow-sm transition-colors hover:border-primary focus-within:border-primary"
+              key={match.id}
+            >
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <h3 className="text-lg font-black">MBJ × {match.opponent_name}</h3>
