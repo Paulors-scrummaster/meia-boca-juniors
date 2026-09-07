@@ -10,7 +10,7 @@ export function WelcomePage() {
         <img
           alt={`Escudo do ${clubConfig.identity.shortName}`}
           className="mb-7 h-24 w-24 drop-shadow-lg"
-          src={clubConfig.assets.logo}
+          src={clubConfig.assets.crest}
         />
         <p className="mb-3 text-sm font-black uppercase tracking-[0.22em] text-primary">
           {clubConfig.identity.shortName}

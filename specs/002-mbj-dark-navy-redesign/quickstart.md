@@ -190,14 +190,14 @@ Esperado:
 **Automatizado**
 
 ```bash
-node scripts/generate-brand-icons.mjs
+npm run brand:assets
 git diff --stat public/brand
 npm run build
 ```
 
 Esperado:
-- Regenerar os ícones a partir do mesmo SVG não produz diferença (processo determinístico, GA-01).
-- Nenhum artefato excede seu orçamento de peso (SVG ≤ 20 KB, PNG de ícone ≤ 40 KB, textura condicional ≤ 30 KB, total ≤ 180 KB).
+- Regenerar a partir das mesmas fontes não produz diferença (processo determinístico, GA-01).
+- Nenhum artefato excede seu orçamento (SVG ≤ 20 KB, PNG de ícone ≤ 40 KB, brasão ≤ 120 KB por variante, textura condicional ≤ 30 KB, total ≤ 300 KB).
 
 **Manual**
 

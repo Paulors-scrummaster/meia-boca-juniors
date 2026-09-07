@@ -58,6 +58,8 @@ export default defineConfig(({ mode }) => {
         includeAssets: [
           'favicon.svg',
           'brand/mbj-shield.svg',
+          'brand/mbj-crest-512.webp',
+          'brand/mbj-crest-1024.webp',
           'brand/mbj-icon-192.png',
           'brand/mbj-icon-512.png',
           'brand/mbj-icon-maskable-512.png',
@@ -101,7 +103,7 @@ export default defineConfig(({ mode }) => {
         strategies: 'generateSW',
         workbox: {
           cleanupOutdatedCaches: true,
-          globPatterns: ['**/*.{css,html,ico,js,png,svg,woff2,webmanifest}'],
+          globPatterns: ['**/*.{css,html,ico,js,png,svg,webp,woff2,webmanifest}'],
           navigateFallback: '/index.html',
           navigateFallbackDenylist: pwaNavigationFallbackDenylist,
           runtimeCaching: [],

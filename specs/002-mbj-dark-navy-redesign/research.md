@@ -66,9 +66,10 @@ modal — a barra lateral estática assume, o que evita o estado inválido de E-
 
 ## D-03 — Como produzir o escudo vetorial a partir do PNG de origem
 
-**Decision**: redesenhar o escudo à mão como SVG otimizado, com fundo transparente, `viewBox`
-quadrado e o conjunto de estrelas gerado por repetição de um único símbolo de estrela; o arquivo de
-origem `logo mbj 2.png` permanece no repositório apenas como referência de design e não é publicado.
+**Decision** *(revista após inspeção visual do resultado — ver nota ao final)*: produzir **duas**
+representações. Para a interface, extrair o brasão de `logo mbj 2.png` removendo o fundo branco por
+preenchimento a partir das bordas, recortar à silhueta e publicar variantes otimizadas com
+transparência. Para favicon e ícones da PWA, manter o redesenho vetorial simplificado.
 
 **Rationale**: o original tem 1,6 MB, fundo branco opaco e dezenas de estrelas pequenas com sombra e
 gradiente. Vetorização automática desse tipo de arte produz milhares de nós e um SVG maior que o PNG,
@@ -82,9 +83,19 @@ fino desde que composição e proporções sejam preservadas.
   nitidez no favicon, estoura o orçamento de peso e mantém duas representações da marca.
 - *Vetorização automática*: gera arquivo maior que o raster e artefatos visíveis nas estrelas.
 
-**Nota de verificação**: o escudo atual em `public/brand/logo.svg` é uma aproximação simplificada
-(contorno duplo, texto "MBJ" e uma estrela) que não corresponde ao brasão oficial. Ele é substituído,
-não ajustado.
+**Nota de verificação**: o escudo anterior em `public/brand/logo.svg` era uma aproximação simplificada
+(contorno duplo, texto "MBJ" e uma estrela) que não correspondia ao brasão oficial. Foi substituído.
+
+**Nota de revisão**: a decisão original previa o vetor simplificado também na interface. Ao comparar o
+resultado com a referência normativa, ficou evidente que a simplificação não sustenta FR-032 — o
+brasão real tem relevo, brilho e dezenas de estrelas que o vetor não reproduz. A extração do original
+resolve isso sem abrir mão da nitidez em tamanhos pequenos, porque o vetor continua servindo favicon e
+ícones. O custo é 140 KB de imagem, dentro do orçamento revisado.
+
+**Detalhes da extração**: o preenchimento parte das bordas de propósito. Um limiar global sobre
+"quase branco" furaria os brilhos especulares do dourado, que chegam perto do branco. O brasão tem
+contorno azul-escuro, então o preenchimento para de forma limpa na silhueta. Uma passagem adicional
+remove a franja de antisserrilhamento, evitando halo claro sobre o fundo navy.
 
 ---
 

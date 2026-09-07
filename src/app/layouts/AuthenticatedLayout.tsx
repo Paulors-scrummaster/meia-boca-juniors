@@ -60,7 +60,7 @@ export function AuthenticatedLayout({
           <img
             alt={`Escudo do ${clubConfig.identity.shortName}`}
             className="h-11 w-11"
-            src={clubConfig.assets.logo}
+            src={clubConfig.assets.crest}
           />
           <div>
             <p className="font-black">{clubConfig.identity.shortName}</p>

@@ -431,18 +431,29 @@ feature. A coluna "Impacto" descreve apenas a natureza da mudança de apresenta�
 - **FR-009**: O sistema DEVE usar o escudo oficial derivado de `logo mbj 2.png` como imagem de marca
   padrão em todas as superfícies de marca: Landing Page, topo da barra lateral, topo da gaveta mobile,
   favicon, ícone da PWA e manifesto.
-- **FR-009a**: O escudo DEVE ser produzido como desenho vetorial fiel ao original — contorno do
-  escudo, campo azul, conjunto de estrelas e letras "MBJ" —, com fundo transparente, e é a
-  representação usada nas superfícies de tela e no favicon.
-- **FR-009b**: Os ícones da PWA DEVEM ser gerados a partir desse mesmo vetor, nos tamanhos de 192px e
-  512px, garantindo uma única origem de verdade para a marca e evitando divergência entre
-  representações.
+- **FR-009a**: A marca DEVE ter **duas representações, com propósitos distintos**:
+  1. **Brasão em tela** — extraído de `logo mbj 2.png`, o arquivo oficial em alta resolução, com o
+     fundo branco removido e transparência preservada. Mantém relevo, brilho e o campo completo de
+     estrelas do brasão real. É a representação usada em **todas as superfícies de interface**:
+     Landing Page, marca d'água do hero, barra lateral, faixa superior mobile e cards.
+  2. **Escudo vetorial simplificado** — desenho fiel à composição do brasão (contorno, campo azul,
+     estrelas e letras "MBJ"), usado apenas onde o detalhe fino do brasão real se degrada: favicon e
+     ícones da PWA.
+- **FR-009f**: A interface NÃO DEVE usar o escudo vetorial simplificado. A referência normativa exige
+  o brasão real em tela, e a simplificação existe exclusivamente para tamanhos pequenos.
+- **FR-009b**: Os ícones da PWA DEVEM ser gerados a partir do escudo vetorial, nos tamanhos de 192px e
+  512px. Ambas as representações derivam do mesmo brasão oficial, e ambas são geradas por script
+  reexecutável, de modo que nenhuma delas seja editada à mão e possa divergir.
 - **FR-009c**: O manifesto DEVE declarar um ícone maskable dedicado, com o escudo reduzido dentro da
   zona de segurança e o restante do quadro preenchido com o azul navy, de modo que nenhum recorte do
   sistema operacional corte o contorno do escudo. O ícone maskable NÃO DEVE ser o mesmo arquivo usado
   como favicon.
-- **FR-009d**: O arquivo de origem `logo mbj 2.png` NÃO DEVE ser publicado como asset da aplicação;
-  ele permanece no repositório apenas como referência de design.
+- **FR-009d**: O arquivo `logo mbj 2.png` é a **fonte de geração** do brasão em tela e permanece no
+  repositório como insumo do script. Ele NÃO DEVE ser publicado como asset da aplicação: o que a
+  aplicação serve são as variantes derivadas, otimizadas e com transparência, nunca o original de
+  1,6 MB.
+- **FR-009g**: As variantes do brasão em tela DEVEM usar formato com compressão adequada a imagem
+  fotográfica com transparência, de modo que o ganho de fidelidade não custe peso desproporcional.
 - **FR-009e**: O escudo DEVE permanecer legível em tamanhos reduzidos: em 32px o contorno e a
   silhueta devem ser identificáveis, admitindo-se simplificação do detalhe fino das estrelas desde que
   a composição e as proporções do original sejam preservadas.
@@ -591,11 +602,14 @@ feature. A coluna "Impacto" descreve apenas a natureza da mudança de apresenta�
   acento claro, texto primário, texto secundário, foco e véu de modal; (b) estado semântico — sucesso,
   atenção, erro/destrutivo e informação, cada um com superfície e borda derivadas por opacidade. Cada
   papel possui exatamente um valor e é a única origem de cor permitida na aplicação.
-- **AssetsDeMarca**: conjunto dos arquivos de identidade derivados de um único escudo vetorial —
-  escudo para uso em tela, favicon, ícones da PWA de 192px e 512px, ícone maskable dedicado — mais as
-  entradas de ícone do manifesto e os caminhos publicados por onde a aplicação os referencia.
+- **AssetsDeMarca**: conjunto dos arquivos de identidade em **duas representações do mesmo brasão**.
+  A primeira é o brasão real, extraído do arquivo oficial em alta resolução, usado em todas as
+  superfícies de interface, em duas variantes de tamanho. A segunda é o escudo vetorial simplificado,
+  restrito a favicon e aos ícones da PWA — 192px, 512px e maskable dedicado — onde o detalhe fino do
+  brasão real se degrada. Inclui ainda as entradas de ícone do manifesto e os caminhos publicados por
+  onde a aplicação os referencia.
 - **ReferênciasVisuais**: arquivos locais do repositório usados como fonte da verdade de design:
-  `Sugestão nova interface e tema mbj.png` (tema e composição), `logo mbj 2.png` (escudo oficial de
+  `Sugestão nova interface e tema mbj.png` (tema e composição), `logo mbj 2.png` (brasão oficial, fonte de geração do brasão em tela e de
   origem) e `logo mbj 1.jpg` (referência histórica, não usada para geração).
 - **ItemDeNavegação**: destino já existente exibido no menu, com rótulo, rota de destino, condição de
   visibilidade por papel e estado ativo. A feature reorganiza a apresentação desses itens; não altera
@@ -609,6 +623,9 @@ feature. A coluna "Impacto" descreve apenas a natureza da mudança de apresenta�
 
 - **SC-001**: 100% das superfícies catalogadas exibem o tema Dark Navy; zero superfícies com fundo do
   tema claro anterior, comprovado pelo portão de verificação definido em SC-003a.
+- **SC-002a1**: 100% das superfícies de interface exibem o brasão real extraído de `logo mbj 2.png`;
+  zero superfícies de interface usam o escudo vetorial simplificado, que fica restrito a favicon e
+  ícones da PWA.
 - **SC-002**: 100% dos pontos que exibem o escudo do clube apresentam o escudo oficial atual; zero
   ocorrências do escudo anterior ou da variante de referência inicial em qualquer superfície, arquivo
   de marca publicado ou entrada de manifesto.

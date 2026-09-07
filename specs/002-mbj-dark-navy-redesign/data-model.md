@@ -147,14 +147,16 @@ na configuração do manifesto em `vite.config.ts`.
 
 | Artefato | Caminho publicado | Origem | Fundo | Orçamento |
 |---|---|---|---|---|
-| Escudo de tela | `/brand/mbj-shield.svg` | Redesenho vetorial | Transparente | ≤ 20 KB |
+| Brasão em tela | `/brand/mbj-crest-512.webp` | Extraído de `logo mbj 2.png` | Transparente | ≤ 120 KB |
+| Brasão, marca d'água | `/brand/mbj-crest-1024.webp` | Extraído de `logo mbj 2.png` | Transparente | ≤ 120 KB |
+| Escudo vetorial (só favicon) | `/brand/mbj-shield.svg` | Redesenho vetorial | Transparente | ≤ 20 KB |
 | Favicon | `/favicon.svg` | Mesmo vetor | Transparente | ≤ 20 KB |
 | Ícone PWA 192 | `/brand/mbj-icon-192.png` | Rasterizado do vetor | Transparente | ≤ 40 KB |
 | Ícone PWA 512 | `/brand/mbj-icon-512.png` | Rasterizado do vetor | Transparente | ≤ 40 KB |
 | Ícone maskable | `/brand/mbj-icon-maskable-512.png` | Rasterizado do vetor | `#0A1325` opaco | ≤ 40 KB |
 | Textura do hero *(condicional)* | `/brand/hero-texture.png` | Ativo próprio da feature | Transparente | ≤ 30 KB |
 
-Carga total de marca ≤ 180 KB. A textura só é criada se a composição por CSS não atingir a fidelidade
+Carga total de marca ≤ 300 KB. A textura só é criada se a composição por CSS não atingir a fidelidade
 exigida por FR-033; nunca é imagem de terceiros.
 
 ### 2.2 Artefatos removidos
@@ -176,12 +178,18 @@ Nenhum dos dois pode permanecer acessível após a publicação (SC-008).
 
 ### 2.4 Regras de validação
 
-- **V-05**: o escudo de tela e o favicon têm fundo transparente e `viewBox` quadrado.
+- **V-05**: o favicon e o escudo vetorial têm fundo transparente e `viewBox` quadrado; as variantes
+  do brasão em tela têm fundo transparente e quadro quadrado.
 - **V-06**: o ícone maskable mantém o escudo dentro da zona de segurança circular de 80% do lado, com
   o restante do quadro preenchido em `background`.
 - **V-07**: o ícone maskable e o favicon são arquivos distintos (requisitos de composição opostos).
 - **V-08**: nenhum artefato excede seu orçamento de peso.
-- **V-09**: `logo mbj 2.png` não é referenciado por nenhum código de aplicação.
+- **V-09**: `logo mbj 2.png` não é referenciado por nenhum código de aplicação nem publicado; é
+  insumo exclusivo do script de geração.
+- **V-17**: as superfícies de interface referenciam `crest` ou `crestLarge`, nunca `shield`
+  (FR-009f).
+- **V-18**: o brasão em tela não apresenta halo claro na silhueta quando composto sobre
+  `background` ou `card` (GA-13).
 
 ---
 

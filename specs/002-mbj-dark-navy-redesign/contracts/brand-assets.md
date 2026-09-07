@@ -9,7 +9,9 @@ HTML raiz, manifesto da PWA e política de cache da borda.
 
 | Caminho | Formato | Fundo | Consumidores |
 |---|---|---|---|
-| `/brand/mbj-shield.svg` | SVG | Transparente | Landing Page, topo da barra lateral, faixa superior mobile, avatar de fallback |
+| `/brand/mbj-crest-512.webp` | WebP | Transparente | **Interface**: Landing Page, barra lateral, faixa superior mobile, cards |
+| `/brand/mbj-crest-1024.webp` | WebP | Transparente | **Interface**: marca d'água do hero |
+| `/brand/mbj-shield.svg` | SVG | Transparente | Apenas favicon; não usado na interface (FR-009f) |
 | `/favicon.svg` | SVG | Transparente | `index.html` (`rel="icon"`) |
 | `/brand/mbj-icon-192.png` | PNG | Transparente | Manifesto (`purpose: "any"`), `apple-touch-icon` |
 | `/brand/mbj-icon-512.png` | PNG | Transparente | Manifesto (`purpose: "any"`) |
@@ -19,10 +21,22 @@ HTML raiz, manifesto da PWA e política de cache da borda.
 Caminhos são referenciados por `clubConfig.assets`. Nenhum componente escreve caminho de marca
 literal.
 
+## Contrato de geração — brasão em tela
+
+Origem: `logo mbj 2.png`, o arquivo oficial em alta resolução (1254x1254, fundo branco opaco). O
+script `scripts/generate-brand-assets.mjs` remove o fundo por preenchimento a partir das bordas,
+recorta à silhueta e exporta as variantes com transparência.
+
+| Garantia | Descrição |
+|---|---|
+| **GA-12** | O brasão em tela preserva relevo, brilho e o campo completo de estrelas do original |
+| **GA-13** | Nenhum halo claro aparece na silhueta quando composto sobre `background` ou `card` |
+| **GA-14** | O original de 1,6 MB permanece como insumo do script e nunca é publicado |
+
 ## Contrato de geração — ícones
 
-Aplica-se aos **três ícones da PWA**. Origem única: `/brand/mbj-shield.svg`, do qual são derivados por
-`scripts/generate-brand-icons.mjs`, que usa o Chromium do Playwright já instalado (research D-04).
+Aplica-se aos **três ícones da PWA**. Origem: `/brand/mbj-shield.svg`, do qual são derivados pelo
+mesmo script, que usa o Chromium do Playwright já instalado (research D-04).
 
 | Garantia | Descrição |
 |---|---|
@@ -30,7 +44,7 @@ Aplica-se aos **três ícones da PWA**. Origem única: `/brand/mbj-shield.svg`, 
 | **GA-02** | Os PNGs são versionados no repositório; o build de produção não gera imagem |
 | **GA-03** | O maskable mantém o escudo dentro da zona de segurança circular de 80% do lado |
 | **GA-04** | O maskable e o favicon são arquivos distintos, com composições diferentes |
-| **GA-05** | `logo mbj 2.png` não é publicado nem importado por código de aplicação |
+| **GA-05** | `logo mbj 2.png` não é publicado nem importado por código de aplicação; é insumo do script de geração |
 
 ## Contrato de geração — textura do hero
 
@@ -107,8 +121,13 @@ que impede uma cópia em cache do escudo antigo de continuar sendo servida (FR-0
 |---|---|
 | Cada SVG | 20 KB |
 | Cada PNG de ícone | 40 KB |
+| Cada variante do brasão em tela | 120 KB |
 | Textura do hero, se existir | 30 KB |
-| Total de marca | 180 KB |
+| Total de marca | 300 KB |
+
+O orçamento subiu de 180 KB para 300 KB ao adotar o brasão real na interface. O ganho de fidelidade
+exigido pela referência normativa custa peso de imagem; a compressão com transparência mantém as duas
+variantes em 140 KB somados, contra 1,6 MB do original.
 
 A textura é **condicional**: só é criada se a composição por CSS não atingir a fidelidade exigida por
 FR-033. Sendo um ativo próprio da feature, nunca uma imagem de terceiros.

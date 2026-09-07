@@ -53,7 +53,12 @@ interface ClubConfig {
     privacy: string | null;
   };
   assets: {
-    logo: string;
+    /** Brasão oficial em tela, extraído do arquivo de alta resolução. */
+    crest: string;
+    /** Mesmo brasão em resolução maior, para a marca d'água do hero. */
+    crestLarge: string;
+    /** Escudo vetorial simplificado, legível em tamanhos pequenos. */
+    shield: string;
     favicon: string;
     pwaIcon192: string;
     pwaIcon512: string;
@@ -82,7 +87,9 @@ export const clubConfig = {
     privacy: null,
   },
   assets: {
-    logo: '/brand/mbj-shield.svg',
+    crest: '/brand/mbj-crest-512.webp',
+    crestLarge: '/brand/mbj-crest-1024.webp',
+    shield: '/brand/mbj-shield.svg',
     favicon: '/favicon.svg',
     pwaIcon192: '/brand/mbj-icon-192.png',
     pwaIcon512: '/brand/mbj-icon-512.png',
