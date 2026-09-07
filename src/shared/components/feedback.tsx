@@ -82,7 +82,9 @@ export function ConfirmationDialog({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-foreground/50 p-4">
+    // overlay a 60%, não foreground/50: no tema escuro foreground é branco e um véu
+    // derivado dele ficaria claro, invertendo a hierarquia visual (E-09).
+    <div className="fixed inset-0 z-50 grid place-items-center bg-overlay/60 p-4">
       <section
         aria-describedby={descriptionId}
         aria-labelledby={titleId}
@@ -129,6 +131,13 @@ interface ToastRegionProps {
   toasts: readonly ToastMessage[];
 }
 
+/** Um par borda/texto por tom, na opacidade de borda de FR-003b (E-11). */
+const TOAST_TONE_STYLES: Record<ToastMessage['tone'], string> = {
+  error: 'border-destructive/40 text-destructive',
+  info: 'border-info/40 text-info',
+  success: 'border-success/40 text-success',
+};
+
 export function ToastRegion({ onDismiss, toasts }: ToastRegionProps) {
   return (
     <div
@@ -138,10 +147,11 @@ export function ToastRegion({ onDismiss, toasts }: ToastRegionProps) {
       role="status"
     >
       {toasts.map((toast) => (
-        <div className="rounded-xl border bg-card p-4 shadow-lg" key={toast.id}>
-          <p className={toast.tone === 'error' ? 'text-destructive' : 'text-foreground'}>
-            {toast.message}
-          </p>
+        <div
+          className={`rounded-xl border bg-card p-4 shadow-lg ${TOAST_TONE_STYLES[toast.tone]}`}
+          key={toast.id}
+        >
+          <p>{toast.message}</p>
           {onDismiss ? (
             <button
               aria-label="Fechar aviso"

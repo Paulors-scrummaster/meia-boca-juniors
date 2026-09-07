@@ -386,6 +386,43 @@
 
 > 💡 Motivo: acelera o MVP sem perder a aparência azul-escuro, dourada e preta.
 
+### Identidade visual — tema Dark Navy
+
+- **Decisão:** tema único "Dark Mode Esportivo Premium" (feature `002-mbj-dark-navy-redesign`), sem
+  alternância clara/escura. Tokens de design ficam em `src/index.css` como CSS custom properties HSL
+  (`--background`, `--card`, `--elevated`, `--primary`, `--secondary`, `--muted`, `--accent`,
+  `--border`, `--input`, `--ring`, `--overlay`; estado semântico `--success`/`--warning`/
+  `--destructive`/`--info` com par `-foreground`; domínio `--pitch`/`--pitch-foreground`/
+  `--pitch-line`), consumidos via `hsl(var(--token))` e mapeados para utilitários Tailwind por
+  `@theme inline`. Opacidades derivadas de token ficam restritas ao conjunto fechado 10% (superfície),
+  40% (borda) e 60% (véu/overlay) — FR-003b. `src/config/club.config.ts` espelha os mesmos valores
+  para uso fora de CSS e é comparado a `src/index.css` por teste de paridade
+  (`club.config.test.ts`).
+- **Marca:** o escudo oficial tem duas representações deliberadas — o brasão fotográfico extraído de
+  `logo mbj 2.png` (`public/brand/mbj-crest-512.webp` e `mbj-crest-1024.webp`, com relevo e brilho
+  reais) para toda a interface (Landing Page, cabeçalho, barra lateral, cards), e um vetor
+  simplificado (`public/brand/mbj-shield.svg`) restrito a favicon e ícones de PWA, onde detalhe fino
+  degradaria em tamanho pequeno. O hero da Landing Page usa também uma fotografia própria do clube
+  (`public/brand/mbj-hero-stadium.webp`, extraída de `estádio meia boca jr.png` — nunca de terceiros,
+  FR-033), espelhada horizontalmente para concentrar torcida/refletores no lado sem texto; o teto de
+  contraste sob o texto é garantido matematicamente contra o pior caso teórico da foto (branco), não
+  contra seu tom real, compondo as camadas de véu/brilho sequencialmente
+  (`hero-backdrop.constants.ts`, fonte única compartilhada com o teste da camada 2b). Todos são
+  gerados por `scripts/generate-brand-assets.mjs` (determinístico — `npm run brand:assets` não produz
+  diff) a partir dos arquivos de referência na raiz do repositório, com orçamento de peso codificado
+  no próprio script (`BUDGETS`): SVG ≤ 20 KB, PNG de ícone ≤ 40 KB, WebP do brasão ≤ 120 KB, foto do
+  hero ≤ 260 KB, total publicado ≤ 560 KB.
+- **Navegação:** barra lateral fixa de três regiões (marca no topo, links no corpo, perfil e "Sair"
+  no rodapé) acima de 768px; abaixo disso, cabeçalho com hambúrguer abre uma gaveta `<dialog>` nativa
+  (`showModal()`) que replica a mesma hierarquia e fecha ao navegar.
+- **Portão de verificação**: `contracts/theme-verification.md` define quatro camadas — varredura
+  estática de cor (`tests/unit/theme-static-scan.test.ts`), conformidade de paleta em runtime nas 28
+  rotas (`tests/e2e/theme-consistency.spec.ts`), conferência visual dirigida e verificação de
+  contraste sobre gradiente/pares não textuais.
+
+> 💡 Motivo: o MVP havia entregado um tema claro genérico; esta feature substitui a camada de
+> apresentação preservando rotas, contratos e regras de negócio (mudança estritamente visual).
+
 ### Estilo de comunicação
 
 - **Decisão:** REST/PostgREST do Supabase e RPC SQL para operações transacionais.

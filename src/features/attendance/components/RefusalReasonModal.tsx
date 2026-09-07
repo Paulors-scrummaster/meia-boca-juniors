@@ -40,7 +40,10 @@ export function RefusalReasonModal({
   });
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-black/55 p-4" role="presentation">
+    <div
+      className="fixed inset-0 z-50 grid place-items-center bg-overlay/60 p-4"
+      role="presentation"
+    >
       <section
         aria-describedby={`refusal-description-${presenceId}`}
         aria-labelledby={`refusal-title-${presenceId}`}

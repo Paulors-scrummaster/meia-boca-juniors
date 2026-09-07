@@ -98,7 +98,7 @@ function PasswordField({
       <input
         aria-invalid={Boolean(error)}
         autoComplete="new-password"
-        className="mt-2 min-h-12 w-full rounded-xl border bg-background px-4 font-normal"
+        className="mt-2 min-h-12 w-full rounded-xl border border-input bg-background px-4 font-normal"
         type="password"
         {...registration}
       />

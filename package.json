@@ -22,6 +22,7 @@
     "db:lint": "supabase db lint",
     "test:db": "supabase test db",
     "test:e2e": "playwright test",
+    "brand:assets": "node scripts/generate-brand-assets.mjs",
     "db:types": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/generate-database-types.ps1",
     "db:types:check": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/generate-database-types.ps1 -Check"
   },

@@ -138,7 +138,12 @@ test.describe('orçamento de desempenho', () => {
       ['Partidas', 'Partidas'],
       ['Mural', 'Mural de avisos'],
     ] as const;
+    // Abaixo de 768px o link fica dentro da gaveta (FR-021), fechada por padrão e
+    // reaberta a cada seleção (FR-023). O orçamento mede a navegação em si, não o
+    // tempo de abrir o menu, então o relógio só começa depois disso.
+    const isDesktop = page.viewportSize()!.width >= 768;
     for (const [link, heading] of screens) {
+      if (!isDesktop) await page.getByRole('button', { name: 'Abrir menu de navegação' }).click();
       const started = Date.now();
       await page.getByRole('link', { name: link, exact: true }).click();
       await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible({

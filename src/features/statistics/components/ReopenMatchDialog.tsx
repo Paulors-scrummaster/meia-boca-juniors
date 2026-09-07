@@ -77,7 +77,7 @@ export function ReopenMatchDialog({
   }
 
   return (
-    <section className="rounded-3xl border border-destructive/30 bg-card p-6">
+    <section className="rounded-3xl border border-destructive/40 bg-card p-6">
       <h2 className="text-xl font-black">Correção de estatísticas</h2>
       <p className="mt-2 text-muted-foreground">
         A reabertura invalida a consolidação, a rodada, os votos e os prêmios atuais sem apagar o
@@ -106,7 +106,8 @@ export function ReopenMatchDialog({
       </p>
 
       {open ? (
-        <div className="fixed inset-0 z-40 grid place-items-center bg-foreground/50 p-4">
+        // overlay a 60%, não foreground/50 (E-09): ver contracts/design-tokens.md G-05.
+        <div className="fixed inset-0 z-40 grid place-items-center bg-overlay/60 p-4">
           <section
             aria-describedby="reopen-statistics-description"
             aria-labelledby="reopen-statistics-title"

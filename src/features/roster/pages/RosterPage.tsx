@@ -104,7 +104,10 @@ export function RosterPage({ canManage = false, service }: RosterPageProps) {
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {athletes.map((athlete) => (
-            <li className="rounded-2xl border bg-card p-5 shadow-sm" key={athlete.id}>
+            <li
+              className="rounded-2xl border bg-card p-5 shadow-sm transition-colors hover:border-primary focus-within:border-primary"
+              key={athlete.id}
+            >
               <div className="flex items-start gap-4">
                 <AthleteAvatar name={athlete.full_name} url={athlete.avatar_url} />
                 <div className="min-w-0 flex-1">

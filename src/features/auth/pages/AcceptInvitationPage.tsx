@@ -96,7 +96,7 @@ export function AcceptInvitationPage({
     <section className="mx-auto max-w-lg rounded-3xl border bg-card p-6 shadow-xl sm:p-8">
       <UserCheck aria-hidden="true" className="h-10 w-10 text-primary" />
       <h1 className="mt-4 text-3xl font-black">Ativar sua conta</h1>
-      <div className="mt-5 flex gap-3 rounded-2xl bg-secondary/20 p-4">
+      <div className="mt-5 flex gap-3 rounded-2xl bg-secondary/10 p-4">
         <BadgeCheck aria-hidden="true" className="mt-0.5 h-6 w-6 shrink-0 text-primary" />
         <div>
           <p className="font-bold">Identidade de acesso confirmada</p>
@@ -112,7 +112,7 @@ export function AcceptInvitationPage({
           Crie sua senha
           <input
             autoComplete="new-password"
-            className="mt-2 min-h-12 w-full rounded-xl border bg-background px-4 font-normal"
+            className="mt-2 min-h-12 w-full rounded-xl border border-input bg-background px-4 font-normal"
             type="password"
             {...form.register('password')}
           />
@@ -124,7 +124,7 @@ export function AcceptInvitationPage({
           Confirme sua senha
           <input
             autoComplete="new-password"
-            className="mt-2 min-h-12 w-full rounded-xl border bg-background px-4 font-normal"
+            className="mt-2 min-h-12 w-full rounded-xl border border-input bg-background px-4 font-normal"
             type="password"
             {...form.register('confirmation')}
           />

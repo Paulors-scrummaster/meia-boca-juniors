@@ -10,7 +10,7 @@ describe('PWA navigation fallback denylist', () => {
     '/workbox-abcd1234.js',
     '/push/onesignal/OneSignalSDKWorker.js',
     '/assets/index-abcd1234.css',
-    '/pwa-192x192.png',
+    '/brand/mbj-icon-192.png',
   ])('never serves the SPA fallback for %s', (pathname) => {
     expect(isDenied(pathname)).toBe(true);
   });

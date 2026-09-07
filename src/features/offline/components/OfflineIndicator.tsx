@@ -101,7 +101,7 @@ function OfflineStatus({
   return (
     <aside
       aria-live="polite"
-      className="mb-5 rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950"
+      className="mb-5 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-warning"
       role="status"
     >
       <p className="font-black">Modo Offline</p>

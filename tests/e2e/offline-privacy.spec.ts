@@ -266,6 +266,11 @@ test.describe('offline privacy and restoration', () => {
     await secondTab.goto('/app/matches');
     await expect(secondTab).toHaveURL(/\/app\/matches$/);
 
+    // Abaixo de 768px o botão "Sair" fica dentro da gaveta (FR-017), alcançável
+    // só depois de abrir o menu.
+    if (page.viewportSize()!.width < 768) {
+      await page.getByRole('button', { name: 'Abrir menu de navegação' }).click();
+    }
     await page.getByRole('button', { name: 'Sair' }).click();
     await expect(page).toHaveURL(/\/$/);
     await expect(secondTab).toHaveURL(/\/$/);

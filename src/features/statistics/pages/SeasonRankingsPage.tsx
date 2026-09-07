@@ -171,7 +171,10 @@ export function SeasonRankingsPage({
         ) : (
           <ul className="grid gap-4 md:grid-cols-2">
             {seasonMatches.map((match) => (
-              <li className="rounded-2xl border bg-card p-5" key={match.id}>
+              <li
+                className="rounded-2xl border bg-card p-5 transition-colors hover:border-primary focus-within:border-primary"
+                key={match.id}
+              >
                 <h3 className="font-black">MBJ × {match.opponent_name}</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {formatSaoPauloDateTime(match.match_date)}
