@@ -132,15 +132,15 @@ rodapé com distinção visual.
 **Independent Test**: autenticar como Presidente em 1920x1080 e 1366x768 e confirmar a ordem topo →
 links → rodapé, todos os 10 itens visíveis sem rolagem, e o "Sair" no rodapé.
 
-- [ ] T043 [P] [US2] Criar `src/app/layouts/navigation/SidebarBrand.tsx` com escudo, nome do clube e subtítulo "Área do clube"
-- [ ] T044 [P] [US2] Criar `src/app/layouts/navigation/NavigationList.tsx` com o conjunto normativo de 10 itens da seção 3.2 de `data-model.md`, incluindo ícones de `lucide-react`, `aria-current="page"` no item ativo e os estados da seção 3.3
-- [ ] T045 [P] [US2] Criar `src/app/layouts/navigation/SidebarFooter.tsx` com o nome do usuário vindo de `profile` do `AuthProvider` e o botão "Sair" com contorno próprio, distinto dos links (FR-018)
-- [ ] T046 [US2] Reestruturar `src/app/layouts/AuthenticatedLayout.tsx` para a coluna contínua de três regiões — topo fixo, corpo com `overflow-y: auto` e rodapé fixo — substituindo o grid atual que separa marca e links em regiões distintas
-- [ ] T047 [US2] Remover de `src/app/layouts/AuthenticatedLayout.tsx` o botão "Sair" do topo, que hoje fica colado à identidade do clube
-- [ ] T048 [US2] Garantir em `src/app/layouts/AuthenticatedLayout.tsx` que nenhuma faixa de cabeçalho seja renderizada em larguras ≥ 768px (FR-015a), preservando o link de pular para o conteúdo como primeiro na ordem de tabulação
-- [ ] T049 [US2] Preservar em `src/app/layouts/AuthenticatedLayout.tsx` o `<fieldset>` de bloqueio de escrita offline, o `id="conteudo-principal"` e a posição de `OfflineIndicator` e `PendingActionsBanner` (contratos C-02 e C-03)
-- [ ] T050 [US2] Atualizar `src/app/layouts/AuthenticatedLayout.test.tsx` para a nova estrutura de três regiões, cobrindo a presença dos 10 itens por papel e a posição do botão "Sair"
-- [ ] T051 [US2] Criar `tests/e2e/navigation-shell.spec.ts` (projeto `desktop-chromium`) verificando ordem das regiões, `aria-current`, ausência de faixa superior, visibilidade dos 10 itens do Presidente sem rolagem em 1920x1080 e 1366x768, e área mínima de 44x44 px em cada item da barra lateral e no botão "Sair" (FR-025, E-04)
+- [X] T043 [P] [US2] Criar `src/app/layouts/navigation/SidebarBrand.tsx` com escudo, nome do clube e subtítulo "Área do clube"
+- [X] T044 [P] [US2] Criar `src/app/layouts/navigation/NavigationList.tsx` com o conjunto normativo de 10 itens da seção 3.2 de `data-model.md`, incluindo ícones de `lucide-react`, `aria-current="page"` no item ativo e os estados da seção 3.3
+- [X] T045 [P] [US2] Criar `src/app/layouts/navigation/SidebarFooter.tsx` com o nome do usuário vindo de `profile` do `AuthProvider` e o botão "Sair" com contorno próprio, distinto dos links (FR-018)
+- [X] T046 [US2] Reestruturar `src/app/layouts/AuthenticatedLayout.tsx` para a coluna contínua de três regiões — topo fixo, corpo com `overflow-y: auto` e rodapé fixo — substituindo o grid atual que separa marca e links em regiões distintas
+- [X] T047 [US2] Remover de `src/app/layouts/AuthenticatedLayout.tsx` o botão "Sair" do topo, que hoje fica colado à identidade do clube
+- [X] T048 [US2] Garantir em `src/app/layouts/AuthenticatedLayout.tsx` que nenhuma faixa de cabeçalho seja renderizada em larguras ≥ 768px (FR-015a), preservando o link de pular para o conteúdo como primeiro na ordem de tabulação
+- [X] T049 [US2] Preservar em `src/app/layouts/AuthenticatedLayout.tsx` o `<fieldset>` de bloqueio de escrita offline, o `id="conteudo-principal"` e a posição de `OfflineIndicator` e `PendingActionsBanner` (contratos C-02 e C-03)
+- [X] T050 [US2] Atualizar `src/app/layouts/AuthenticatedLayout.test.tsx` para a nova estrutura de três regiões, cobrindo a presença dos 10 itens por papel e a posição do botão "Sair"
+- [X] T051 [US2] Criar `tests/e2e/navigation-shell.spec.ts` (projeto `desktop-chromium`) verificando ordem das regiões, `aria-current`, ausência de faixa superior, visibilidade dos 10 itens do Presidente sem rolagem em 1920x1080 e 1366x768, e área mínima de 44x44 px em cada item da barra lateral e no botão "Sair" (FR-025, E-04)
 
 **Checkpoint**: barra lateral desktop reorganizada e verificada, independente da gaveta mobile.
 

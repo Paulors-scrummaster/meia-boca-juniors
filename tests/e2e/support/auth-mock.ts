@@ -80,6 +80,12 @@ export interface AuthMockOptions {
   fullName?: string;
   /** `true` para exercitar `PasswordChangeRouteGuard` (rota `/alterar-senha`). Padrão: `false`. */
   mustChangePassword?: boolean;
+  /**
+   * Papéis efetivos, se o cenário precisar de mais de um simultaneamente — por
+   * exemplo, o "papel de maior alcance" de E-04 é PRESIDENT+ATHLETE combinados, não
+   * PRESIDENT isolado. Substitui inteiramente `ROLES[role]` quando informado.
+   */
+  roles?: readonly AppRole[];
 }
 
 /**
@@ -92,7 +98,12 @@ export async function mockAuthenticatedSession(
   role: AppRole,
   options: AuthMockOptions = {},
 ): Promise<void> {
-  const { fullName = 'Usuário de Teste', mustChangePassword = false, routes = {} } = options;
+  const {
+    fullName = 'Usuário de Teste',
+    mustChangePassword = false,
+    roles = ROLES[role],
+    routes = {},
+  } = options;
 
   await page.route(`${SUPABASE_ORIGIN}/**`, async (route) => {
     const request = route.request();
@@ -124,7 +135,7 @@ export async function mockAuthenticatedSession(
     if (pathname === '/rest/v1/user_roles')
       return json(
         route,
-        ROLES[role].map((value) => ({ role: value })),
+        roles.map((value) => ({ role: value })),
       );
 
     if (pathname in routes) return json(route, routes[pathname]);

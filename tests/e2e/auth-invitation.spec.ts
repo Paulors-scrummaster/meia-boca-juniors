@@ -141,13 +141,17 @@ test('ativa convite individual e libera a união de papéis somente após MFA', 
   await page.getByLabel('Código de 6 números').fill('123456');
   await page.getByRole('button', { name: 'Verificar código' }).click();
   await expect(page.getByRole('heading', { name: 'Gerenciar acessos' })).toBeVisible();
+  // Abaixo de 768px a barra lateral desktop (`aria-label="Navegação principal"`) fica
+  // oculta; a barra de abas mobile ocupa o rodapé sob outro rótulo, temporariamente
+  // (FR-021a, removida em T061). Acima de 768px é a barra lateral que existe.
+  const isDesktop = page.viewportSize()!.width >= 768;
   const navigationBox = await page
-    .getByRole('navigation', { name: 'Navegação principal' })
+    .getByRole('navigation', { name: isDesktop ? 'Navegação principal' : 'Navegação mobile' })
     .boundingBox();
   const mainBox = await page.getByRole('main').boundingBox();
   expect(navigationBox).not.toBeNull();
   expect(mainBox).not.toBeNull();
-  if (page.viewportSize()!.width >= 768) {
+  if (isDesktop) {
     expect(mainBox!.x).toBeGreaterThan(navigationBox!.x + navigationBox!.width - 1);
     expect(mainBox!.width).toBeGreaterThan(600);
   } else {
