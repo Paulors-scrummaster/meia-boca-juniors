@@ -56,6 +56,8 @@ interface ClubConfig {
     logo: string;
     favicon: string;
     pwaIcon192: string;
+    pwaIcon512: string;
+    pwaIconMaskable512: string;
   };
   theme: Readonly<Record<SemanticThemeToken, string>>;
   approvedFormations: readonly ApprovedFormation[];
@@ -80,9 +82,11 @@ export const clubConfig = {
     privacy: null,
   },
   assets: {
-    logo: '/brand/logo.svg',
+    logo: '/brand/mbj-shield.svg',
     favicon: '/favicon.svg',
-    pwaIcon192: '/pwa-192x192.png',
+    pwaIcon192: '/brand/mbj-icon-192.png',
+    pwaIcon512: '/brand/mbj-icon-512.png',
+    pwaIconMaskable512: '/brand/mbj-icon-maskable-512.png',
   },
   theme: {
     background: '220 58% 9%',

@@ -82,16 +82,16 @@ lado a lado com a referência normativa e confirmar os sete elementos de composi
 
 ### Assets de marca
 
-- [ ] T014 [US1] Redesenhar o escudo oficial como SVG otimizado em `public/brand/mbj-shield.svg`, com fundo transparente e `viewBox` quadrado, usando `logo mbj 2.png` como referência: contorno do escudo, campo azul, faixa dourada, letras "MBJ" e conjunto de estrelas por repetição de um único símbolo — orçamento de 20 KB
-- [ ] T015 [US1] Substituir o conteúdo de `public/favicon.svg` pelo escudo de `public/brand/mbj-shield.svg`, verificando legibilidade do contorno a 32px
-- [ ] T016 [US1] Criar `scripts/generate-brand-icons.mjs` que abre o SVG no Chromium do Playwright e captura `public/brand/mbj-icon-192.png`, `public/brand/mbj-icon-512.png` (ambos com `omitBackground`) e `public/brand/mbj-icon-maskable-512.png` (escudo a ~60% da largura, centralizado sobre `#0A1325` opaco)
-- [ ] T017 [US1] Adicionar o script `brand:icons` em `package.json` apontando para `scripts/generate-brand-icons.mjs`, seguindo o padrão já usado por `db:types`
-- [ ] T018 [US1] Executar a geração e versionar os três PNGs em `public/brand/`, confirmando que cada um respeita o orçamento de 40 KB
-- [ ] T019 [US1] Atualizar `clubConfig.assets` em `src/config/club.config.ts` para os novos caminhos e acrescentar as entradas de ícone 512 e maskable
-- [ ] T020 [US1] Remover `public/brand/logo.svg` e `public/pwa-192x192.png`, garantindo que nenhum caminho de marca anterior continue publicado (GA-07)
-- [ ] T021 [US1] Atualizar em `index.html` a `theme-color` para `#0A1325` e o `apple-touch-icon` para `/brand/mbj-icon-192.png`
-- [ ] T022 [US1] Atualizar o manifesto em `vite.config.ts`: três entradas de ícone conforme `contracts/brand-assets.md`, `theme_color` e `background_color` em `#0A1325`, e `includeAssets` com os novos caminhos
-- [ ] T023 [US1] Adicionar em `public/_headers` a regra de revalidação obrigatória para `/brand/*` e `/favicon.svg`, garantindo que não herdem a política imutável de `/assets/*`
+- [X] T014 [US1] Redesenhar o escudo oficial como SVG otimizado em `public/brand/mbj-shield.svg`, com fundo transparente e `viewBox` quadrado, usando `logo mbj 2.png` como referência: contorno do escudo, campo azul, faixa dourada, letras "MBJ" e conjunto de estrelas por repetição de um único símbolo — orçamento de 20 KB
+- [X] T015 [US1] Substituir o conteúdo de `public/favicon.svg` pelo escudo de `public/brand/mbj-shield.svg`, verificando legibilidade do contorno a 32px
+- [X] T016 [US1] Criar `scripts/generate-brand-icons.mjs` que abre o SVG no Chromium do Playwright e captura `public/brand/mbj-icon-192.png`, `public/brand/mbj-icon-512.png` (ambos com `omitBackground`) e `public/brand/mbj-icon-maskable-512.png` (escudo a ~60% da largura, centralizado sobre `#0A1325` opaco)
+- [X] T017 [US1] Adicionar o script `brand:icons` em `package.json` apontando para `scripts/generate-brand-icons.mjs`, seguindo o padrão já usado por `db:types`
+- [X] T018 [US1] Executar a geração e versionar os três PNGs em `public/brand/`, confirmando que cada um respeita o orçamento de 40 KB
+- [X] T019 [US1] Atualizar `clubConfig.assets` em `src/config/club.config.ts` para os novos caminhos e acrescentar as entradas de ícone 512 e maskable
+- [X] T020 [US1] Remover `public/brand/logo.svg` e `public/pwa-192x192.png`, garantindo que nenhum caminho de marca anterior continue publicado (GA-07)
+- [X] T021 [US1] Atualizar em `index.html` a `theme-color` para `#0A1325` e o `apple-touch-icon` para `/brand/mbj-icon-192.png`
+- [X] T022 [US1] Atualizar o manifesto em `vite.config.ts`: três entradas de ícone conforme `contracts/brand-assets.md`, `theme_color` e `background_color` em `#0A1325`, e `includeAssets` com os novos caminhos
+- [X] T023 [US1] Adicionar em `public/_headers` a regra de revalidação obrigatória para `/brand/*` e `/favicon.svg`, garantindo que não herdem a política imutável de `/assets/*`
 
 ### Superfícies públicas e de fluxo de autenticação
 
