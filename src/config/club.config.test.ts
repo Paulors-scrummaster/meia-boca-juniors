@@ -33,6 +33,12 @@ describe('clubConfig', () => {
   it('fornece valor para cada token semântico permitido', () => {
     expect(Object.keys(clubConfig.theme).sort()).toEqual([...SEMANTIC_THEME_TOKENS].sort());
   });
+
+  it('mantém o título bicolor da landing idêntico à cadeia original ao concatenar (FR-035, GL-05)', () => {
+    const { welcomeTitle, welcomeTitleHighlight, welcomeTitleLead } = clubConfig.institutional;
+    expect(`${welcomeTitleLead} ${welcomeTitleHighlight}`).toBe(welcomeTitle);
+    expect(welcomeTitle).toBe('Bem-vindo ao Meia Boca Juniors');
+  });
 });
 
 describe('paridade de tokens entre a folha de estilo e a configuração do clube', () => {

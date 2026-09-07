@@ -35,6 +35,15 @@ export const SEMANTIC_THEME_TOKENS = [
 
 export type SemanticThemeToken = (typeof SEMANTIC_THEME_TOKENS)[number];
 
+/**
+ * Partes do título bicolor da Landing Page (FR-035). `WELCOME_TITLE` é derivado da
+ * concatenação, não duplicado: a igualdade com o texto exibido é garantida por
+ * construção, não por convenção entre dois valores escritos à mão.
+ */
+const WELCOME_TITLE_LEAD = 'Bem-vindo ao';
+const WELCOME_TITLE_HIGHLIGHT = 'Meia Boca Juniors';
+const WELCOME_TITLE = `${WELCOME_TITLE_LEAD} ${WELCOME_TITLE_HIGHLIGHT}`;
+
 interface ClubConfig {
   identity: {
     deploymentId: 'mbj';
@@ -44,7 +53,12 @@ interface ClubConfig {
     slogan: string;
   };
   institutional: {
+    /** Cadeia completa, preservada para qualquer consumidor que precise do título íntegro. */
     welcomeTitle: string;
+    /** Primeira parte do título bicolor da Landing Page (FR-035), em texto primário. */
+    welcomeTitleLead: string;
+    /** Segunda parte do título bicolor da Landing Page (FR-035), em texto de destaque. */
+    welcomeTitleHighlight: string;
     welcomeDescription: string;
   };
   links: {
@@ -77,7 +91,9 @@ export const clubConfig = {
     slogan: 'Raça, amizade e futebol.',
   },
   institutional: {
-    welcomeTitle: 'Bem-vindo ao Meia Boca Juniors',
+    welcomeTitle: WELCOME_TITLE,
+    welcomeTitleLead: WELCOME_TITLE_LEAD,
+    welcomeTitleHighlight: WELCOME_TITLE_HIGHLIGHT,
     welcomeDescription:
       'O ponto de encontro do clube para organizar elenco, partidas, presenças e nossa história.',
   },

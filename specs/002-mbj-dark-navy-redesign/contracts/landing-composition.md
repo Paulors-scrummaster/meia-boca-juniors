@@ -51,16 +51,18 @@ deste documento.
   composição, não apenas sobre a cor base.
 
 **GL-16 — teto de luminância e razões calculadas**: nenhuma região do hero sob texto ultrapassa
-luminância relativa de **0,030**, equivalente a ~18% do dourado sobre o navy (FR-041). Contra esse
-pior caso:
+luminância relativa de **0,030**, equivalente a ~18% do dourado sobre o navy (FR-041). A implementação
+usa 16% de pico, medido em produção (T035) contra o pior caso real do gradiente:
 
-| Texto | Razão no pior caso | WCAG AA |
+| Texto | Razão medida | WCAG AA |
 |---|---|---|
-| Primário (`foreground`) | 13,1:1 | Passa |
-| Secundário (`muted-foreground`) | 5,1:1 | Passa |
-| Dourado (`primary`) | 6,6:1 | Passa |
+| Primário (`foreground`) | 14,0:1 | Passa |
+| Secundário (`muted-foreground`) | 5,5:1 | Passa |
+| Dourado (`primary`) | 7,1:1 | Passa |
 
-O texto secundário é o par crítico: reprova por volta de 23% de brilho. O teto de 18% preserva margem.
+Luminância do pior pixel medida: **0,025**, 17% abaixo do teto de 0,030. O texto secundário continua
+sendo o par mais próximo do limite; a folga entre 16% (implementado) e ~23% (onde reprovaria) é a
+margem de segurança.
 
 **Método de verificação — reproduzível e independente do axe**: ler `background-image` computado do
 hero, extrair os stops resolvidos, compor cada um sobre o navy base e falhar se algum exceder 0,030.

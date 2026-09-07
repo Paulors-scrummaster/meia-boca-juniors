@@ -782,12 +782,14 @@ FR-041 a 0,030. As razões abaixo são calculadas contra esse teto, não contra 
 |---|---|---|---|---|
 | 0% (base navy) | 0,0063 | 18,7:1 | 7,3:1 | 9,3:1 |
 | 10% | 0,0163 | 15,8:1 | 6,2:1 | 7,9:1 |
-| **18% — teto de FR-041** | **0,030** | **13,1:1** | **5,1:1** | **6,6:1** |
+| **16% — implementado (T035)** | **0,025** | **14,0:1** | **5,5:1** | **7,1:1** |
+| 18% — teto de FR-041 | 0,030 | 13,1:1 | 5,1:1 | 6,6:1 |
 | 22% | 0,038 | 11,9:1 | 4,7:1 | 6,0:1 |
 | 25% | 0,043 | 11,3:1 | **4,4:1 — reprova** | 5,7:1 |
 
-O texto secundário é o par que primeiro reprova, por volta de 23% de brilho. O teto de 18% preserva
-margem sobre o limite de 4,5:1 em todos os três pares.
+O texto secundário é o par que primeiro reprova, por volta de 23% de brilho. A implementação usa 16%,
+medido em produção com os helpers de `tests/e2e/support/palette.ts`; o teto de 18% definido em FR-041
+é a margem de segurança formal, não o valor real usado.
 
 ### Contraste de elementos não textuais (FR-042)
 

@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components -- route elements and configuration are intentionally colocated */
-import { createBrowserRouter, Link, Navigate, Outlet, type RouteObject } from 'react-router-dom';
+import { createBrowserRouter, NavLink, Navigate, Outlet, type RouteObject } from 'react-router-dom';
 
 import { AuthenticatedLayout } from '@/app/layouts/AuthenticatedLayout';
 import { useAuth } from '@/app/providers/AuthProvider';
@@ -43,20 +43,32 @@ import { useParams } from 'react-router-dom';
 
 type AppRole = Database['public']['Enums']['app_role'];
 
+/**
+ * Estado ativo da navegação pública (FR-036, GL-07): rota atual em dourado com um
+ * indicador visual (sublinhado), sobre os três destinos já existentes — nenhuma
+ * rota nova. `NavLink` aplica `aria-current="page"` automaticamente ao destino
+ * ativo, satisfazendo GL-07 sem lógica adicional.
+ */
+function publicNavLinkClassName({ isActive }: { isActive: boolean }): string {
+  return `min-h-11 rounded-lg border-b-2 px-3 py-2 font-semibold ${
+    isActive ? 'border-primary text-primary' : 'border-transparent text-foreground'
+  }`;
+}
+
 function PublicLayout() {
   return (
     <main className="min-h-dvh bg-background px-5 py-8 text-foreground">
       <div className="mx-auto max-w-5xl">
         <nav aria-label="Navegação pública" className="mb-4 flex justify-end gap-2">
-          <Link className="min-h-11 rounded-lg px-3 py-2 font-semibold text-primary" to="/">
+          <NavLink className={publicNavLinkClassName} end to="/">
             Início
-          </Link>
-          <Link className="min-h-11 rounded-lg px-3 py-2 font-semibold text-primary" to="/login">
+          </NavLink>
+          <NavLink className={publicNavLinkClassName} to="/login">
             Entrar
-          </Link>
-          <Link className="min-h-11 rounded-lg px-3 py-2 font-semibold text-primary" to="/convite">
+          </NavLink>
+          <NavLink className={publicNavLinkClassName} to="/convite">
             Ativar convite
-          </Link>
+          </NavLink>
         </nav>
         <Outlet />
       </div>
