@@ -54,7 +54,7 @@ export function LoginPage({ service = createAuthService(supabase) }: LoginPagePr
           <input
             aria-invalid={Boolean(form.formState.errors.email)}
             autoComplete="email"
-            className="mt-2 min-h-12 w-full rounded-xl border bg-background px-4 font-normal"
+            className="mt-2 min-h-12 w-full rounded-xl border border-input bg-background px-4 font-normal"
             type="email"
             {...form.register('email')}
           />
@@ -67,7 +67,7 @@ export function LoginPage({ service = createAuthService(supabase) }: LoginPagePr
           <input
             aria-invalid={Boolean(form.formState.errors.password)}
             autoComplete="current-password"
-            className="mt-2 min-h-12 w-full rounded-xl border bg-background px-4 font-normal"
+            className="mt-2 min-h-12 w-full rounded-xl border border-input bg-background px-4 font-normal"
             type="password"
             {...form.register('password')}
           />

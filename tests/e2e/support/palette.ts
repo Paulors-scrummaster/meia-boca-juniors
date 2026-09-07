@@ -114,7 +114,10 @@ export async function readThemeTokens(page: Page): Promise<Record<string, Rgb>> 
  * de superfície e borda, o véu a 60% e o transparente.
  */
 export function buildAllowedColors(tokens: Record<string, Rgb>): Set<string> {
-  const allowed = new Set<string>(['0,0,0,0']);
+  // Derivado de `normalize()`, não escrito à mão: o formato do sentinel transparente
+  // precisa bater exatamente com o que `normalizeValue()` produz no navegador (camada
+  // 2b), inclusive o sufixo decimal do alfa quando ele é zero.
+  const allowed = new Set<string>([normalize({ a: 0, b: 0, g: 0, r: 0 })]);
   for (const [name, rgb] of Object.entries(tokens)) {
     allowed.add(normalize({ ...rgb, a: 1 }));
     allowed.add(normalize({ ...rgb, a: SURFACE_ALPHA }));

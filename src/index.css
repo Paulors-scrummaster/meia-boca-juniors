@@ -103,7 +103,8 @@ body {
 }
 
 @layer components {
+  /* border-input, não o divisor `border`: o contorno de campo precisa de 3:1 (FR-042, G-08). */
   .form-input {
-    @apply mt-2 min-h-12 w-full rounded-xl border bg-background px-4 font-normal text-foreground;
+    @apply mt-2 min-h-12 w-full rounded-xl border border-input bg-background px-4 font-normal text-foreground;
   }
 }

@@ -109,16 +109,16 @@ lado a lado com a referência normativa e confirmar os sete elementos de composi
 - [X] T033 [P] [US1] Aplicar estado ativo em dourado com indicador visual à navegação pública em `src/app/router/router.tsx`, convertendo os links para `NavLink` com `aria-current="page"` sobre as rotas já existentes; nenhuma rota nova (FR-036, GL-07, GL-08)
 - [X] T034 [US1] Ajustar proporções, espaçamentos e hierarquia da landing — dimensão do escudo, escala tipográfica, largura da coluna direita e relação entre hero, título, chamadas para ação e cards — para corresponder à referência em 1920x1080 e 1366x768, e degradar de forma coerente abaixo de 768px sem rolagem horizontal (FR-040, GL-14, GL-15)
 - [X] T035 [US1] Conferir a fidelidade da landing contra `Sugestão nova interface e tema mbj.png` usando a lista de sete itens de `contracts/landing-composition.md`, registrando cada item como presente, e medir o pior caso de luminância do hero confirmando as razões de GL-16; um item ausente ou uma razão abaixo de 4,5:1 reprova (SC-011, SC-013, FR-032)
-- [ ] T036 [P] [US1] Revisar contraste e superfícies em `src/features/auth/pages/LoginPage.tsx` e `src/features/auth/pages/AcceptInvitationPage.tsx`, normalizando `bg-secondary/20` (AcceptInvitationPage:99) para a opacidade de superfície de 10% definida em FR-003b
-- [ ] T037 [P] [US1] Revisar contraste e superfícies em `src/features/auth/pages/ChangePasswordPage.tsx`
-- [ ] T038 [P] [US1] Revisar `src/features/auth/pages/MfaPage.tsx` mantendo deliberadamente o fundo claro do contêiner do QR Code, exceção declarada em FR-003g — é requisito funcional de leitura por scanner, não resíduo de tema; documentar a exceção em comentário
-- [ ] T039 [US1] Ajustar a classe de componente `.form-input` em `src/index.css` para o tema escuro, preservando altura mínima e contorno de campo
+- [X] T036 [P] [US1] Revisar contraste e superfícies em `src/features/auth/pages/LoginPage.tsx` e `src/features/auth/pages/AcceptInvitationPage.tsx`, normalizando `bg-secondary/20` (AcceptInvitationPage:99) para a opacidade de superfície de 10% definida em FR-003b
+- [X] T037 [P] [US1] Revisar contraste e superfícies em `src/features/auth/pages/ChangePasswordPage.tsx`
+- [X] T038 [P] [US1] Revisar `src/features/auth/pages/MfaPage.tsx` mantendo deliberadamente o fundo claro do contêiner do QR Code, exceção declarada em FR-003g — é requisito funcional de leitura por scanner, não resíduo de tema; documentar a exceção em comentário
+- [X] T039 [US1] Ajustar a classe de componente `.form-input` em `src/index.css` para o tema escuro, preservando altura mínima e contorno de campo
 
 ### Verificação da story
 
-- [ ] T040 [US1] Criar `tests/e2e/theme-consistency.spec.ts` com o helper de conformidade de paleta, cobrindo nesta fase as rotas públicas e de fluxo de autenticação (`/`, `/login`, `/convite`, `/alterar-senha`, `/mfa` e a rota de captura), falhando se algum elemento visível usar cor fora da lista permitida e declarando como exceção o contêiner do QR Code. A ampliação para as 28 rotas ocorre em T089, depois que US4 sanear as superfícies de conteúdo
-- [ ] T041 [US1] Ampliar `tests/e2e/accessibility.spec.ts` das 2 rotas públicas atuais para as 28 rotas do catálogo, usando as fixtures de `tests/e2e/support/`, mantendo as tags WCAG já em uso e exigindo zero violações
-- [ ] T042 [US1] Atualizar em `tests/e2e/app-shell.spec.ts` a asserção de texto alternativo do escudo, se o rótulo derivado de `clubConfig.identity` tiver mudado
+- [X] T040 [US1] Criar `tests/e2e/theme-consistency.spec.ts` com o helper de conformidade de paleta, cobrindo nesta fase as rotas públicas e de fluxo de autenticação (`/`, `/login`, `/convite`, `/alterar-senha`, `/mfa` e a rota de captura), falhando se algum elemento visível usar cor fora da lista permitida e declarando como exceção o contêiner do QR Code. A ampliação para as 28 rotas ocorre em T089, depois que US4 sanear as superfícies de conteúdo
+- [X] T041 [US1] Ampliar `tests/e2e/accessibility.spec.ts` das 2 rotas públicas atuais para as 28 rotas do catálogo, usando as fixtures de `tests/e2e/support/`, mantendo as tags WCAG já em uso e exigindo zero violações
+- [X] T042 [US1] Atualizar em `tests/e2e/app-shell.spec.ts` a asserção de texto alternativo do escudo, se o rótulo derivado de `clubConfig.identity` tiver mudado
 
 **Checkpoint**: tema e marca completos e verificados. Este é o MVP entregável.
 

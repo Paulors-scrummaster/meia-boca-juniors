@@ -1,6 +1,9 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
+import { mockAuthenticatedSession } from './support/auth-mock';
+import { EXPECTED_ROUTE_COUNT, ROUTE_CATALOG } from './support/route-catalog';
+
 async function expectWcagAa(page: Page) {
   const results = await new AxeBuilder({ page })
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
@@ -43,4 +46,30 @@ test.describe('regressões de acessibilidade', () => {
       expect(box!.width, `largura do alvo interativo ${index}`).toBeGreaterThanOrEqual(44);
     }
   });
+});
+
+/**
+ * Cobertura ampliada (FR-008a): das 2 rotas públicas originais para as 28 rotas do
+ * catálogo (GV-01), exercidas com o papel mínimo que as alcança — cada rota uma vez,
+ * não com os três papéis (research D-07): auditar toda rota com todo papel geraria 84
+ * execuções, a maioria terminando em redirecionamento por guarda, sem ganho de sinal.
+ */
+test.describe('regressões de acessibilidade — catálogo de rotas', () => {
+  test('o catálogo cobre exatamente as 28 rotas esperadas', () => {
+    expect(ROUTE_CATALOG).toHaveLength(EXPECTED_ROUTE_COUNT);
+  });
+
+  for (const { data, label, path, role } of ROUTE_CATALOG) {
+    test(`${label} (${path}) não viola WCAG A/AA`, async ({ page }) => {
+      if (role) {
+        await mockAuthenticatedSession(page, role, {
+          mustChangePassword: path === '/alterar-senha',
+          routes: data,
+        });
+      }
+      await page.goto(path);
+      await page.waitForLoadState('networkidle');
+      await expectWcagAa(page);
+    });
+  }
 });

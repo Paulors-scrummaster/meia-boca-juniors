@@ -55,7 +55,9 @@ export const PUBLIC_ROUTES: CatalogEntry[] = [
   { path: '/', label: 'Landing Page', role: null },
   { path: '/login', label: 'Entrar', role: null },
   { path: '/convite', label: 'Ativar convite', role: null },
-  { path: '/alterar-senha', label: 'Alterar senha', role: null },
+  // Requer sessão autenticada com `must_change_password: true` (PasswordChangeRouteGuard);
+  // o papel é irrelevante para o guard, ATHLETE é o mais simples de montar.
+  { path: '/alterar-senha', label: 'Alterar senha', role: 'ATHLETE' },
   { path: '/mfa', label: 'Verificação em duas etapas', role: 'COACH' },
   { path: '/rota-inexistente', label: 'Página não encontrada', role: null },
 ];

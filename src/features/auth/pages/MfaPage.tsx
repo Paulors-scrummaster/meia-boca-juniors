@@ -100,9 +100,15 @@ export function MfaPage({ service: providedService }: MfaPageProps) {
       {enrollment ? (
         <div className="mt-6 rounded-2xl bg-muted p-5 text-center">
           <p className="font-bold">Adicione o MBJ ao seu autenticador</p>
+          {/*
+            Exceção declarada a FR-003f, permitida por FR-003g: um QR Code exige módulos
+            escuros sobre fundo claro para ser lido por scanner. Convertê-lo ao tema escuro
+            inviabilizaria a inscrição no segundo fator. Escopo estrito a este contêiner.
+          */}
           <img
             alt="QR Code para configurar o autenticador"
             className="mx-auto mt-4 h-52 w-52 rounded-xl bg-white p-2"
+            data-theme-exception="qr-code"
             src={enrollment.qrCode}
           />
           <details className="mt-3 text-left text-sm">
@@ -117,7 +123,7 @@ export function MfaPage({ service: providedService }: MfaPageProps) {
           Código de 6 números
           <input
             autoComplete="one-time-code"
-            className="mt-2 min-h-12 w-full rounded-xl border bg-background px-4 text-center text-2xl tracking-[0.35em]"
+            className="mt-2 min-h-12 w-full rounded-xl border border-input bg-background px-4 text-center text-2xl tracking-[0.35em]"
             inputMode="numeric"
             maxLength={6}
             {...form.register('code')}

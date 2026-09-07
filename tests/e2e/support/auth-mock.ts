@@ -78,6 +78,8 @@ export interface AuthMockOptions {
   routes?: Record<string, unknown>;
   /** Nome exibido no rodapé da navegação. */
   fullName?: string;
+  /** `true` para exercitar `PasswordChangeRouteGuard` (rota `/alterar-senha`). Padrão: `false`. */
+  mustChangePassword?: boolean;
 }
 
 /**
@@ -90,7 +92,7 @@ export async function mockAuthenticatedSession(
   role: AppRole,
   options: AuthMockOptions = {},
 ): Promise<void> {
-  const { fullName = 'Usuário de Teste', routes = {} } = options;
+  const { fullName = 'Usuário de Teste', mustChangePassword = false, routes = {} } = options;
 
   await page.route(`${SUPABASE_ORIGIN}/**`, async (route) => {
     const request = route.request();
@@ -116,7 +118,7 @@ export async function mockAuthenticatedSession(
         account_status: 'ACTIVE',
         full_name: fullName,
         id: USER_ID[role],
-        must_change_password: false,
+        must_change_password: mustChangePassword,
       });
 
     if (pathname === '/rest/v1/user_roles')
