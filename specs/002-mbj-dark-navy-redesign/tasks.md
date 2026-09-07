@@ -209,19 +209,19 @@ e erro de validação; abrir um diálogo modal e confirmar véu escuro.
 
 ## Phase 7: Polish & Cross-Cutting Concerns
 
-- [ ] T079 Executar a conferência visual dirigida (camada 4 de `contracts/theme-verification.md`) **apenas** no editor de escalação, na escalação publicada, na consolidação de estatísticas e no painel de presenças — a Landing Page tem conferência própria em T035 e não se repete aqui
-- [ ] T080 Verificar o orçamento de peso da marca: SVG ≤ 20 KB, cada PNG de ícone ≤ 40 KB, textura condicional do hero ≤ 30 KB, total ≤ 180 KB
-- [ ] T081 Reexecutar `npm run brand:icons` e confirmar que `git diff` fica vazio, provando o determinismo da geração (GA-01)
-- [ ] T082 Instalar a PWA e conferir o ícone sob máscara circular, confirmando que o contorno do escudo não é cortado (GA-03), e que `/brand/logo.svg` e `/pwa-192x192.png` retornam 404 (GA-07)
-- [ ] T083 [P] Confirmar por `git diff` que `supabase/`, todos os arquivos `*.service.ts` e `src/app/router/guards.tsx` têm **zero linhas alteradas** — qualquer diferença viola FR-027 e FR-028
-- [ ] T084 [P] Atualizar `TECH_STACK.md` na seção de identidade visual com a paleta Dark Navy e os novos caminhos de marca
-- [ ] T085 Executar o portão completo: `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm run test:unit`, `npm run build` e `npm run test:e2e`
-- [ ] T086 Executar os seis cenários de `specs/002-mbj-dark-navy-redesign/quickstart.md` e registrar o resultado
+- [X] T079 Executar a conferência visual dirigida (camada 4 de `contracts/theme-verification.md`) **apenas** no editor de escalação, na escalação publicada, na consolidação de estatísticas e no painel de presenças — a Landing Page tem conferência própria em T035 e não se repete aqui
+- [X] T080 Verificar o orçamento de peso da marca: SVG ≤ 20 KB, cada PNG de ícone ≤ 40 KB, brasão fotográfico ≤ 120 KB por variante, total ≤ 300 KB (orçamento revisado após D-03 admitir o brasão fotográfico na interface)
+- [X] T081 Reexecutar `npm run brand:assets` e confirmar que `git diff` fica vazio, provando o determinismo da geração (GA-01)
+- [X] T082 Instalar a PWA e conferir o ícone sob máscara circular, confirmando que o contorno do escudo não é cortado (GA-03), e que `/brand/logo.svg` e `/pwa-192x192.png` retornam 404 (GA-07)
+- [X] T083 [P] Confirmar por `git diff` que `supabase/`, todos os arquivos `*.service.ts` e `src/app/router/guards.tsx` têm **zero linhas alteradas** — qualquer diferença viola FR-027 e FR-028
+- [X] T084 [P] Atualizar `TECH_STACK.md` na seção de identidade visual com a paleta Dark Navy e os novos caminhos de marca
+- [X] T085 Executar o portão completo: `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm run test:unit`, `npm run build` e `npm run test:e2e`
+- [X] T086 Executar os seis cenários de `specs/002-mbj-dark-navy-redesign/quickstart.md` e registrar o resultado
 - [ ] T087 Abrir o Pull Request com autorrevisão estruturada e validar o preview do Cloudflare, conforme exigido pelo Princípio IV da Constituição
-- [ ] T088 Estender em `tests/e2e/accessibility.spec.ts` o laço de alvos de toque — hoje aplicado apenas a `/` — às rotas autenticadas do catálogo, fechando o item "touch targets" nomeado explicitamente no Princípio IV da Constituição (SC-009)
-- [ ] T089 Ampliar `tests/e2e/theme-consistency.spec.ts` para as 28 rotas do catálogo, fechando a camada 2 do portão (SC-003a) agora que todas as superfícies de conteúdo foram saneadas em US4
-- [ ] T090 Implementar a camada 2b em `tests/e2e/theme-consistency.spec.ts`: ler o `background-image` computado do hero, compor cada stop sobre o navy base e falhar se algum sob região de texto exceder luminância 0,030, depois calcular as razões dos textos primário, secundário e dourado contra esse pior caso e falhar abaixo de 4,5:1 — sem depender do axe, que devolve *incomplete* sobre gradiente (FR-041, SC-013, GL-16, GL-18)
-- [ ] T091 Acrescentar ao mesmo arquivo a verificação dos pares não textuais de FR-042 — contorno de campo, anel de foco e marcações do campo — falhando abaixo de 3:1, e registrar as razões calculadas (SC-014, GL-17)
+- [X] T088 Estender em `tests/e2e/accessibility.spec.ts` o laço de alvos de toque — hoje aplicado apenas a `/` — às rotas autenticadas do catálogo, fechando o item "touch targets" nomeado explicitamente no Princípio IV da Constituição (SC-009)
+- [X] T089 Ampliar `tests/e2e/theme-consistency.spec.ts` para as 28 rotas do catálogo, fechando a camada 2 do portão (SC-003a) agora que todas as superfícies de conteúdo foram saneadas em US4
+- [X] T090 Implementar a camada 2b em `tests/e2e/theme-consistency.spec.ts`: ler o `background-image` computado do hero, compor cada stop sobre o navy base e falhar se algum sob região de texto exceder luminância 0,030, depois calcular as razões dos textos primário, secundário e dourado contra esse pior caso e falhar abaixo de 4,5:1 — sem depender do axe, que devolve *incomplete* sobre gradiente (FR-041, SC-013, GL-16, GL-18)
+- [X] T091 Acrescentar ao mesmo arquivo a verificação dos pares não textuais de FR-042 — contorno de campo, anel de foco e marcações do campo — falhando abaixo de 3:1, e registrar as razões calculadas (SC-014, GL-17)
 
 ---
 

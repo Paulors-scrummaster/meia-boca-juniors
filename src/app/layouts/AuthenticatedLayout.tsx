@@ -50,7 +50,12 @@ export function AuthenticatedLayout({
   return (
     <div className="min-h-dvh bg-background text-foreground md:flex">
       <a
-        className="sr-only z-50 rounded-md bg-primary p-3 text-primary-foreground focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+        // Todo estilo visível fica atrás de `focus:`, inclusive o que parece incondicional
+        // (padding, cor de fundo, cantos): com `sr-only` (largura/altura 1px, box-sizing
+        // border-box), um `p-3` incondicional força a caixa a crescer para caber o padding e
+        // reaparece um alvo de 24x24 fora da tela mesmo sem foco, quebrando a técnica de
+        // ocultação e falhando a auditoria de alvo de toque (SC-009).
+        className="sr-only z-50 focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:rounded-md focus:bg-primary focus:p-3 focus:text-primary-foreground"
         href="#conteudo-principal"
       >
         Ir para o conteúdo
@@ -98,8 +103,12 @@ export function AuthenticatedLayout({
       />
 
       <main
-        className="mx-auto w-full max-w-6xl px-4 py-6 md:flex-1 md:px-8 md:pb-8"
+        className="mx-auto w-full max-w-6xl px-4 py-6 md:flex-1 md:px-8 md:pb-8 focus:outline-none"
         id="conteudo-principal"
+        // Sem tabIndex, o link "Pular para o conteúdo" rola até aqui mas não move o foco
+        // de teclado de verdade — <main> não é focável por padrão. -1 o torna alvo
+        // válido de foco programático sem entrar na ordem de Tab normal da página.
+        tabIndex={-1}
       >
         <OfflineIndicator />
         <fieldset

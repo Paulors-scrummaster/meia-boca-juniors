@@ -100,13 +100,15 @@ Esperado:
 npx playwright test tests/e2e/theme-consistency.spec.ts -g "hero"
 ```
 
-Esperado, contra o pior caso do gradiente (luminância 0,030, teto de FR-041):
+Esperado, contra o pior caso do gradiente (luminância 0,030, teto de FR-041). Razões medidas pela
+camada 2b automatizada (T090, `tests/e2e/theme-consistency.spec.ts`), autoridade sobre as estimativas
+manuais anteriores de T035:
 
 | Texto | Razão exigida | Razão calculada |
 |---|---|---|
-| Primário | ≥ 4,5:1 | 13,1:1 |
-| Secundário | ≥ 4,5:1 | 5,1:1 |
-| Dourado | ≥ 4,5:1 | 6,6:1 |
+| Primário | ≥ 4,5:1 | 14,0:1 |
+| Secundário | ≥ 4,5:1 | 5,5:1 |
+| Dourado | ≥ 4,5:1 | 7,1:1 |
 
 **O axe não aprova o hero.** Sobre gradiente ele devolve *incomplete*, nunca *violation* — ausência de
 erro na auditoria não é aprovação. A camada 2b é a autoridade aqui.
@@ -253,3 +255,28 @@ confirmar comportamento idêntico ao anterior, apenas revestido pelo novo tema.
 | SC-004 | Cenário 2, passo manual 2 |
 | SC-005, SC-009, SC-010 | Cenário 3 |
 | SC-006, SC-007 | Cenário 6 |
+
+---
+
+## Registro de execução (T086)
+
+Executado ao final da Fase 7 (Polish), com o portão completo (T085) já verde nos dois projetos
+Playwright.
+
+| Cenário | Resultado |
+|---|---|
+| 1 — Identidade Dark Navy | ✅ `theme-consistency.spec.ts` e `accessibility.spec.ts` sem violação nas 28 rotas (ambos os projetos); `club.config.test.ts` verde. Passos manuais cobertos pelas capturas de tela da conferência visual dirigida (T079). |
+| 1b — Fidelidade da landing | ✅ `git diff main -- src/config/club.config.ts` mostra só a segmentação do título; contraste do hero medido pela camada 2b automatizada (T090): primário 14,0:1, secundário 5,5:1, dourado 7,1:1 — todos acima de 4,5:1 (tabela desta página atualizada para refletir a medição real, que substitui a estimativa manual de T035). |
+| 2 — Barra lateral desktop | ✅ `navigation-shell.spec.ts --project=desktop-chromium` e `AuthenticatedLayout.test.tsx` verdes. Ordem topo → links → rodapé e rodapé fixo confirmados nas capturas de T079/T086. |
+| 3 — Gaveta mobile | ✅ `navigation-shell.spec.ts --project=mobile-chromium` verde (fechamento ao navegar, Esc, véu, inacessibilidade por teclado fechada). |
+| 4 — Cards e estados no tema escuro | ✅ Verificado por captura de tela em `/app/roster` (T086): superfície navy distinguível, borda sutil, iniciais legíveis sobre `elevated` com anel dourado (T070). Indicador offline (T065), véu de diálogo (T062) e texto de erro em `destructive` já cobertos pelas mudanças de tema aplicadas nos lotes 6-7. |
+| 5 — Marca e cache | ✅ `npm run brand:assets` seguido de `git diff --stat public/brand` vazio (determinismo, GA-01); todos os artefatos dentro do orçamento (206,7 KB de 300 KB). `/brand/logo.svg` e `/pwa-192x192.png` confirmados 404 contra um servidor estático real servindo `dist/` (GA-07); ícone maskable verificado sob máscara circular simulada — escudo não é cortado (GA-03). |
+| 6 — Preservação do MVP | ✅ Suíte completa verde (165 testes unitários, 116+111 testes e2e nos dois projetos). `git diff --stat main -- supabase/ src/features/**/api src/app/router/guards.tsx` vazio. Diff de `router.tsx` restrito à troca `Link`→`NavLink` da navegação pública (T033), sem alteração de rota/guarda. |
+
+**Achado corrigido durante a execução**: T088 (ampliação do laço de alvo de toque às rotas
+autenticadas) expôs uma regressão real e pré-existente no link "Pular para o conteúdo" de
+`AuthenticatedLayout.tsx` — estilos visíveis incondicionais (`p-3`, `bg-primary`, ...) competiam com
+`sr-only`, e o navegador expandia a caixa de 1px para caber o padding, produzindo um alvo fantasma de
+24x24 fora da tela mesmo sem foco. Corrigido movendo todo estilo visível para `focus:`; `<main>`
+recebeu `tabIndex={-1}` para que o link também mova o foco de teclado de verdade, não apenas role a
+tela. Regressão coberta por um teste novo dedicado em `accessibility.spec.ts`.

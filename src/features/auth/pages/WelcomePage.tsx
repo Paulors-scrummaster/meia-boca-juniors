@@ -26,6 +26,7 @@ function HeroBackdrop() {
     <div
       aria-hidden="true"
       className="pointer-events-none absolute inset-y-0 left-1/2 -z-10 w-screen -translate-x-1/2"
+      data-testid="hero-backdrop"
       style={{
         backgroundColor: 'hsl(var(--background))',
         backgroundImage: [
