@@ -1,4 +1,4 @@
-import { ArrowLeft, History, Pencil } from 'lucide-react';
+import { ArrowLeft, History, Pencil, ShieldCheck } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 
 import type { AuthService } from '@/features/auth/api/auth.service';
@@ -64,12 +64,22 @@ export function AthleteProfilePage({
             <p className="mt-1 font-semibold">{athlete.primary_position}</p>
           </div>
           {canManage && !athlete.anonymized_at ? (
-            <Link
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-5 font-bold text-primary-foreground"
-              to={`/app/admin/roster/${athlete.id}/edit`}
-            >
-              <Pencil aria-hidden="true" className="h-5 w-5" /> Editar perfil
-            </Link>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-5 font-bold text-primary-foreground"
+                to={`/app/admin/roster/${athlete.id}/edit`}
+              >
+                <Pencil aria-hidden="true" className="h-5 w-5" /> Editar perfil
+              </Link>
+              {athlete.user_id ? (
+                <Link
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border px-5 font-bold"
+                  to={`/app/admin?userId=${athlete.user_id}`}
+                >
+                  <ShieldCheck aria-hidden="true" className="h-5 w-5" /> Gerenciar papéis
+                </Link>
+              ) : null}
+            </div>
           ) : null}
         </div>
       </section>
