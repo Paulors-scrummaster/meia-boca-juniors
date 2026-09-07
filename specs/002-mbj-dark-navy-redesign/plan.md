@@ -21,7 +21,7 @@ em variáveis CSS consumidas pelo Tailwind v4 via `@theme inline`; a gaveta usa 
 (`::backdrop`) sem biblioteca; os ícones PNG são rasterizados a partir do SVG por um script que usa o
 Playwright já presente como dependência de desenvolvimento. A verificação de consistência é
 automatizada em duas camadas — varredura estática de utilitários de cor fora do sistema de tokens e
-auditoria de acessibilidade e de paleta nas 24 rotas.
+auditoria de acessibilidade e de paleta nas 28 rotas.
 
 Toda a mudança fica na camada de apresentação. Rotas, guardas, papéis, serviços, chaves de query,
 políticas RLS e migrações permanecem intocados.
@@ -56,7 +56,7 @@ qualquer região do hero sob texto ≤ 0,030, para que o contraste sobre gradien
 calculável (FR-041); corte responsivo binário em 768px; interface em pt-BR e código em inglês;
 escrita offline permanece desabilitada; nenhuma cor declarada fora do conjunto de tokens.
 
-**Scale/Scope**: 24 rotas e 15 superfícies transversais catalogadas na spec; 3 papéis (`ATHLETE`,
+**Scale/Scope**: 28 rotas e 15 superfícies transversais catalogadas na spec; 3 papéis (`ATHLETE`,
 `COACH`, `PRESIDENT`); 10 destinos de navegação; 7 elementos de composição da Landing Page aferidos
 contra a referência normativa; ~50 arquivos de origem tocados, todos de apresentação.
 
@@ -71,7 +71,7 @@ contra a referência normativa; ~50 arquivos de origem tocados, todos de apresen
 | I. Segurança imposta pelo servidor | A feature altera autorização, RLS, auditoria ou exposição de segredos? | **PASS** — nenhuma alteração. FR-027 e FR-028 proíbem explicitamente. O nome do usuário exibido no rodapé já está na sessão do próprio usuário; não há nova exposição de dado pessoal. |
 | II. Integridade de domínio e história | A feature altera invariantes, migrações ou cálculos de domínio? | **PASS** — nenhuma alteração. Sem migrações, sem SQL, sem lógica de elegibilidade. |
 | III. Simplicidade e escopo controlado do MVP | Introduz dependência, abstração ou infraestrutura nova? | **PASS** — zero dependências novas (ver Fase 0, decisões D-02 e D-04). A feature é exatamente a "customização estética White-Label por configuração centralizada" prevista no `TECH_STACK.md`. React Native/Expo removidos do escopo. |
-| IV. Portões automatizados de qualidade | Formatação, lint, typecheck, testes e build passam? Acessibilidade WCAG AA? | **PASS** — a feature *amplia* a cobertura: a auditoria de acessibilidade sai de 2 rotas públicas para as 24 catalogadas (FR-008a). Contraste verificado por cálculo na spec. |
+| IV. Portões automatizados de qualidade | Formatação, lint, typecheck, testes e build passam? Acessibilidade WCAG AA? | **PASS** — a feature *amplia* a cobertura: a auditoria de acessibilidade sai de 2 rotas públicas para as 28 catalogadas (FR-008a). Contraste verificado por cálculo na spec. |
 | V. Resiliência, privacidade e operabilidade | Degrada o offline, vaza dado pessoal em log, ou quebra a operação? | **PASS** — offline permanece somente leitura; nenhum log novo; nenhum dado pessoal adicional. |
 
 **Restrições de produto**: interface em pt-BR mantida (nenhum texto alterado, FR-008); código e
@@ -161,7 +161,7 @@ scripts/
 
 tests/
 ├── e2e/
-│   ├── accessibility.spec.ts              # Ampliação para 24 rotas
+│   ├── accessibility.spec.ts              # Ampliação para 28 rotas
 │   ├── theme-consistency.spec.ts          # NOVO: conformidade de paleta
 │   ├── navigation-shell.spec.ts           # NOVO: gaveta, foco, fechamento
 │   └── support/                           # NOVO: fixtures de autenticação mockada

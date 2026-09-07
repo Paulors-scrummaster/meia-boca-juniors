@@ -45,8 +45,8 @@ perfil e saída), com gaveta lateral no mobile.
   identidade fica no topo da barra lateral e o conteúdo ocupa toda a altura. Abaixo de 768px surge
   uma faixa superior enxuta com botão de menu, escudo e nome do clube, e a gaveta abre sobreposta ao
   conteúdo, com véu, sem empurrar a página.
-- Q: Como a consistência do tema e o contraste nas 24 rotas devem ser comprovados antes de a feature
-  ser considerada pronta? → A: Auditoria automatizada de acessibilidade nas 24 rotas com os três
+- Q: Como a consistência do tema e o contraste nas 28 rotas devem ser comprovados antes de a feature
+  ser considerada pronta? → A: Auditoria automatizada de acessibilidade nas 28 rotas com os três
   papéis, mais uma verificação de que nenhum elemento renderiza fora da paleta de tokens,
   complementadas por conferência visual dirigida das telas de maior densidade (escalação,
   consolidação de estatísticas e painel de presenças).
@@ -423,7 +423,7 @@ feature. A coluna "Impacto" descreve apenas a natureza da mudança de apresenta�
   cadeia de texto para fins de apresentação é permitido **desde que a cadeia renderizada permaneça
   idêntica** e isso seja comprovado por teste de igualdade (ver FR-035).
 - **FR-008a**: A cobertura da auditoria automatizada de acessibilidade DEVE ser estendida das duas
-  rotas públicas atuais para as 24 rotas catalogadas, exercidas com os três papéis. Essa ampliação de
+  rotas públicas atuais para as 28 rotas catalogadas, exercidas com os três papéis. Essa ampliação de
   cobertura de teste é parte da entrega desta feature.
 
 ### Requisitos Funcionais — Assets de Marca
@@ -617,7 +617,7 @@ feature. A coluna "Impacto" descreve apenas a natureza da mudança de apresenta�
 - **SC-003**: 100% dos pares texto/fundo primários e secundários atingem no mínimo 4,5:1, verificado
   por auditoria automatizada de acessibilidade.
 - **SC-003a**: O portão de verificação do tema tem três partes, todas obrigatórias:
-  1. **Auditoria automatizada**: a auditoria de acessibilidade cobre as 24 rotas catalogadas, exercidas
+  1. **Auditoria automatizada**: a auditoria de acessibilidade cobre as 28 rotas catalogadas, exercidas
      com os três papéis, e reporta zero violações das regras WCAG A e AA — ampliando a cobertura atual,
      hoje limitada às duas rotas públicas.
   2. **Conformidade de paleta**: nenhum elemento renderizado apresenta cor de fundo, texto ou borda
@@ -691,7 +691,7 @@ feature. A coluna "Impacto" descreve apenas a natureza da mudança de apresenta�
   recursos já disponíveis na stack aprovada.
 - **A-11**: As alterações de teste esperadas nesta feature são de duas categorias: atualizar as
   asserções que hoje afirmam a estrutura da navegação autenticada, incluindo as que dependem da barra
-  de abas fixa no rodapé; e ampliar a cobertura da auditoria de acessibilidade para as 24 rotas.
+  de abas fixa no rodapé; e ampliar a cobertura da auditoria de acessibilidade para as 28 rotas.
   Nenhum teste de regra de negócio é alterado.
 - **A-12**: O papel de maior alcance é `PRESIDENT`, com até 10 itens de navegação simultâneos. O
   dimensionamento da barra lateral e da gaveta usa esse número como pior caso para SC-004.

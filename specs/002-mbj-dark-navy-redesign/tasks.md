@@ -11,7 +11,7 @@ description: "Task list for feature implementation"
 [data-model.md](./data-model.md), [contracts/](./contracts/)
 
 **Tests**: **Incluídos e obrigatórios.** FR-008a exige ampliar a auditoria de acessibilidade para as
-24 rotas, SC-003a define um portão de verificação em quatro camadas, e o Princípio IV da Constituição
+28 rotas, SC-003a define um portão de verificação em quatro camadas, e o Princípio IV da Constituição
 exige portões automatizados. Testes não são opcionais nesta feature.
 
 **Organization**: Tarefas agrupadas por user story, permitindo implementação e validação
@@ -42,9 +42,9 @@ navegação e na ampliação da cobertura de testes.
 
 **Purpose**: Preparar o ramo e os diretórios previstos no plano
 
-- [ ] T001 Criar e publicar o ramo `feature/mbj-ui-redesign-dark-navy` a partir de `main`
-- [ ] T002 [P] Criar o diretório `src/app/layouts/navigation/` para os subcomponentes da casca de navegação
-- [ ] T003 [P] Criar o diretório `tests/e2e/support/` para as fixtures compartilhadas de teste
+- [X] T001 Criar e publicar o ramo `feature/mbj-ui-redesign-dark-navy` a partir de `main`
+- [X] T002 [P] Criar o diretório `src/app/layouts/navigation/` para os subcomponentes da casca de navegação
+- [X] T003 [P] Criar o diretório `tests/e2e/support/` para as fixtures compartilhadas de teste
 
 ---
 
@@ -55,16 +55,16 @@ navegação e na ampliação da cobertura de testes.
 **⚠️ CRÍTICO**: nenhuma user story pode começar antes desta fase terminar. Os tokens são a base de
 todo o resto; as fixtures de teste são pré-requisito da validação de qualquer story.
 
-- [ ] T004 Substituir pelos valores Dark Navy os 17 tokens que **já existem** em `src/index.css`, conforme as linhas correspondentes da tabela 1.1 de `specs/002-mbj-dark-navy-redesign/data-model.md`; os tokens novos são escopo de T005
-- [ ] T005 Adicionar em `src/index.css` os tokens novos `elevated`, `overlay`, `success`, `success-foreground`, `warning`, `warning-foreground`, `info`, `info-foreground`, `pitch`, `pitch-foreground` e `pitch-line`, e corrigir `destructive` de `0 72% 51%` para `0 91% 71%` (o valor atual atinge apenas 4,0:1 sobre o novo fundo); desacoplar também `input` de `border`, atribuindo a `input` o valor `220 38% 48%` — no valor anterior, idêntico ao divisor, o contorno de campo atingia apenas 1,4:1 sobre o card e reprovava em WCAG 1.4.11 (FR-042, G-08)
-- [ ] T006 Mapear todos os tokens novos para utilitários Tailwind no bloco `@theme inline` de `src/index.css`
-- [ ] T007 Trocar `color-scheme: light` por `color-scheme: dark` em `src/index.css` para alinhar controles nativos e barras de rolagem ao tema
-- [ ] T008 Estender o array `SEMANTIC_THEME_TOKENS` em `src/config/club.config.ts` com os 11 nomes novos, mantendo a ordem alfabética por família
-- [ ] T009 Atualizar `clubConfig.theme` em `src/config/club.config.ts` com os mesmos valores declarados em `src/index.css`
-- [ ] T010 Adicionar em `src/config/club.config.test.ts` o teste de paridade (regra V-02) que lê `src/index.css` e falha se algum valor divergir de `clubConfig.theme`
-- [ ] T011 [P] Criar `tests/e2e/support/auth-mock.ts` extraindo o padrão hoje duplicado em oito specs (`jwt()`, `user()`, `json()` e interceptação de `user_roles` por `page.route()`), parametrizado por papel `ATHLETE`, `COACH` e `PRESIDENT`
-- [ ] T012 [P] Criar `tests/e2e/support/route-catalog.ts` com as 24 rotas da seção "Superfícies Impactadas" de `spec.md`, cada uma declarando caminho, papel mínimo que a alcança e dados mínimos para renderizar conteúdo
-- [ ] T013 [P] Criar `tests/e2e/support/palette.ts` com o helper que lê os valores resolvidos dos tokens em `:root` e monta a lista de cores permitidas (sólidos, derivações a 12%, 40% e 60%, e `rgba(0, 0, 0, 0)`), conforme `contracts/theme-verification.md`
+- [X] T004 Substituir pelos valores Dark Navy os 17 tokens que **já existem** em `src/index.css`, conforme as linhas correspondentes da tabela 1.1 de `specs/002-mbj-dark-navy-redesign/data-model.md`; os tokens novos são escopo de T005
+- [X] T005 Adicionar em `src/index.css` os tokens novos `elevated`, `overlay`, `success`, `success-foreground`, `warning`, `warning-foreground`, `info`, `info-foreground`, `pitch`, `pitch-foreground` e `pitch-line`, e corrigir `destructive` de `0 72% 51%` para `0 91% 71%` (o valor atual atinge apenas 4,0:1 sobre o novo fundo); desacoplar também `input` de `border`, atribuindo a `input` o valor `220 38% 48%` — no valor anterior, idêntico ao divisor, o contorno de campo atingia apenas 1,4:1 sobre o card e reprovava em WCAG 1.4.11 (FR-042, G-08)
+- [X] T006 Mapear todos os tokens novos para utilitários Tailwind no bloco `@theme inline` de `src/index.css`
+- [X] T007 Trocar `color-scheme: light` por `color-scheme: dark` em `src/index.css` para alinhar controles nativos e barras de rolagem ao tema
+- [X] T008 Estender o array `SEMANTIC_THEME_TOKENS` em `src/config/club.config.ts` com os 11 nomes novos, mantendo a ordem alfabética por família
+- [X] T009 Atualizar `clubConfig.theme` em `src/config/club.config.ts` com os mesmos valores declarados em `src/index.css`
+- [X] T010 Adicionar em `src/config/club.config.test.ts` o teste de paridade (regra V-02) que lê `src/index.css` e falha se algum valor divergir de `clubConfig.theme`
+- [X] T011 [P] Criar `tests/e2e/support/auth-mock.ts` extraindo o padrão hoje duplicado em oito specs (`jwt()`, `user()`, `json()` e interceptação de `user_roles` por `page.route()`), parametrizado por papel `ATHLETE`, `COACH` e `PRESIDENT`
+- [X] T012 [P] Criar `tests/e2e/support/route-catalog.ts` com as 28 rotas da seção "Superfícies Impactadas" de `spec.md`, cada uma declarando caminho, papel mínimo que a alcança e dados mínimos para renderizar conteúdo
+- [X] T013 [P] Criar `tests/e2e/support/palette.ts` com o helper que lê os valores resolvidos dos tokens em `:root` e monta a lista de cores permitidas (sólidos, derivações a 12%, 40% e 60%, e `rgba(0, 0, 0, 0)`), conforme `contracts/theme-verification.md`
 
 **Checkpoint**: tema virado para Dark Navy em toda superfície que já usa tokens; fixtures de teste
 prontas. As user stories podem começar.
@@ -76,7 +76,7 @@ prontas. As user stories podem começar.
 **Goal**: tema Dark Navy aplicado a 100% das superfícies e escudo oficial em todos os pontos de
 marca, sem resíduo do escudo antigo nem superfície clara herdada.
 
-**Independent Test**: percorrer as 24 rotas com os três papéis e confirmar fundo navy, escudo oficial
+**Independent Test**: percorrer as 28 rotas com os três papéis e confirmar fundo navy, escudo oficial
 e ausência de superfície clara; instalar a PWA e conferir ícone e favicon; comparar a Landing Page
 lado a lado com a referência normativa e confirmar os sete elementos de composição.
 
@@ -116,8 +116,8 @@ lado a lado com a referência normativa e confirmar os sete elementos de composi
 
 ### Verificação da story
 
-- [ ] T040 [US1] Criar `tests/e2e/theme-consistency.spec.ts` com o helper de conformidade de paleta, cobrindo nesta fase as rotas públicas e de fluxo de autenticação (`/`, `/login`, `/convite`, `/alterar-senha`, `/mfa` e a rota de captura), falhando se algum elemento visível usar cor fora da lista permitida e declarando como exceção o contêiner do QR Code. A ampliação para as 24 rotas ocorre em T089, depois que US4 sanear as superfícies de conteúdo
-- [ ] T041 [US1] Ampliar `tests/e2e/accessibility.spec.ts` das 2 rotas públicas atuais para as 24 rotas do catálogo, usando as fixtures de `tests/e2e/support/`, mantendo as tags WCAG já em uso e exigindo zero violações
+- [ ] T040 [US1] Criar `tests/e2e/theme-consistency.spec.ts` com o helper de conformidade de paleta, cobrindo nesta fase as rotas públicas e de fluxo de autenticação (`/`, `/login`, `/convite`, `/alterar-senha`, `/mfa` e a rota de captura), falhando se algum elemento visível usar cor fora da lista permitida e declarando como exceção o contêiner do QR Code. A ampliação para as 28 rotas ocorre em T089, depois que US4 sanear as superfícies de conteúdo
+- [ ] T041 [US1] Ampliar `tests/e2e/accessibility.spec.ts` das 2 rotas públicas atuais para as 28 rotas do catálogo, usando as fixtures de `tests/e2e/support/`, mantendo as tags WCAG já em uso e exigindo zero violações
 - [ ] T042 [US1] Atualizar em `tests/e2e/app-shell.spec.ts` a asserção de texto alternativo do escudo, se o rótulo derivado de `clubConfig.identity` tiver mudado
 
 **Checkpoint**: tema e marca completos e verificados. Este é o MVP entregável.
@@ -219,7 +219,7 @@ e erro de validação; abrir um diálogo modal e confirmar véu escuro.
 - [ ] T086 Executar os seis cenários de `specs/002-mbj-dark-navy-redesign/quickstart.md` e registrar o resultado
 - [ ] T087 Abrir o Pull Request com autorrevisão estruturada e validar o preview do Cloudflare, conforme exigido pelo Princípio IV da Constituição
 - [ ] T088 Estender em `tests/e2e/accessibility.spec.ts` o laço de alvos de toque — hoje aplicado apenas a `/` — às rotas autenticadas do catálogo, fechando o item "touch targets" nomeado explicitamente no Princípio IV da Constituição (SC-009)
-- [ ] T089 Ampliar `tests/e2e/theme-consistency.spec.ts` para as 24 rotas do catálogo, fechando a camada 2 do portão (SC-003a) agora que todas as superfícies de conteúdo foram saneadas em US4
+- [ ] T089 Ampliar `tests/e2e/theme-consistency.spec.ts` para as 28 rotas do catálogo, fechando a camada 2 do portão (SC-003a) agora que todas as superfícies de conteúdo foram saneadas em US4
 - [ ] T090 Implementar a camada 2b em `tests/e2e/theme-consistency.spec.ts`: ler o `background-image` computado do hero, compor cada stop sobre o navy base e falhar se algum sob região de texto exceder luminância 0,030, depois calcular as razões dos textos primário, secundário e dourado contra esse pior caso e falhar abaixo de 4,5:1 — sem depender do axe, que devolve *incomplete* sobre gradiente (FR-041, SC-013, GL-16, GL-18)
 - [ ] T091 Acrescentar ao mesmo arquivo a verificação dos pares não textuais de FR-042 — contorno de campo, anel de foco e marcações do campo — falhando abaixo de 3:1, e registrar as razões calculadas (SC-014, GL-17)
 
@@ -250,7 +250,7 @@ e erro de validação; abrir um diálogo modal e confirmar véu escuro.
 - Subcomponentes antes do layout que os compõe (T043-T045 antes de T046)
 - Implementação antes dos testes que a verificam
 - T078 por último em US4: a varredura estática só fica verde depois que T065, T066 e T073 removem as cores fixas
-- T040 cobre apenas as rotas de US1; a conformidade de paleta nas 24 rotas só é alcançável depois de US4, e por isso vive em T089
+- T040 cobre apenas as rotas de US1; a conformidade de paleta nas 28 rotas só é alcançável depois de US4, e por isso vive em T089
 
 ---
 

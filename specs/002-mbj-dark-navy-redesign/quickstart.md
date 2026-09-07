@@ -38,8 +38,8 @@ npm run test:unit -- src/config/club.config.test.ts
 ```
 
 Esperado:
-- Conformidade de paleta sem violações nas 24 rotas do catálogo.
-- Auditoria de acessibilidade com zero violações nas 24 rotas, em desktop e mobile.
+- Conformidade de paleta sem violações nas 28 rotas do catálogo.
+- Auditoria de acessibilidade com zero violações nas 28 rotas, em desktop e mobile.
 - Paridade de valores entre `src/index.css` e `clubConfig.theme` (regra V-02).
 
 **Manual**

@@ -135,7 +135,7 @@ opostos (o primeiro quer preencher, o segundo quer margem), e por isso não pode
 
 ---
 
-## D-06 — Como automatizar a verificação de consistência do tema nas 24 rotas
+## D-06 — Como automatizar a verificação de consistência do tema nas 28 rotas
 
 **Decision**: portão em três camadas, conforme SC-003a:
 
@@ -148,7 +148,7 @@ opostos (o primeiro quer preencher, o segundo quer margem), e por isso não pode
    `color` e cores de borda contra a lista de valores permitidos — tokens sólidos mais suas
    derivações nas opacidades definidas (12%, 40%, 60%) mais `rgba(0, 0, 0, 0)`.
 3. **Auditoria de acessibilidade** (Playwright + axe): as regras WCAG A e AA já usadas, ampliadas das
-   2 rotas públicas atuais para as 24 catalogadas, incluindo a largura mobile com a gaveta aberta.
+   2 rotas públicas atuais para as 28 catalogadas, incluindo a largura mobile com a gaveta aberta.
 
 **Rationale**: as três camadas cobrem falhas diferentes. A estática pega a causa raiz mais provável —
 alguém escrevendo `bg-white` numa tela nova — e é a mais barata de rodar. A de runtime pega superfície
@@ -164,12 +164,12 @@ avaliado na clarificação, deixaria passar exatamente o cenário que a feature 
 
 ---
 
-## D-07 — Como exercitar as 24 rotas autenticadas nos testes
+## D-07 — Como exercitar as 28 rotas autenticadas nos testes
 
 **Decision**: extrair para `tests/e2e/support/auth-mock.ts` o padrão de mock já usado nas specs
 existentes — interceptação das chamadas ao Supabase por `page.route()`, com JWT forjado carregando
 `sub` e `aal`, e resposta fixa para a consulta de `user_roles` — parametrizado por papel. Um catálogo
-em `tests/e2e/support/route-catalog.ts` lista as 24 rotas com o papel mínimo que as alcança e os
+em `tests/e2e/support/route-catalog.ts` lista as 28 rotas com o papel mínimo que as alcança e os
 dados mínimos necessários para renderizar conteúdo.
 
 **Rationale**: as specs de ponta a ponta hoje **não autenticam de verdade**; elas apontam para um
@@ -178,9 +178,9 @@ mockam cada endpoint com `page.route()`. O padrão funciona e está replicado em
 redefinindo `jwt()`, `user()` e `json()`. Extrair o helper é pré-requisito prático para cobrir 24
 rotas sem multiplicar essa duplicação por três papéis.
 
-**Interpretação de escopo**: SC-003a fala em "24 rotas exercidas com os três papéis". Cada rota é
+**Interpretação de escopo**: SC-003a fala em "28 rotas exercidas com os três papéis". Cada rota é
 auditada **uma vez, com um papel autorizado a alcançá-la** — os três papéis em conjunto cobrem o
-catálogo. Auditar toda rota com todo papel produziria 72 execuções, a maioria terminando em
+catálogo. Auditar toda rota com todo papel produziria 84 execuções, a maioria terminando em
 redirecionamento por guarda de rota, sem ganho de sinal.
 
 **Alternatives considered**:

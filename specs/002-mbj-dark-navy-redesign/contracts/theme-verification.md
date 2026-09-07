@@ -23,7 +23,7 @@ superfície clara por requisito funcional de leitura por scanner (FR-003g).
 
 ## Camada 2 — Conformidade de paleta em runtime
 
-**Ferramenta**: Playwright. **Escopo**: as 24 rotas do catálogo, no projeto `desktop-chromium`; mais
+**Ferramenta**: Playwright. **Escopo**: as 28 rotas do catálogo, no projeto `desktop-chromium`; mais
 a largura mobile com a gaveta aberta (SC-003b).
 
 **Procedimento**:
@@ -76,7 +76,7 @@ o portão aprovaria o hero sem nunca medir seu contraste.
 **Ferramenta**: Playwright + `@axe-core/playwright`, com as tags já em uso
 (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`).
 
-**Escopo**: ampliado de 2 rotas públicas para as 24 rotas do catálogo, mais a largura mobile com a
+**Escopo**: ampliado de 2 rotas públicas para as 28 rotas do catálogo, mais a largura mobile com a
 gaveta aberta.
 
 **Critério**: zero violações. **Resultados *incomplete* não contam como aprovação** — onde ocorrerem
@@ -114,11 +114,12 @@ Fonte única em `tests/e2e/support/route-catalog.ts`. Cada entrada declara camin
 alcança e os dados mínimos para renderizar conteúdo.
 
 **Regra de escopo**: cada rota é auditada **uma vez, com um papel autorizado**. Os três papéis em
-conjunto cobrem as 24 rotas (research D-07). Auditar toda rota com todo papel geraria 72 execuções, a
+conjunto cobrem as 28 rotas (research D-07). Auditar toda rota com todo papel geraria 84 execuções, a
 maioria terminando em redirecionamento por guarda.
 
-**Garantia GV-01**: o catálogo tem exatamente 24 entradas e cobre toda rota declarada em
-`src/app/router/router.tsx`, exceto a rota de captura `*`, que é auditada como caso próprio.
+**Garantia GV-01**: o catálogo tem exatamente 28 entradas — 6 públicas e de fluxo de autenticação
+(incluindo a rota de captura `*`) e 22 autenticadas — e cobre toda rota navegável declarada em
+`src/app/router/router.tsx`.
 
 ## Autenticação nos testes
 

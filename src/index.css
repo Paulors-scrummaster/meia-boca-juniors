@@ -9,26 +9,44 @@
     BlinkMacSystemFont,
     'Segoe UI',
     sans-serif;
-  color-scheme: light;
+  color-scheme: dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --background: 220 35% 98%;
-  --foreground: 216 65% 12%;
-  --card: 0 0% 100%;
-  --card-foreground: 216 65% 12%;
-  --primary: 217 74% 24%;
-  --primary-foreground: 43 78% 92%;
-  --secondary: 43 82% 55%;
-  --secondary-foreground: 216 65% 12%;
-  --muted: 216 24% 92%;
-  --muted-foreground: 216 15% 38%;
-  --accent: 43 82% 55%;
-  --accent-foreground: 216 65% 12%;
-  --destructive: 0 72% 51%;
-  --destructive-foreground: 0 0% 100%;
-  --border: 216 24% 82%;
-  --input: 216 24% 82%;
-  --ring: 43 82% 55%;
+
+  /* Marca e superfície */
+  --background: 220 58% 9%;
+  --foreground: 0 0% 100%;
+  --card: 222 51% 14%;
+  --card-foreground: 0 0% 100%;
+  --elevated: 221 45% 18%;
+  --primary: 45 84% 49%;
+  --primary-foreground: 220 58% 9%;
+  --secondary: 47 90% 55%;
+  --secondary-foreground: 220 58% 9%;
+  --muted: 223 46% 16%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 45 84% 49%;
+  --accent-foreground: 220 58% 9%;
+  --border: 220 43% 24%;
+  --input: 220 38% 48%;
+  --ring: 45 84% 49%;
+  --overlay: 0 0% 0%;
+
+  /* Estado semântico */
+  --success: 158 64% 52%;
+  --success-foreground: 220 58% 9%;
+  --warning: 27 96% 61%;
+  --warning-foreground: 220 58% 9%;
+  --destructive: 0 91% 71%;
+  --destructive-foreground: 220 58% 9%;
+  --info: 213 94% 68%;
+  --info-foreground: 220 58% 9%;
+
+  /* Domínio */
+  --pitch: 160 61% 15%;
+  --pitch-foreground: 0 0% 100%;
+  --pitch-line: 159 11% 75%;
+
   --radius: 0.75rem;
 }
 
@@ -37,6 +55,7 @@
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
+  --color-elevated: hsl(var(--elevated));
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
   --color-secondary: hsl(var(--secondary));
@@ -45,11 +64,21 @@
   --color-muted-foreground: hsl(var(--muted-foreground));
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+  --color-overlay: hsl(var(--overlay));
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-info: hsl(var(--info));
+  --color-info-foreground: hsl(var(--info-foreground));
+  --color-pitch: hsl(var(--pitch));
+  --color-pitch-foreground: hsl(var(--pitch-foreground));
+  --color-pitch-line: hsl(var(--pitch-line));
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
