@@ -46,16 +46,17 @@ via manifesto. **React Native e Expo estão fora de escopo** (Constituição, Pr
 **Project Type**: Aplicação web de página única, monolito modular por feature, projeto único
 
 **Performance Goals**: Sem regressão nos limites já verificados em `tests/e2e/performance.spec.ts`.
-Orçamento de peso da marca (revisado após D-03 admitir o brasão fotográfico na interface, não apenas
-o vetor simplificado, e mantido em sincronia com `BUDGETS` em `scripts/generate-brand-assets.mjs`,
-que falha a geração se excedido): SVG do escudo vetorial (favicon/PWA) ≤ 20 KB, cada PNG de ícone da
-PWA ≤ 40 KB, cada variante WebP do brasão fotográfico (`mbj-crest-512`, `mbj-crest-1024`) ≤ 120 KB,
-carga total de assets de marca publicados em `public/brand/` ≤ 300 KB (real: ~207 KB) — contra os
-1,6 MB do arquivo de origem, que não é publicado. Uma única navegação nunca baixa esse total: páginas
-autenticadas carregam apenas `mbj-crest-512.webp` (~52 KB) e a Landing Page apenas
-`mbj-crest-1024.webp` (~88 KB); o SVG e os ícones da PWA são buscados pelo navegador fora do fluxo de
-navegação (favicon, manifest) e ficam em cache. A composição do hero é feita por CSS e não adiciona
-peso de imagem.
+Orçamento de peso da marca (revisado após D-03 admitir o brasão fotográfico na interface e D-13
+admitir uma fotografia própria do clube no hero, e mantido em sincronia com `BUDGETS` em
+`scripts/generate-brand-assets.mjs`, que falha a geração se excedido): SVG do escudo vetorial
+(favicon/PWA) ≤ 20 KB, cada PNG de ícone da PWA ≤ 40 KB, cada variante WebP do brasão fotográfico
+(`mbj-crest-512`, `mbj-crest-1024`) ≤ 120 KB, a foto do hero (`mbj-hero-stadium`) ≤ 260 KB, carga
+total de assets de marca publicados em `public/brand/` ≤ 560 KB (real: ~281 KB) — contra os 1,6 MB do
+arquivo de origem do brasão e a foto de origem do hero, nenhum dos dois publicado. Uma única navegação
+nunca baixa esse total: a Landing Page carrega `mbj-crest-1024.webp` (~88 KB) e `mbj-hero-stadium.webp`
+(~74 KB); páginas autenticadas carregam apenas `mbj-crest-512.webp` (~52 KB); o SVG e os ícones da PWA
+são buscados pelo navegador fora do fluxo de navegação (favicon, manifest) e ficam em cache. O véu, o
+brilho e a vinheta sobre a foto do hero são compostos por CSS e não adicionam peso de imagem.
 
 **Constraints**: WCAG AA obrigatório — contraste ≥ 4,5:1 em texto, ≥ 3:1 em limites de controle,
 indicadores de foco e objetos gráficos informativos (FR-042), alvos de toque ≥ 44x44; luminância de

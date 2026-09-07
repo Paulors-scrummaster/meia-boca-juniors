@@ -39,35 +39,41 @@ deste documento.
 
 | Camada | Exigência |
 |---|---|
-| Base | Gradiente em azul navy, mais profundo nas bordas inferiores |
+| Fotografia | Fotografia própria do clube (`heroStadium`), espelhada para concentrar torcida/refletores no lado sem texto (D-13) |
+| Véu | Gradiente horizontal em azul navy, opaco onde fica o texto, mais fraco onde só ficam cards e marca d'água |
 | Iluminação | Gradiente radial dourado de baixa intensidade na região superior, simulando refletores |
 | Vinheta | Escurecimento radial nas bordas, concentrando a atenção no centro-esquerda |
 | Textura | Grão sutil, preferencialmente por CSS; asset raster próprio apenas se necessário |
 
 **Garantias**:
-- **GL-01**: nenhuma fotografia de terceiros é usada. Toda a composição é própria do projeto (FR-033).
-- **GL-02**: todos os stops de gradiente derivam de tokens do tema (G-07).
+- **GL-01**: nenhuma fotografia de terceiros é usada — a única fotografia do hero é própria do clube
+  (FR-033). Uma futura troca de foto continua coberta pela mesma garantia, porque o teto de FR-041 é
+  calculado contra o pior caso teórico (branco), não contra o tom real da foto em uso (D-13).
+- **GL-02**: todos os stops de gradiente derivam de tokens do tema (G-07); a fotografia em si, sendo
+  captura real, está isenta dessa exigência.
 - **GL-03**: o texto sobre o hero mantém contraste mínimo de 4,5:1 **sobre a região mais clara** da
   composição, não apenas sobre a cor base.
 
 **GL-16 — teto de luminância e razões calculadas**: nenhuma região do hero sob texto ultrapassa
-luminância relativa de **0,030**, equivalente a ~18% do dourado sobre o navy (FR-041). A implementação
-usa 16% de pico, medido em produção (T035) contra o pior caso real do gradiente:
+luminância relativa de **0,030** (FR-041). Desde D-13, o pior caso não é mais medido contra o tom real
+da fotografia, e sim **calculado** contra o pior caso teórico dela (pixel branco), compondo as camadas
+de véu e brilho sequencialmente, na ordem real de pintura do CSS:
 
 | Texto | Razão medida | WCAG AA |
 |---|---|---|
-| Primário (`foreground`) | 14,0:1 | Passa |
-| Secundário (`muted-foreground`) | 5,5:1 | Passa |
-| Dourado (`primary`) | 7,1:1 | Passa |
+| Primário (`foreground`) | 13,8:1 | Passa |
+| Secundário (`muted-foreground`) | 5,4:1 | Passa |
+| Dourado (`primary`) | 7,0:1 | Passa |
 
-Luminância do pior pixel medida: **0,025**, 17% abaixo do teto de 0,030. O texto secundário continua
-sendo o par mais próximo do limite; a folga entre 16% (implementado) e ~23% (onde reprovaria) é a
-margem de segurança.
+Luminância do pior caso composto: **0,026**, abaixo do teto de 0,030. O texto secundário continua
+sendo o par mais próximo do limite.
 
-**Método de verificação — reproduzível e independente do axe**: ler `background-image` computado do
-hero, extrair os stops resolvidos, compor cada um sobre o navy base e falhar se algum exceder 0,030.
-Opera sobre os stops declarados, não sobre pixels, portanto não exige decodificar imagem e produz o
-mesmo resultado em qualquer máquina.
+**Método de verificação — reproduzível e independente do axe e da fotografia em uso**: compor
+sequencialmente, sobre branco puro, o véu horizontal (na zona forte, onde vive o texto) e depois o
+brilho radial dourado por cima do véu já escurecido — nunca da fotografia crua (D-13,
+`HERO_LAYER_ALPHA` em `hero-backdrop.constants.ts`, fonte única compartilhada entre o componente e o
+teste). Opera sobre os alfas declarados, não sobre pixels da fotografia, então continua válido mesmo
+que a foto seja trocada no futuro.
 
 **GL-17 — elementos não textuais do hero**: contorno do botão secundário, anel de foco e indicador de
 rota ativa atingem no mínimo 3:1 contra o pior caso do fundo (FR-042). O contorno usa `input`
@@ -165,7 +171,7 @@ lado a lado com a referência.
 
 | # | Elemento | Presente? |
 |---|---|---|
-| 1 | Hero com iluminação radial e vinheta, sem fotografia de terceiros | ☐ |
+| 1 | Hero com fotografia própria do clube, véu, iluminação radial e vinheta | ☐ |
 | 2 | Escudo em marca d'água no lado direito | ☐ |
 | 3 | Título bicolor — branco e dourado | ☐ |
 | 4 | Navegação pública com rota ativa em dourado | ☐ |

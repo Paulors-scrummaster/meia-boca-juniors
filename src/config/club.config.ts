@@ -73,6 +73,8 @@ interface ClubConfig {
     crestLarge: string;
     /** Escudo vetorial simplificado, legível em tamanhos pequenos. */
     shield: string;
+    /** Fundo fotográfico do hero — fotografia própria do clube (FR-033). */
+    heroStadium: string;
     favicon: string;
     pwaIcon192: string;
     pwaIcon512: string;
@@ -106,6 +108,7 @@ export const clubConfig = {
     crest: '/brand/mbj-crest-512.webp',
     crestLarge: '/brand/mbj-crest-1024.webp',
     shield: '/brand/mbj-shield.svg',
+    heroStadium: '/brand/mbj-hero-stadium.webp',
     favicon: '/favicon.svg',
     pwaIcon192: '/brand/mbj-icon-192.png',
     pwaIcon512: '/brand/mbj-icon-512.png',

@@ -402,10 +402,16 @@
   `logo mbj 2.png` (`public/brand/mbj-crest-512.webp` e `mbj-crest-1024.webp`, com relevo e brilho
   reais) para toda a interface (Landing Page, cabeçalho, barra lateral, cards), e um vetor
   simplificado (`public/brand/mbj-shield.svg`) restrito a favicon e ícones de PWA, onde detalhe fino
-  degradaria em tamanho pequeno. Ambos são gerados por `scripts/generate-brand-assets.mjs`
-  (determinístico — `npm run brand:assets` não produz diff) a partir dos arquivos de referência na
-  raiz do repositório, com orçamento de peso codificado no próprio script (`BUDGETS`): SVG ≤ 20 KB,
-  PNG de ícone ≤ 40 KB, WebP do brasão ≤ 120 KB, total publicado ≤ 300 KB.
+  degradaria em tamanho pequeno. O hero da Landing Page usa também uma fotografia própria do clube
+  (`public/brand/mbj-hero-stadium.webp`, extraída de `estádio meia boca jr.png` — nunca de terceiros,
+  FR-033), espelhada horizontalmente para concentrar torcida/refletores no lado sem texto; o teto de
+  contraste sob o texto é garantido matematicamente contra o pior caso teórico da foto (branco), não
+  contra seu tom real, compondo as camadas de véu/brilho sequencialmente
+  (`hero-backdrop.constants.ts`, fonte única compartilhada com o teste da camada 2b). Todos são
+  gerados por `scripts/generate-brand-assets.mjs` (determinístico — `npm run brand:assets` não produz
+  diff) a partir dos arquivos de referência na raiz do repositório, com orçamento de peso codificado
+  no próprio script (`BUDGETS`): SVG ≤ 20 KB, PNG de ícone ≤ 40 KB, WebP do brasão ≤ 120 KB, foto do
+  hero ≤ 260 KB, total publicado ≤ 560 KB.
 - **Navegação:** barra lateral fixa de três regiões (marca no topo, links no corpo, perfil e "Sair"
   no rodapé) acima de 768px; abaixo disso, cabeçalho com hambúrguer abre uma gaveta `<dialog>` nativa
   (`showModal()`) que replica a mesma hierarquia e fecha ao navegar.

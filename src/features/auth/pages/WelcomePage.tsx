@@ -2,21 +2,43 @@ import { ArrowRight, LockKeyhole, UsersRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 import { clubConfig } from '@/config/club.config';
+import { HERO_LAYER_ALPHA } from '@/features/auth/pages/hero-backdrop.constants';
 
 /**
- * Fundo do hero (C-L1, contracts/landing-composition.md).
- *
- * Três camadas de `background-image`, todas com stops derivados de tokens do tema
- * (G-07), nunca de fotografia de terceiros (FR-033):
+ * Foto do hero (C-L1). Fotografia própria do clube (FR-033, não de terceiros) — a
+ * torcida e os refletores, que na origem ficam do lado esquerdo do arquivo, são
+ * espelhados (`-scale-x-100`) para caírem do lado **direito** da composição, onde o
+ * véu de `HeroBackdrop` é mais fraco (região dos cards e da marca d'água, sem texto
+ * de corpo) — sem o espelhamento, a parte "interessante" da foto ficaria escondida
+ * atrás do véu forte que protege o texto à esquerda, e o lado fraco do véu revelaria
+ * só a região vazia/lisa da foto.
+ */
+function HeroPhoto() {
+  return (
+    <img
+      alt=""
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-y-0 left-1/2 -z-20 h-full w-screen max-w-none -translate-x-1/2 -scale-x-100 object-cover object-left select-none"
+      src={clubConfig.assets.heroStadium}
+    />
+  );
+}
+
+/**
+ * Véu do hero (C-L1, contracts/landing-composition.md). Fica por cima de
+ * `HeroPhoto` e tem quatro camadas de `background-image`, todas com stops
+ * derivados de tokens do tema (G-07):
  *   1. Um brilho radial dourado no canto superior esquerdo, simulando refletores.
- *      O pico de opacidade é 16% — abaixo do teto de 18% de FR-041/GL-16, que é o
- *      limite que mantém o contraste do texto calculável e acima de 4,5:1 no pior
- *      caso (ver T035 para a medição).
- *   2. Uma vinheta radial que escurece as bordas, concentrando a atenção no
+ *   2. Um véu horizontal opaco o bastante para garantir o teto de luminância de
+ *      FR-041/GL-16 sob a coluna de texto **mesmo no pior caso teórico** — pixel
+ *      branco puro por trás da foto, não seu tom real (ver T090, que passa a
+ *      compor as camadas sequencialmente contra branco por essa razão). Começa
+ *      forte à esquerda, onde fica o texto, e afrouxa a partir de 60% da largura,
+ *      onde só restam os cards (com fundo próprio) e a marca d'água do escudo —
+ *      exatamente onde `HeroPhoto` concentra a torcida espelhada.
+ *   3. Uma vinheta radial que escurece as bordas, concentrando a atenção no
  *      centro-esquerda onde fica o conteúdo.
- *   3. Uma textura de grão muito sutil (T027): pontilhado em opacidade quase nula.
- *      Preferida a um asset raster — sua contribuição à luminância é desprezível
- *      (< 0,001 mesmo sobreposta ao brilho), então não afeta o teto de FR-041.
+ *   4. Uma textura de grão muito sutil (T027): pontilhado em opacidade quase nula.
  *
  * Posicionado full-bleed via o truque `left-1/2 w-screen -translate-x-1/2` para
  * cobrir a largura do viewport sem alterar a estrutura de `PublicLayout`.
@@ -28,11 +50,11 @@ function HeroBackdrop() {
       className="pointer-events-none absolute inset-y-0 left-1/2 -z-10 w-screen -translate-x-1/2"
       data-testid="hero-backdrop"
       style={{
-        backgroundColor: 'hsl(var(--background))',
         backgroundImage: [
-          'radial-gradient(60rem 42rem at 22% 6%, hsl(var(--primary) / 0.16), transparent 60%)',
-          'radial-gradient(90rem 55rem at 50% 100%, transparent 45%, hsl(var(--overlay) / 0.42) 100%)',
-          'repeating-radial-gradient(circle at 0 0, hsl(var(--foreground) / 0.015) 0, transparent 2px, transparent 4px)',
+          `radial-gradient(60rem 42rem at 22% 6%, hsl(var(--primary) / ${HERO_LAYER_ALPHA.goldGlow}), transparent 60%)`,
+          `linear-gradient(90deg, hsl(var(--background) / ${HERO_LAYER_ALPHA.scrimStrong}) 0%, hsl(var(--background) / ${HERO_LAYER_ALPHA.scrimStrong}) 60%, hsl(var(--background) / ${HERO_LAYER_ALPHA.scrimWeak}) 100%)`,
+          `radial-gradient(90rem 55rem at 50% 100%, transparent 45%, hsl(var(--overlay) / ${HERO_LAYER_ALPHA.vignette}) 100%)`,
+          `repeating-radial-gradient(circle at 0 0, hsl(var(--foreground) / ${HERO_LAYER_ALPHA.grain}) 0, transparent 2px, transparent 4px)`,
         ].join(', '),
       }}
     />
@@ -77,6 +99,7 @@ function InstitutionalFooter() {
 export function WelcomePage() {
   return (
     <div className="relative isolate">
+      <HeroPhoto />
       <HeroBackdrop />
 
       <section className="relative grid min-h-[calc(100dvh-9rem)] items-center gap-8 py-8 lg:grid-cols-[1.35fr_0.65fr]">

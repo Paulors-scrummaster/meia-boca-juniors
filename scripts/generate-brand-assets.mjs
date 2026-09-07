@@ -1,6 +1,6 @@
 // Gera os ativos de marca a partir das fontes do repositório.
 //
-// Dois artefatos com propósitos diferentes (research D-03):
+// Três artefatos com propósitos diferentes (research D-03, D-13):
 //
 //   1. Brasão em tela — extraído de `logo mbj 2.png`, o arquivo oficial em alta
 //      resolução, com o fundo branco removido. Preserva relevo, brilho e o campo de
@@ -8,6 +8,9 @@
 //   2. Ícones da PWA — rasterizados do escudo vetorial `mbj-shield.svg`, que é uma
 //      simplificação legível em tamanhos pequenos, onde o detalhe fino do brasão real
 //      vira ruído.
+//   3. Fundo fotográfico do hero — reamostrado e comprimido de `estádio meia boca
+//      jr.png`, fotografia própria do clube (não de terceiros — ver FR-033), sem
+//      nenhum texto ou elemento de interface desenhado sobre ela.
 //
 // Usa o Chromium do Playwright, já presente como dependência de desenvolvimento, em
 // vez de adicionar uma biblioteca de processamento de imagem. A saída é versionada:
@@ -23,6 +26,7 @@ import { chromium } from '@playwright/test';
 const ROOT = process.cwd();
 const CREST_SOURCE = resolve(ROOT, 'logo mbj 2.png');
 const SHIELD = resolve(ROOT, 'public/brand/mbj-shield.svg');
+const HERO_SOURCE = resolve(ROOT, 'estádio meia boca jr.png');
 const NAVY = '#0A1325';
 
 /**
@@ -40,7 +44,17 @@ const ICON_TARGETS = [
   { file: 'public/brand/mbj-icon-maskable-512.png', size: 512, scale: 0.6, background: NAVY },
 ];
 
-const BUDGETS = { svg: 20 * 1024, icon: 40 * 1024, crest: 120 * 1024, total: 300 * 1024 };
+/** Fundo do hero: uma variante só, larga o bastante para full-bleed em desktop. */
+const HERO_WIDTH = 1920;
+const HERO_QUALITY = 0.72;
+
+const BUDGETS = {
+  svg: 20 * 1024,
+  icon: 40 * 1024,
+  crest: 120 * 1024,
+  hero: 260 * 1024,
+  total: 560 * 1024,
+};
 
 /**
  * Remove o fundo branco por preenchimento a partir das bordas, recorta ao brasão e
@@ -156,6 +170,39 @@ async function extractCrest(page, dataUrl, size, quality) {
   );
 }
 
+/**
+ * Reamostra a foto do hero para a largura alvo, mantendo a proporção, e comprime para
+ * WebP. Sem remoção de fundo: a fonte já é uma chapa limpa, sem texto nem elemento de
+ * interface desenhado sobre ela.
+ */
+async function resizeAndEncode(page, dataUrl, targetWidth, quality) {
+  return page.evaluate(
+    async ({ url, target, quality: q }) => {
+      const img = new Image();
+      img.src = url;
+      await img.decode();
+
+      // Nunca amplia além da resolução real da fonte — isso só borraria a imagem
+      // sem acrescentar detalhe de verdade.
+      const scale = Math.min(1, target / img.width);
+      const out = document.createElement('canvas');
+      out.width = Math.round(img.width * scale);
+      out.height = Math.round(img.height * scale);
+      const ctx = out.getContext('2d');
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.drawImage(img, 0, 0, out.width, out.height);
+
+      return {
+        dataUrl: out.toDataURL('image/webp', q),
+        output: { width: out.width, height: out.height },
+        source: { width: img.width, height: img.height },
+      };
+    },
+    { url: dataUrl, target: targetWidth, quality },
+  );
+}
+
 function iconPage(svg, { size, scale, background }) {
   const inset = ((1 - scale) / 2) * 100;
   return `<!doctype html><meta charset="utf-8"><style>
@@ -191,6 +238,25 @@ try {
     }
   }
   await crestPage.close();
+
+  // --- Fundo fotográfico do hero ---
+  const heroBuffer = await readFile(HERO_SOURCE);
+  const heroSourceUrl = `data:image/png;base64,${heroBuffer.toString('base64')}`;
+  const heroPage = await browser.newPage();
+  await heroPage.setContent('<!doctype html><meta charset="utf-8"><body>');
+  const {
+    dataUrl: heroDataUrl,
+    source: heroSource,
+    output: heroOutputSize,
+  } = await resizeAndEncode(heroPage, heroSourceUrl, HERO_WIDTH, HERO_QUALITY);
+  await heroPage.close();
+  const heroOut = Buffer.from(heroDataUrl.split(',')[1], 'base64');
+  const heroFile = 'public/brand/mbj-hero-stadium.webp';
+  await writeFile(resolve(ROOT, heroFile), heroOut);
+  results.push({ file: heroFile, bytes: heroOut.byteLength, budget: BUDGETS.hero });
+  console.log(
+    `origem do hero ${heroSource.width}x${heroSource.height}, reamostrado para ${heroOutputSize.width}x${heroOutputSize.height}`,
+  );
 
   // --- Ícones da PWA, a partir do escudo vetorial ---
   const svg = await readFile(SHIELD, 'utf8');

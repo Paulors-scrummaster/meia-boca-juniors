@@ -544,9 +544,14 @@ feature. A coluna "Impacto" descreve apenas a natureza da mudança de apresenta�
 - **FR-032**: A referência `Sugestão nova interface e tema mbj.png` é normativa para a Landing Page. A
   composição implementada DEVE ser reconhecível como a mesma proposta visual da referência, e não
   apenas como uma tela que usa azul navy e dourado.
-- **FR-033**: O hero DEVE ser composto por meios próprios do projeto: gradiente base em azul navy,
-  iluminação radial simulando refletores, vinheta nas bordas e textura sutil. Fotografia de terceiros
-  sem licença NÃO DEVE ser usada. Todos os tons da composição DEVEM derivar dos tokens do tema.
+- **FR-033**: O hero DEVE ser composto por meios próprios do projeto — fotografia do próprio clube
+  (nunca de terceiros sem licença) e/ou gradiente, iluminação radial simulando refletores, vinheta nas
+  bordas e textura sutil. Quando uma fotografia própria for usada como camada do hero, o teto de
+  luminância de FR-041 sob a coluna de texto DEVE ser garantido pelas camadas de véu/gradiente
+  sobrepostas a ela — calculado contra o pior caso teórico (pixel branco) da fotografia, nunca contra
+  o tom real dela, para que a garantia não dependa de qual foto está em uso. Os tons das camadas de
+  véu e decorativas DEVEM derivar dos tokens do tema (G-07); a fotografia em si, sendo captura real,
+  está isenta dessa exigência.
 - **FR-034**: O hero DEVE exibir o escudo oficial em marca d'água no lado direito, em escala grande e
   opacidade reduzida, marcado como decorativo para tecnologias assistivas e sem prejudicar a
   legibilidade do conteúdo sobreposto.

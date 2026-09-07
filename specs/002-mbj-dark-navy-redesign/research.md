@@ -297,6 +297,14 @@ jurídico. Textura por CSS evita até o asset raster no caso comum.
 **Consequência**: a composição usa gradientes, que são `background-image` e não `background-color` —
 ver D-12.
 
+**Nota de revisão**: a decisão original presumia que o repositório não tinha fotografia licenciada do
+clube. O usuário forneceu, depois da entrega inicial da User Story 1, uma fotografia própria do
+estádio/torcida do MBJ (sem texto ou elemento de interface desenhado sobre ela) — o que a
+FR-033 original proibia por engano, ao tratar "sem fotografia de terceiros" como "sem fotografia".
+Corrigido: o hero passa a usar essa fotografia como camada mais baixa, com o mesmo tratamento de véu
+e brilho descrito acima aplicado por cima dela em vez de sobre um gradiente base plano. Ver D-13 para
+como o teto de luminância continua garantido matematicamente com uma fotografia por trás.
+
 ---
 
 ## D-12 — Gradientes e a verificação automatizada de paleta
@@ -315,6 +323,40 @@ exigido por FR-033.
 - *Estender a camada 2 para analisar stops de `background-image`*: possível, mas exige interpretar
   sintaxe de gradiente em runtime para um ganho pequeno, já que os stops vêm de tokens por construção.
 - *Proibir gradientes*: inviabilizaria FR-033 e FR-037.
+
+---
+
+## D-13 — Como manter o teto de luminância provável com uma fotografia no hero
+
+**Decision**: as camadas de véu e brilho por cima da fotografia são compostas **sequencialmente, na
+ordem real de pintura do CSS**, partindo de branco puro como pior caso teórico da fotografia — não do
+tom real dela. Os alfas de cada camada (`HERO_LAYER_ALPHA`, `hero-backdrop.constants.ts`) são a fonte
+única compartilhada entre o componente (`WelcomePage.tsx`) e o teste (`theme-consistency.spec.ts`,
+T090), eliminando o risco de os dois arquivos divergirem. A vinheta (que só escurece) e o grão
+(contribuição desprezível) ficam fora do cálculo de pior caso de propósito: um pior caso real assume
+que eles podem não estar presentes naquele ponto exato do gradiente radial, não conta com a proteção
+deles.
+
+**Rationale**: os helpers de composição já existentes (`readGradientStops`/`worstCaseBackground` em
+`palette.ts`) tratam cada stop de cor extraído do `background-image` computado como algo que toca
+diretamente uma única base compartilhada — modelo que bastava quando a base era sempre o token de
+fundo navy conhecido, mas produz falsos positivos graves com uma fotografia por trás: uma camada de
+brilho dourado a 14–16% de alfa, testada isoladamente contra branco puro, mede luminância ~0,89 (muito
+acima do teto), mesmo que na renderização real ela pinte por cima de um véu já escurecido a 98%, não
+da foto crua. Só a composição sequencial reflete a semântica real de múltiplas camadas de
+`background-image` no CSS.
+
+**Alternatives considered**:
+- *Amostrar o pixel real renderizado atrás de cada texto (leitura de canvas)*: mais fiel à foto atual,
+  mas a garantia deixaria de valer para uma troca futura de foto sem re-executar a amostragem — o
+  ponto do teto matemático é não depender disso.
+- *Manter o teste genérico `readGradientStops`/`worstCaseBackground` e só fortalecer o véu até o pior
+  caso independente passar*: tentado primeiro; o véu precisaria ficar opaco a ponto de a fotografia
+  nunca aparecer visualmente, esvaziando o propósito de tê-la.
+
+**Consequência**: o texto DEVE viver inteiramente dentro da zona onde o véu está no alfa forte
+(`scrimStrong`); a zona fraca (`scrimWeak`, onde a fotografia — espelhada para concentrar a torcida no
+lado sem texto — fica visível) não precisa provar o teto de FR-041 porque nenhum texto vive ali.
 
 ---
 

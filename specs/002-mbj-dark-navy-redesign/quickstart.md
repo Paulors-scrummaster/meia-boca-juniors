@@ -71,7 +71,7 @@ Abrir `http://127.0.0.1:5173/` em 1920x1080 e comparar lado a lado com
 `Sugestão nova interface e tema mbj.png`, percorrendo a lista de sete itens de
 [contracts/landing-composition.md](./contracts/landing-composition.md):
 
-1. Hero com iluminação radial e vinheta, sem fotografia de terceiros
+1. Hero com fotografia própria do clube, véu, iluminação radial e vinheta
 2. Escudo em marca d'água no lado direito
 3. Título bicolor — "Bem-vindo ao" em branco, "Meia Boca Juniors" em dourado
 4. Navegação pública com "Início" ativo em dourado
@@ -106,9 +106,9 @@ manuais anteriores de T035:
 
 | Texto | Razão exigida | Razão calculada |
 |---|---|---|
-| Primário | ≥ 4,5:1 | 14,0:1 |
-| Secundário | ≥ 4,5:1 | 5,5:1 |
-| Dourado | ≥ 4,5:1 | 7,1:1 |
+| Primário | ≥ 4,5:1 | 13,8:1 |
+| Secundário | ≥ 4,5:1 | 5,4:1 |
+| Dourado | ≥ 4,5:1 | 7,0:1 |
 
 **O axe não aprova o hero.** Sobre gradiente ele devolve *incomplete*, nunca *violation* — ausência de
 erro na auditoria não é aprovação. A camada 2b é a autoridade aqui.
@@ -199,7 +199,7 @@ npm run build
 
 Esperado:
 - Regenerar a partir das mesmas fontes não produz diferença (processo determinístico, GA-01).
-- Nenhum artefato excede seu orçamento (SVG ≤ 20 KB, PNG de ícone ≤ 40 KB, brasão ≤ 120 KB por variante, textura condicional ≤ 30 KB, total ≤ 300 KB).
+- Nenhum artefato excede seu orçamento (SVG ≤ 20 KB, PNG de ícone ≤ 40 KB, brasão ≤ 120 KB por variante, foto do hero ≤ 260 KB, total ≤ 560 KB).
 
 **Manual**
 
@@ -270,7 +270,7 @@ Playwright.
 | 2 — Barra lateral desktop | ✅ `navigation-shell.spec.ts --project=desktop-chromium` e `AuthenticatedLayout.test.tsx` verdes. Ordem topo → links → rodapé e rodapé fixo confirmados nas capturas de T079/T086. |
 | 3 — Gaveta mobile | ✅ `navigation-shell.spec.ts --project=mobile-chromium` verde (fechamento ao navegar, Esc, véu, inacessibilidade por teclado fechada). |
 | 4 — Cards e estados no tema escuro | ✅ Verificado por captura de tela em `/app/roster` (T086): superfície navy distinguível, borda sutil, iniciais legíveis sobre `elevated` com anel dourado (T070). Indicador offline (T065), véu de diálogo (T062) e texto de erro em `destructive` já cobertos pelas mudanças de tema aplicadas nos lotes 6-7. |
-| 5 — Marca e cache | ✅ `npm run brand:assets` seguido de `git diff --stat public/brand` vazio (determinismo, GA-01); todos os artefatos dentro do orçamento (206,7 KB de 300 KB). `/brand/logo.svg` e `/pwa-192x192.png` confirmados 404 contra um servidor estático real servindo `dist/` (GA-07); ícone maskable verificado sob máscara circular simulada — escudo não é cortado (GA-03). |
+| 5 — Marca e cache | ✅ `npm run brand:assets` seguido de `git diff --stat public/brand` vazio (determinismo, GA-01); todos os artefatos dentro do orçamento (280,7 KB de 560 KB). `/brand/logo.svg` e `/pwa-192x192.png` confirmados 404 contra um servidor estático real servindo `dist/` (GA-07); ícone maskable verificado sob máscara circular simulada — escudo não é cortado (GA-03). |
 | 6 — Preservação do MVP | ✅ Suíte completa verde (165 testes unitários, 116+111 testes e2e nos dois projetos). `git diff --stat main -- supabase/ src/features/**/api src/app/router/guards.tsx` vazio. Diff de `router.tsx` restrito à troca `Link`→`NavLink` da navegação pública (T033), sem alteração de rota/guarda. |
 
 **Achado corrigido durante a execução**: T088 (ampliação do laço de alvo de toque às rotas
