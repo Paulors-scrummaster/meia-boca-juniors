@@ -217,7 +217,7 @@ e erro de validação; abrir um diálogo modal e confirmar véu escuro.
 - [X] T084 [P] Atualizar `TECH_STACK.md` na seção de identidade visual com a paleta Dark Navy e os novos caminhos de marca
 - [X] T085 Executar o portão completo: `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm run test:unit`, `npm run build` e `npm run test:e2e`
 - [X] T086 Executar os seis cenários de `specs/002-mbj-dark-navy-redesign/quickstart.md` e registrar o resultado
-- [ ] T087 Abrir o Pull Request com autorrevisão estruturada e validar o preview do Cloudflare, conforme exigido pelo Princípio IV da Constituição
+- [X] T087 Abrir o Pull Request com autorrevisão estruturada e validar o preview do Cloudflare, conforme exigido pelo Princípio IV da Constituição
 - [X] T088 Estender em `tests/e2e/accessibility.spec.ts` o laço de alvos de toque — hoje aplicado apenas a `/` — às rotas autenticadas do catálogo, fechando o item "touch targets" nomeado explicitamente no Princípio IV da Constituição (SC-009)
 - [X] T089 Ampliar `tests/e2e/theme-consistency.spec.ts` para as 28 rotas do catálogo, fechando a camada 2 do portão (SC-003a) agora que todas as superfícies de conteúdo foram saneadas em US4
 - [X] T090 Implementar a camada 2b em `tests/e2e/theme-consistency.spec.ts`: ler o `background-image` computado do hero, compor cada stop sobre o navy base e falhar se algum sob região de texto exceder luminância 0,030, depois calcular as razões dos textos primário, secundário e dourado contra esse pior caso e falhar abaixo de 4,5:1 — sem depender do axe, que devolve *incomplete* sobre gradiente (FR-041, SC-013, GL-16, GL-18)
