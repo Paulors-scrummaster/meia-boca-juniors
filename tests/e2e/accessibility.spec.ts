@@ -73,3 +73,53 @@ test.describe('regressões de acessibilidade — catálogo de rotas', () => {
     });
   }
 });
+
+/**
+ * SC-003b: a auditoria também roda em largura mobile com a gaveta aberta, cobrindo
+ * foco contido e véu — estados que só existem nessa combinação e que o laço acima,
+ * em largura padrão e gaveta fechada, não exercita.
+ */
+test.describe('regressões de acessibilidade — gaveta mobile aberta (SC-003b)', () => {
+  test('não viola WCAG A/AA com a gaveta aberta em 360x640', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 640 });
+    await mockAuthenticatedSession(page, 'PRESIDENT', {
+      roles: ['PRESIDENT', 'ATHLETE'],
+      routes: { '/rest/v1/athletes': [] },
+    });
+    await page.goto('/app/roster');
+    await page.waitForLoadState('networkidle');
+
+    await page.getByRole('button', { name: 'Abrir menu de navegação' }).click();
+    await expect(page.getByRole('navigation', { name: 'Navegação principal' })).toBeVisible();
+
+    await expectWcagAa(page);
+  });
+
+  test('contém o foco dentro da gaveta enquanto aberta', async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 640 });
+    await mockAuthenticatedSession(page, 'PRESIDENT', {
+      roles: ['PRESIDENT', 'ATHLETE'],
+      routes: { '/rest/v1/athletes': [] },
+    });
+    await page.goto('/app/roster');
+    await page.waitForLoadState('networkidle');
+
+    const menuButton = page.getByRole('button', { name: 'Abrir menu de navegação' });
+    await menuButton.click();
+    const drawer = page.getByRole('navigation', { name: 'Navegação principal' });
+    await expect(drawer).toBeVisible();
+
+    // `showModal()` torna o restante da página inerte: tabular repetidamente a
+    // partir de dentro da gaveta nunca deve levar o foco para fora dela.
+    for (let index = 0; index < 15; index += 1) {
+      await page.keyboard.press('Tab');
+      const focusedInsideDrawer = await page.evaluate(() => {
+        const active = document.activeElement;
+        return Boolean(active?.closest('dialog[open]'));
+      });
+      expect(focusedInsideDrawer, `foco após ${index + 1} Tab(s) deve permanecer na gaveta`).toBe(
+        true,
+      );
+    }
+  });
+});

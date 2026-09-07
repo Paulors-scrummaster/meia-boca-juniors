@@ -48,15 +48,31 @@ function renderLayout() {
   );
 }
 
+/**
+ * jsdom não computa CSS real: as classes responsivas (`hidden`, `md:flex`) e o
+ * estado fechado do `<dialog>` da gaveta não escondem nada para as consultas do
+ * Testing Library, que operam sobre o DOM, não sobre uma árvore de acessibilidade
+ * calculada. A barra lateral desktop (`<aside>`, landmark `complementary`) é o
+ * único ponto de referência estável para escopar asserções especificamente sobre
+ * ela — sem isso, `getByRole`/`getByAltText` sem escopo encontram também o
+ * conteúdo da faixa superior mobile e da gaveta, que agora coexistem no mesmo
+ * componente.
+ */
+function getSidebar() {
+  return within(screen.getByRole('complementary'));
+}
+
 describe('AuthenticatedLayout', () => {
   it('expõe a região de navegação com o rótulo estável', () => {
     renderLayout();
-    expect(screen.getByRole('navigation', { name: 'Navegação principal' })).toBeInTheDocument();
+    expect(
+      getSidebar().getByRole('navigation', { name: 'Navegação principal' }),
+    ).toBeInTheDocument();
   });
 
   it('lista os 10 itens do conjunto normativo pela união dos papéis efetivos', () => {
     renderLayout();
-    const nav = screen.getByRole('navigation', { name: 'Navegação principal' });
+    const nav = getSidebar().getByRole('navigation', { name: 'Navegação principal' });
     const labels = [
       'Início',
       'Elenco',
@@ -77,7 +93,7 @@ describe('AuthenticatedLayout', () => {
 
   it('preserva os destinos dos itens existentes', () => {
     renderLayout();
-    const nav = screen.getByRole('navigation', { name: 'Navegação principal' });
+    const nav = getSidebar().getByRole('navigation', { name: 'Navegação principal' });
     expect(within(nav).getByRole('link', { name: 'Mural' })).toHaveAttribute(
       'href',
       '/app/notices',
@@ -90,23 +106,21 @@ describe('AuthenticatedLayout', () => {
 
   it('fixa a identificação do usuário e o botão "Sair" fora da região de navegação (FR-017)', () => {
     renderLayout();
-    const nav = screen.getByRole('navigation', { name: 'Navegação principal' });
-    const signOutButton = within(screen.getByRole('complementary')).getByRole('button', {
-      name: /Sair/,
-    });
+    const sidebar = getSidebar();
+    const nav = sidebar.getByRole('navigation', { name: 'Navegação principal' });
+    const signOutButton = sidebar.getByRole('button', { name: /Sair/ });
 
     expect(signOutButton).toHaveAttribute('type', 'button');
     expect(within(nav).queryByRole('button', { name: /Sair/ })).not.toBeInTheDocument();
-    expect(screen.getByText('presidente@mbj.test')).toBeInTheDocument();
+    expect(sidebar.getByText('presidente@mbj.test')).toBeInTheDocument();
   });
 
   it('posiciona identidade, navegação e rodapé em ordem — topo, corpo, rodapé (FR-015 a FR-017)', () => {
     renderLayout();
-    const brand = screen.getByAltText('Escudo do MBJ');
-    const nav = screen.getByRole('navigation', { name: 'Navegação principal' });
-    const signOutButton = within(screen.getByRole('complementary')).getByRole('button', {
-      name: /Sair/,
-    });
+    const sidebar = getSidebar();
+    const brand = sidebar.getByAltText('Escudo do MBJ');
+    const nav = sidebar.getByRole('navigation', { name: 'Navegação principal' });
+    const signOutButton = sidebar.getByRole('button', { name: /Sair/ });
 
     // DOCUMENT_POSITION_FOLLOWING (4): o segundo argumento vem depois do primeiro no documento.
     expect(brand.compareDocumentPosition(nav) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
@@ -117,9 +131,15 @@ describe('AuthenticatedLayout', () => {
 
   it('mantém o botão "Sair" visualmente distinto dos links de navegação (FR-018)', () => {
     renderLayout();
-    const signOutButton = within(screen.getByRole('complementary')).getByRole('button', {
-      name: /Sair/,
-    });
+    const signOutButton = getSidebar().getByRole('button', { name: /Sair/ });
     expect(signOutButton.className).toContain('destructive');
+  });
+
+  it('expõe o botão de menu mobile com aria-expanded refletindo a gaveta fechada', () => {
+    renderLayout();
+    expect(screen.getByRole('button', { name: 'Abrir menu de navegação' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
   });
 });

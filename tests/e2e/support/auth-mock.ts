@@ -19,6 +19,13 @@ export type AppRole = 'ATHLETE' | 'COACH' | 'PRESIDENT';
 
 const SUPABASE_ORIGIN = 'http://127.0.0.1:54321';
 
+/**
+ * Mesma chave que `src/shared/adapters/supabase/client.ts` monta a partir de
+ * `VITE_CLUB_DEPLOYMENT_ID`, que `playwright.config.ts` fixa em `mbj-e2e` para o
+ * servidor de desenvolvimento usado pelos testes.
+ */
+const SESSION_STORAGE_KEY = 'mbj:auth:mbj-e2e';
+
 /** Identificadores fictícios estáveis, um por papel, para facilitar o diagnóstico. */
 const USER_ID: Record<AppRole, string> = {
   ATHLETE: '00000000-0000-4000-8000-0000000a0001',
@@ -92,6 +99,15 @@ export interface AuthMockOptions {
  * Intercepta as chamadas ao Supabase e responde como um usuário autenticado do papel
  * indicado. Caminhos não cobertos respondem 500 com mensagem explícita, para que um
  * mock ausente apareça como falha clara em vez de tela vazia.
+ *
+ * Também semeia a sessão diretamente no `localStorage` (mesma chave e formato que o
+ * SDK do Supabase grava após um login real) via `addInitScript`, que roda antes de
+ * qualquer script da aplicação em toda navegação subsequente na página. Sem isso,
+ * `AuthProvider` lê `localStorage` no carregamento, não encontra nada, e todo
+ * `page.goto()` para uma rota autenticada é redirecionado para `/` pelo guard —
+ * silenciosamente, sem erro — a menos que o chamador também execute `signIn()`
+ * primeiro. Essa lacuna existia desde a criação deste helper e fazia a auditoria de
+ * acessibilidade das rotas autenticadas testar a Landing Page, não o destino real.
  */
 export async function mockAuthenticatedSession(
   page: Page,
@@ -104,6 +120,23 @@ export async function mockAuthenticatedSession(
     roles = ROLES[role],
     routes = {},
   } = options;
+
+  await page.addInitScript(
+    ({ key, session }) => {
+      window.localStorage.setItem(key, JSON.stringify(session));
+    },
+    {
+      key: SESSION_STORAGE_KEY,
+      session: {
+        access_token: signedJwt(role),
+        expires_at: 2_000_000_000,
+        expires_in: 3600,
+        refresh_token: 'refresh',
+        token_type: 'bearer',
+        user: sessionUser(role),
+      },
+    },
+  );
 
   await page.route(`${SUPABASE_ORIGIN}/**`, async (route) => {
     const request = route.request();
@@ -152,7 +185,12 @@ export async function signIn(page: Page, role: AppRole): Promise<void> {
   await page.getByRole('button', { name: 'Entrar' }).click();
 }
 
-/** Atalho: intercepta, autentica e navega até a rota pedida. */
+/**
+ * Atalho: intercepta, semeia a sessão e navega até a rota pedida. Não passa por
+ * `/login` — a sessão já está em `localStorage` antes da navegação (ver o
+ * comentário de `mockAuthenticatedSession`); usar `signIn()` depois deste helper
+ * falharia, pois `/login` redireciona quem já está autenticado.
+ */
 export async function visitAs(
   page: Page,
   role: AppRole,
@@ -160,6 +198,5 @@ export async function visitAs(
   options: AuthMockOptions = {},
 ): Promise<void> {
   await mockAuthenticatedSession(page, role, options);
-  await signIn(page, role);
   await page.goto(path);
 }

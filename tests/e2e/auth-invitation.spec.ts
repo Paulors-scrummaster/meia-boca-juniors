@@ -132,8 +132,16 @@ test('ativa convite individual e libera a união de papéis somente após MFA', 
   await page.getByRole('button', { name: 'Confirmar e ativar conta' }).click();
   await expect(page.getByRole('heading', { name: 'Área do atleta' })).toBeVisible();
 
+  // Abaixo de 768px a barra lateral desktop fica ausente; os links só ficam
+  // alcançáveis depois de abrir a gaveta pelo botão de menu (FR-021, FR-022).
+  const isDesktop = page.viewportSize()!.width >= 768;
+  const openMobileMenuIfNeeded = async () => {
+    if (!isDesktop) await page.getByRole('button', { name: 'Abrir menu de navegação' }).click();
+  };
+
   roles = ['ATHLETE', 'COACH', 'PRESIDENT'];
   await page.reload();
+  await openMobileMenuIfNeeded();
   await expect(page.getByRole('link', { name: 'Administração' })).toBeVisible();
   await page.getByRole('link', { name: 'Administração' }).click();
   await expect(page).toHaveURL(/\/mfa$/);
@@ -141,25 +149,27 @@ test('ativa convite individual e libera a união de papéis somente após MFA', 
   await page.getByLabel('Código de 6 números').fill('123456');
   await page.getByRole('button', { name: 'Verificar código' }).click();
   await expect(page.getByRole('heading', { name: 'Gerenciar acessos' })).toBeVisible();
-  // Abaixo de 768px a barra lateral desktop (`aria-label="Navegação principal"`) fica
-  // oculta; a barra de abas mobile ocupa o rodapé sob outro rótulo, temporariamente
-  // (FR-021a, removida em T061). Acima de 768px é a barra lateral que existe.
-  const isDesktop = page.viewportSize()!.width >= 768;
-  const navigationBox = await page
-    .getByRole('navigation', { name: isDesktop ? 'Navegação principal' : 'Navegação mobile' })
-    .boundingBox();
   const mainBox = await page.getByRole('main').boundingBox();
-  expect(navigationBox).not.toBeNull();
   expect(mainBox).not.toBeNull();
   if (isDesktop) {
+    const navigationBox = await page
+      .getByRole('navigation', { name: 'Navegação principal' })
+      .boundingBox();
+    expect(navigationBox).not.toBeNull();
     expect(mainBox!.x).toBeGreaterThan(navigationBox!.x + navigationBox!.width - 1);
     expect(mainBox!.width).toBeGreaterThan(600);
+    await expect(page.getByRole('link', { name: 'Área do atleta' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Comissão técnica' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Administração' })).toBeVisible();
   } else {
+    // A gaveta se fechou ao navegar para /mfa (FR-023); reabri-la para confirmar
+    // que os mesmos três destinos continuam alcançáveis depois da união de papéis.
     expect(mainBox!.width).toBeGreaterThan(300);
+    await openMobileMenuIfNeeded();
+    await expect(page.getByRole('link', { name: 'Área do atleta' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Comissão técnica' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Administração' })).toBeVisible();
   }
-  await expect(page.getByRole('link', { name: 'Área do atleta' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Comissão técnica' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Administração' })).toBeVisible();
 
   const forbidden = await page.evaluate(async () => {
     const response = await fetch('http://127.0.0.1:54321/rest/v1/rpc/set_user_role', {

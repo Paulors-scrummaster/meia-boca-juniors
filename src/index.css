@@ -107,4 +107,22 @@ body {
   .form-input {
     @apply mt-2 min-h-12 w-full rounded-xl border border-input bg-background px-4 font-normal text-foreground;
   }
+
+  /*
+   * Gaveta de navegação mobile (contracts/navigation-shell.md). O `<dialog>` nativo
+   * ocupa o viewport inteiro para que a área fora do painel funcione como zona de
+   * clique do véu (NavigationDrawer.tsx compara `event.target` ao próprio diálogo);
+   * o painel em si é o filho `w-72` ancorado à esquerda. `::backdrop` não tem
+   * equivalente em utilitário Tailwind — é o único lugar do projeto que precisa de
+   * uma regra CSS explícita fora do sistema de utilitários.
+   */
+  .navigation-drawer {
+    @apply fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none border-none bg-transparent p-0;
+  }
+  .navigation-drawer[open] {
+    @apply flex;
+  }
+  .navigation-drawer::backdrop {
+    background: hsl(var(--overlay) / 0.6);
+  }
 }

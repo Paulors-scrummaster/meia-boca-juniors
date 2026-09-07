@@ -43,12 +43,15 @@ semânticos, suas superfícies e bordas derivadas, e o véu de modal. O contrato
 ancorado à esquerda ocupando `100dvh`, com o véu aplicado via `::backdrop`.
 
 **Rationale**: FR-024 exige foco contido, fechamento por Esc e retorno de foco ao botão de menu.
-`showModal()` entrega os três nativamente, além de tornar inerte o conteúdo de fundo e de fornecer o
-véu por `::backdrop` — o que também satisfaz FR-003e sem um elemento de overlay próprio. O projeto
-tem `components.json` configurado para shadcn/ui, mas **nenhum componente instalado** e nenhum pacote
-Radix nas dependências; adicionar um `Sheet` traria `@radix-ui/react-dialog` para resolver um problema
-que a plataforma já resolve. O Princípio III exige comparação com a alternativa mais simples antes de
-adotar biblioteca — e aqui a alternativa mais simples é suficiente.
+`showModal()` entrega nativamente a inertização do fundo (nada fora do diálogo é focável ou clicável),
+o fechamento por Esc via o evento `cancel`, e o véu por `::backdrop` — o que também satisfaz FR-003e
+sem um elemento de overlay próprio. **Uma verificação depois** (T061, ver nota de revisão) mostrou que
+o wraparound de Tab dentro do diálogo *não* é nativo e precisou de ~15 linhas de tratamento explícito.
+Mesmo com esse ajuste, a plataforma cobre a maior parte do problema. O projeto tem `components.json`
+configurado para shadcn/ui, mas **nenhum componente instalado** e nenhum pacote Radix nas dependências;
+adicionar um `Sheet` traria `@radix-ui/react-dialog` para resolver um problema que a plataforma
+majoritariamente já resolve. O Princípio III exige comparação com a alternativa mais simples antes de
+adotar biblioteca — e aqui a alternativa mais simples, com um pequeno complemento, é suficiente.
 
 **Alternatives considered**:
 - *`Sheet` do shadcn/ui sobre Radix Dialog*: acessibilidade pronta e bem testada, mas adiciona
@@ -61,6 +64,14 @@ adotar biblioteca — e aqui a alternativa mais simples é suficiente.
 ponto único para restaurar estado; o clique no véu não fecha por padrão e precisa ser tratado
 comparando o alvo do clique com o próprio `<dialog>`. Acima de 768px a gaveta nunca é montada como
 modal — a barra lateral estática assume, o que evita o estado inválido de E-08.
+
+**Nota de revisão (T061)**: `showModal()` torna o conteúdo de fundo inerte, mas **não** implementa
+wraparound de Tab dentro do próprio diálogo em Chromium — depois do último elemento focável, o Tab
+escapa da página (para a interface do navegador) em vez de voltar ao primeiro. Isso só foi descoberto
+ao auditar `NavigationDrawer.tsx` na largura mobile com a gaveta aberta (SC-003b), tabulando
+repetidamente e verificando `document.activeElement`. A correção é um `onKeyDown` no próprio diálogo
+que intercepta Tab/Shift+Tab nos limites do primeiro e do último elemento focável e os enlaça — sem
+biblioteca, mas também sem ser inteiramente "de graça" como a decisão original supôs.
 
 ---
 

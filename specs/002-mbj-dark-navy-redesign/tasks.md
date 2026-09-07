@@ -154,16 +154,16 @@ hierarquia da barra lateral e fecha ao escolher um destino.
 **Independent Test**: em 360x640, abrir o menu, escolher "Partidas" e confirmar navegação com
 fechamento automático; validar Esc, véu e retorno de foco.
 
-- [ ] T052 [P] [US3] Criar `src/app/layouts/navigation/MobileTopBar.tsx` com botão de menu, escudo e nome do clube, exibida apenas abaixo de 768px, com `aria-expanded` refletindo o estado da gaveta
-- [ ] T053 [US3] Criar `src/app/layouts/navigation/NavigationDrawer.tsx` usando `<dialog>` nativo com `showModal()`, reaproveitando `SidebarBrand`, `NavigationList` e `SidebarFooter` para replicar a hierarquia vertical (FR-022)
-- [ ] T054 [US3] Estilizar em `NavigationDrawer.tsx` o painel ancorado à esquerda com `100dvh` e o véu via `::backdrop` usando o token `overlay` a 60% (FR-003e), com o corpo central rolando internamente e topo e rodapé fixos (E-02)
-- [ ] T055 [US3] Implementar em `NavigationDrawer.tsx` o fechamento por seleção de destino (FR-023), por evento `cancel` do Esc, e por clique cujo alvo é o próprio elemento de diálogo (o véu não fecha por padrão)
-- [ ] T056 [US3] Implementar em `src/app/layouts/AuthenticatedLayout.tsx` o estado `isDrawerOpen` como estado local de UI — não em Zustand nem em TanStack Query, conforme a Constituição — e a exclusividade mútua entre gaveta e barra lateral
-- [ ] T057 [US3] Fechar a gaveta em `src/app/layouts/AuthenticatedLayout.tsx` quando a largura atingir 768px, liberando a rolagem do corpo e evitando o estado inválido de E-08
-- [ ] T058 [US3] Remover de `src/app/layouts/AuthenticatedLayout.tsx` a barra de abas fixa no rodapé com rolagem horizontal, substituída pela gaveta (FR-021a)
-- [ ] T059 [US3] Estender `tests/e2e/navigation-shell.spec.ts` (projeto `mobile-chromium`) cobrindo abertura, fechamento por seleção, Esc, véu, retorno de foco ao botão de menu, inacessibilidade por teclado quando fechada, área mínima de 44x44 px no botão de menu e em cada item da gaveta (FR-025), e que qualquer destino seja alcançável em no máximo dois toques — abrir o menu e escolher o destino (SC-005)
-- [ ] T060 [US3] Ajustar em `tests/e2e/auth-invitation.spec.ts` e `tests/e2e/offline-privacy.spec.ts` os seletores que dependem da barra de abas do rodapé removida
-- [ ] T061 [US3] Estender `tests/e2e/accessibility.spec.ts` com a auditoria em largura mobile e gaveta aberta, cobrindo foco contido e véu (SC-003b)
+- [X] T052 [P] [US3] Criar `src/app/layouts/navigation/MobileTopBar.tsx` com botão de menu, escudo e nome do clube, exibida apenas abaixo de 768px, com `aria-expanded` refletindo o estado da gaveta
+- [X] T053 [US3] Criar `src/app/layouts/navigation/NavigationDrawer.tsx` usando `<dialog>` nativo com `showModal()`, reaproveitando `SidebarBrand`, `NavigationList` e `SidebarFooter` para replicar a hierarquia vertical (FR-022)
+- [X] T054 [US3] Estilizar em `NavigationDrawer.tsx` o painel ancorado à esquerda com `100dvh` e o véu via `::backdrop` usando o token `overlay` a 60% (FR-003e), com o corpo central rolando internamente e topo e rodapé fixos (E-02)
+- [X] T055 [US3] Implementar em `NavigationDrawer.tsx` o fechamento por seleção de destino (FR-023), por evento `cancel` do Esc, e por clique cujo alvo é o próprio elemento de diálogo (o véu não fecha por padrão)
+- [X] T056 [US3] Implementar em `src/app/layouts/AuthenticatedLayout.tsx` o estado `isDrawerOpen` como estado local de UI — não em Zustand nem em TanStack Query, conforme a Constituição — e a exclusividade mútua entre gaveta e barra lateral
+- [X] T057 [US3] Fechar a gaveta em `src/app/layouts/AuthenticatedLayout.tsx` quando a largura atingir 768px, liberando a rolagem do corpo e evitando o estado inválido de E-08
+- [X] T058 [US3] Remover de `src/app/layouts/AuthenticatedLayout.tsx` a barra de abas fixa no rodapé com rolagem horizontal, substituída pela gaveta (FR-021a)
+- [X] T059 [US3] Estender `tests/e2e/navigation-shell.spec.ts` (projeto `mobile-chromium`) cobrindo abertura, fechamento por seleção, Esc, véu, retorno de foco ao botão de menu, inacessibilidade por teclado quando fechada, área mínima de 44x44 px no botão de menu e em cada item da gaveta (FR-025), e que qualquer destino seja alcançável em no máximo dois toques — abrir o menu e escolher o destino (SC-005)
+- [X] T060 [US3] Ajustar em `tests/e2e/auth-invitation.spec.ts` e `tests/e2e/offline-privacy.spec.ts` os seletores que dependem da barra de abas do rodapé removida
+- [X] T061 [US3] Estender `tests/e2e/accessibility.spec.ts` com a auditoria em largura mobile e gaveta aberta, cobrindo foco contido e véu (SC-003b)
 
 **Checkpoint**: navegação completa em desktop e mobile.
 

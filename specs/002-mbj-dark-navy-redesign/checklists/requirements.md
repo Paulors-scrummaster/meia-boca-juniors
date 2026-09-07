@@ -176,3 +176,44 @@ G1 não era lacuna de verificação: era falha de acessibilidade já presente na
 passa a `220 38% 48%` (3,2:1 sobre o card), desacoplado de `border` por G-08.
 
 Totais: FR 63 → 65 · SC 15 → 17 · tarefas 89 → 91 · contratos 5 (inalterado).
+
+---
+
+**Iteração 6 (2026-09-07)** — Lote 6 (T052–T061, User Story 3). Nenhuma mudança nos 16
+itens do checklist original; registro de um achado de infraestrutura de teste que
+afetava lotes anteriores.
+
+**Achado**: `mockAuthenticatedSession()` nunca estabeleceu sessão real — apenas
+interceptava chamadas de rede. A sessão do Supabase só era persistida em
+`localStorage` por um `signIn()` real (submissão do formulário). Todo teste que
+chamava `mockAuthenticatedSession()` sozinha para uma rota autenticada era
+silenciosamente redirecionado para `/` pelo guard, sem erro — e ainda assim "passava",
+porque a asserção rodava contra a Landing Page, não contra o destino pretendido.
+
+Isso afetava, desde o lote 4: as 22 rotas autenticadas do laço de `accessibility.spec.ts`
+(T041) e as entradas `/alterar-senha` e `/mfa` de `theme-consistency.spec.ts` (T040).
+Ambas as suítes reportavam sucesso, mas auditavam a página errada.
+
+**Correção**: `mockAuthenticatedSession()` agora semeia a sessão diretamente no
+`localStorage` via `page.addInitScript()`, no mesmo formato que o SDK do Supabase
+grava após um login real — dispensando `signIn()` para simplesmente alcançar uma rota
+autenticada. Reexecutadas todas as suítes afetadas: **33/33** em `accessibility.spec.ts`
+(incluindo as 22 rotas, agora auditadas de fato) e **6/6** em `theme-consistency.spec.ts`,
+todas passando contra o conteúdo real — zero violações WCAG, zero cor fora dos tokens.
+
+Consequência colateral corrigida: `signIn()` chamado depois da sessão já semeada
+quebraria (`/login` redireciona quem já está autenticado). `navigation-shell.spec.ts`
+e `visitAs()` em `auth-mock.ts` foram ajustados para não chamar `signIn()` quando
+`mockAuthenticatedSession()` já basta.
+
+**Segundo achado, no mesmo lote**: a documentação de research D-02 afirmava que
+`showModal()` entrega "foco contido" nativamente. Verificação empírica (tabulação
+repetida com a gaveta aberta, T061/SC-003b) mostrou que a inertização do fundo é
+nativa, mas o wraparound de Tab dentro do próprio diálogo não é — o foco escapava da
+página após o último elemento focável. Corrigido com um `onKeyDown` de ~15 linhas em
+`NavigationDrawer.tsx`; a afirmação em research.md foi corrigida para refletir o
+comportamento real, não o presumido.
+
+Resultado: **16/16 itens do checklist seguem aprovados.** Nenhuma alteração
+estrutural na spec — os dois achados são de implementação e infraestrutura de teste,
+já corrigidos e reverificados.

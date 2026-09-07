@@ -1,9 +1,10 @@
-import { LogOut } from 'lucide-react';
-import { useState } from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Outlet } from 'react-router-dom';
 
-import { SidebarBrand } from '@/app/layouts/navigation/SidebarBrand';
+import { MobileTopBar } from '@/app/layouts/navigation/MobileTopBar';
+import { NavigationDrawer } from '@/app/layouts/navigation/NavigationDrawer';
 import { NavigationList } from '@/app/layouts/navigation/NavigationList';
+import { SidebarBrand } from '@/app/layouts/navigation/SidebarBrand';
 import { SidebarFooter } from '@/app/layouts/navigation/SidebarFooter';
 import { useAuth } from '@/app/providers/AuthProvider';
 import { createAuthService, type AuthService } from '@/features/auth/api/auth.service';
@@ -13,10 +14,8 @@ import { OfflineIndicator } from '@/features/offline/components/OfflineIndicator
 import { supabase } from '@/shared/adapters/supabase/client';
 import { useConnectivity } from '@/shared/hooks/use-connectivity';
 
-interface MobileNavigationItem {
-  label: string;
-  to: string;
-}
+/** Corte responsivo binário do contrato (contracts/navigation-shell.md, A-06). */
+const DESKTOP_BREAKPOINT_QUERY = '(min-width: 768px)';
 
 interface AuthenticatedLayoutProps {
   authService?: AuthService;
@@ -29,35 +28,24 @@ export function AuthenticatedLayout({
 }: AuthenticatedLayoutProps = {}) {
   const { roles } = useAuth();
   const { isOnline } = useConnectivity();
-  // Sair na barra mobile: a versão anterior tinha o botão no cabeçalho, visível em
-  // qualquer largura. `SidebarFooter` (T045) só existe dentro do `<aside>` desktop
-  // (`hidden` abaixo de 768px) — sem este botão, o usuário mobile perderia a
-  // capacidade de sair. Duplicação temporária: some junto com toda esta barra em
-  // T061, quando a gaveta assume a navegação mobile.
-  const [mobileSigningOut, setMobileSigningOut] = useState(false);
+  const [isDrawerOpen, setDrawerOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Barra de abas do rodapé mobile: mantida temporariamente com sua lista e estilo
-  // originais. FR-021a a substitui pela gaveta lateral, mas essa troca é escopo de
-  // US3 (T052-T061), não desta reestruturação da barra lateral desktop (US2). As
-  // duas listas de itens coexistem só até T061 remover esta.
-  const mobileItems: MobileNavigationItem[] = [
-    { label: 'Início', to: '/app' },
-    { label: 'Elenco', to: '/app/roster' },
-    { label: 'Partidas', to: '/app/matches' },
-    { label: 'Estatísticas', to: '/app/statistics' },
-    { label: 'Mural', to: '/app/notices' },
-    { label: 'Notificações', to: '/app/notification-preferences' },
-  ];
-  if (roles.includes('ATHLETE')) {
-    mobileItems.push({ label: 'Área do atleta', to: '/app/athlete' });
-    mobileItems.push({ label: 'Craque do Jogo', to: '/app/athlete/mvp-voting' });
-  }
-  if (roles.some((role) => role === 'COACH' || role === 'PRESIDENT')) {
-    mobileItems.push({ label: 'Comissão técnica', to: '/app/staff' });
-  }
-  if (roles.includes('PRESIDENT')) {
-    mobileItems.push({ label: 'Administração', to: '/app/admin' });
-  }
+  // Estado local de UI (NavigationShellState, data-model.md §4): não é estado
+  // remoto nem compartilhado entre componentes distantes, então não vai para
+  // TanStack Query nem para Zustand.
+  const closeDrawer = () => setDrawerOpen(false);
+
+  useEffect(() => {
+    const query = window.matchMedia(DESKTOP_BREAKPOINT_QUERY);
+    // Redimensionar para desktop com a gaveta aberta a fecha, evitando gaveta e
+    // barra lateral simultâneas e liberando a rolagem do corpo (E-08, T057).
+    const handleChange = (event: MediaQueryListEvent) => {
+      if (event.matches) setDrawerOpen(false);
+    };
+    query.addEventListener('change', handleChange);
+    return () => query.removeEventListener('change', handleChange);
+  }, []);
 
   return (
     <div className="min-h-dvh bg-background text-foreground md:flex">
@@ -85,8 +73,32 @@ export function AuthenticatedLayout({
         </div>
       </aside>
 
+      {/*
+        Faixa superior e gaveta mobile (FR-021 a FR-024): ausentes em larguras
+        ≥768px, onde a barra lateral acima assume. A gaveta fica sempre montada,
+        mas permanece fechada nessa largura (nunca há botão alcançável para abri-la
+        e o efeito de redimensionamento acima a fecha se a largura crescer com ela
+        aberta) — equivalente, na prática, a "nunca montada como modal" (E-08).
+      */}
+      <MobileTopBar
+        isDrawerOpen={isDrawerOpen}
+        onOpenMenu={() => setDrawerOpen(true)}
+        ref={menuButtonRef}
+      />
+      <NavigationDrawer
+        authService={authService}
+        onClose={() => {
+          closeDrawer();
+          // V-14: o foco retorna ao botão que abriu a gaveta, por qualquer via de
+          // fechamento — Esc, véu ou seleção de destino.
+          menuButtonRef.current?.focus();
+        }}
+        open={isDrawerOpen}
+        roles={roles}
+      />
+
       <main
-        className="mx-auto w-full max-w-6xl px-4 py-6 pb-28 md:flex-1 md:px-8 md:pb-8"
+        className="mx-auto w-full max-w-6xl px-4 py-6 md:flex-1 md:px-8 md:pb-8"
         id="conteudo-principal"
       >
         <OfflineIndicator />
@@ -113,38 +125,6 @@ export function AuthenticatedLayout({
           </p>
         ) : null}
       </main>
-
-      <nav
-        aria-label="Navegação mobile"
-        className="fixed inset-x-0 bottom-0 z-40 flex min-h-20 items-stretch gap-1 overflow-x-auto border-t bg-card px-2 pb-[env(safe-area-inset-bottom)] md:hidden"
-      >
-        {mobileItems.map((item) => (
-          <NavLink
-            className={({ isActive }) =>
-              `flex min-h-12 min-w-24 shrink-0 items-center justify-center rounded-lg px-3 text-center text-xs font-bold ${
-                isActive ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
-              }`
-            }
-            end={item.to === '/app'}
-            key={item.to}
-            to={item.to}
-          >
-            {item.label}
-          </NavLink>
-        ))}
-        <button
-          className="flex min-h-12 min-w-24 shrink-0 items-center justify-center gap-1 rounded-lg px-3 text-center text-xs font-bold text-destructive disabled:opacity-60"
-          disabled={mobileSigningOut}
-          onClick={() => {
-            setMobileSigningOut(true);
-            void authService.signOut().finally(() => setMobileSigningOut(false));
-          }}
-          type="button"
-        >
-          <LogOut aria-hidden="true" className="h-4 w-4" />
-          {mobileSigningOut ? 'Saindo…' : 'Sair'}
-        </button>
-      </nav>
     </div>
   );
 }
