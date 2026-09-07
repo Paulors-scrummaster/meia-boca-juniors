@@ -41,16 +41,20 @@ function HeroBackdrop() {
 
 /**
  * Escudo em marca d'água (C-L2). Usa o brasão real em resolução maior
- * (`crestLarge`), grande e parcialmente sangrado na borda direita, com opacidade
- * reduzida no elemento para não competir com o conteúdo (GL-04). Decorativo:
- * `aria-hidden` e `alt=""`, suprimido abaixo de 768px (GL-15).
+ * (`crestLarge`), grande e dominante na região à direita — como pede o contrato
+ * ("Escala: Grande — dominante na região, como na referência") — parcialmente
+ * sangrado na borda, com opacidade reduzida no elemento para não competir com o
+ * conteúdo (GL-04). Fica atrás dos cards (z-index negativo) e fora da coluna de
+ * texto à esquerda, então a opacidade mais alta não reduz nenhum contraste de
+ * texto abaixo de 4,5:1. Decorativo: `aria-hidden` e `alt=""`, suprimido abaixo
+ * de 768px (GL-15).
  */
 function CrestWatermark() {
   return (
     <img
       alt=""
       aria-hidden="true"
-      className="pointer-events-none absolute -right-16 top-1/2 hidden w-[26rem] -translate-y-1/2 opacity-[0.07] select-none lg:block"
+      className="pointer-events-none absolute -right-24 top-1/2 -z-10 hidden w-[40rem] -translate-y-1/2 opacity-[0.16] select-none lg:block"
       src={clubConfig.assets.crestLarge}
     />
   );
