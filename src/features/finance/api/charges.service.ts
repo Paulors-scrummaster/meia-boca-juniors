@@ -68,9 +68,7 @@ function key(): string {
   return globalThis.crypto.randomUUID();
 }
 
-export function createFinanceService(
-  client: SupabaseClient<Database> = supabase,
-): FinanceService {
+export function createFinanceService(client: SupabaseClient<Database> = supabase): FinanceService {
   async function rpc(fn: Parameters<typeof client.rpc>[0], args: Record<string, unknown>) {
     const { data, error } = await client.rpc(fn, args as never);
     if (error) throw mapFinanceError(error);

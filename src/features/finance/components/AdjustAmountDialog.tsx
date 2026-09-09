@@ -63,10 +63,7 @@ export function AdjustAmountDialog({
       ref={dialogRef}
     >
       <h2 className="text-lg font-black">Ajustar valor</h2>
-      <form
-        className="mt-4 space-y-3"
-        onSubmit={form.handleSubmit((values) => run.mutate(values))}
-      >
+      <form className="mt-4 space-y-3" onSubmit={form.handleSubmit((values) => run.mutate(values))}>
         <label className="block text-sm">
           <span className="mb-1 block font-semibold">Novo valor (R$)</span>
           <input

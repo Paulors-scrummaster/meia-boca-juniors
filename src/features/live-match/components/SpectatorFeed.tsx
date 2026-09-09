@@ -46,13 +46,18 @@ export function SpectatorFeed({ matchId, service }: SpectatorFeedProps) {
       </div>
 
       {events.length === 0 ? (
-        <EmptyState title="Sem eventos ainda" description="Os lances aparecem aqui em tempo real." />
+        <EmptyState
+          title="Sem eventos ainda"
+          description="Os lances aparecem aqui em tempo real."
+        />
       ) : (
         <ol className="mt-3 divide-y divide-border">
           {events.map((event) => (
             <li className="flex items-center gap-3 py-2 text-sm" key={event.id}>
               <span className="w-10 shrink-0 font-black text-primary">{event.minute}&apos;</span>
-              <span className="font-semibold text-foreground">{LIVE_EVENT_LABEL[event.event_type]}</span>
+              <span className="font-semibold text-foreground">
+                {LIVE_EVENT_LABEL[event.event_type]}
+              </span>
               <span className="text-muted-foreground">
                 {nameOf(event.athlete_id)}
                 {event.team_side === 'OPPONENT' ? ' (adversário)' : ''}

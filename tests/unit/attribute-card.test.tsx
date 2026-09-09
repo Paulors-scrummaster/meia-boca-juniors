@@ -44,7 +44,14 @@ describe('mapa sigla↔atributo e ordem (FR-019g)', () => {
   });
 
   it('ordena as colunas RIT, FIN, PAS, CON, DEF, FÍS', () => {
-    expect(ATTRIBUTE_COLUMNS.map((c) => c.sigla)).toEqual(['RIT', 'FIN', 'PAS', 'CON', 'DEF', 'FÍS']);
+    expect(ATTRIBUTE_COLUMNS.map((c) => c.sigla)).toEqual([
+      'RIT',
+      'FIN',
+      'PAS',
+      'CON',
+      'DEF',
+      'FÍS',
+    ]);
     expect(ATTRIBUTE_COLUMNS.map((c) => c.key)).toEqual([
       'pace',
       'shooting',
@@ -107,7 +114,9 @@ describe('render do cartão', () => {
     );
     expect(screen.getByText('82')).toBeInTheDocument();
 
-    rerender(<AttributeCard card={makeCard({ overall: null, incomplete: true })} variant="compact" />);
+    rerender(
+      <AttributeCard card={makeCard({ overall: null, incomplete: true })} variant="compact" />,
+    );
     expect(container.querySelector('article')?.dataset.incomplete).toBe('true');
     expect(screen.queryByText('82')).not.toBeInTheDocument();
   });

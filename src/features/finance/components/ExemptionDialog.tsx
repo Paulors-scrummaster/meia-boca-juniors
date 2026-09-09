@@ -72,10 +72,7 @@ export function ExemptionDialog({
       ref={dialogRef}
     >
       <h2 className="text-lg font-black">Conceder isenção</h2>
-      <form
-        className="mt-4 space-y-3"
-        onSubmit={form.handleSubmit((values) => run.mutate(values))}
-      >
+      <form className="mt-4 space-y-3" onSubmit={form.handleSubmit((values) => run.mutate(values))}>
         <label className="block text-sm">
           <span className="mb-1 block font-semibold">Atleta</span>
           <select

@@ -8,11 +8,7 @@ import { useOnlineMutation } from '@/shared/hooks/use-online-mutation';
 import { mapToAppError } from '@/shared/lib/app-error';
 
 const schema = z.object({
-  reason: z
-    .string()
-    .trim()
-    .min(1, 'Informe o motivo.')
-    .max(500, 'Use no máximo 500 caracteres.'),
+  reason: z.string().trim().min(1, 'Informe o motivo.').max(500, 'Use no máximo 500 caracteres.'),
 });
 
 type Values = z.infer<typeof schema>;
@@ -72,10 +68,7 @@ export function ChargeReasonDialog({
       ref={dialogRef}
     >
       <h2 className="text-lg font-black">{title}</h2>
-      <form
-        className="mt-4 space-y-3"
-        onSubmit={form.handleSubmit((values) => run.mutate(values))}
-      >
+      <form className="mt-4 space-y-3" onSubmit={form.handleSubmit((values) => run.mutate(values))}>
         <label className="block text-sm">
           <span className="mb-1 block font-semibold">Motivo</span>
           <textarea

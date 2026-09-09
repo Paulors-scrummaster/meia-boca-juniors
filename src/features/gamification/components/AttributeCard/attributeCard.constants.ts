@@ -3,12 +3,7 @@
 // posição pt-BR com fallback de 3 letras (FR-019c), e a geometria do cartão.
 
 export type CardAttributeKey =
-  | 'pace'
-  | 'shooting'
-  | 'passing'
-  | 'dribbling'
-  | 'defending'
-  | 'physical';
+  'pace' | 'shooting' | 'passing' | 'dribbling' | 'defending' | 'physical';
 
 /** Sigla exibida sobre cada valor. Ordem canônica em `ATTRIBUTE_COLUMNS`. */
 export const ATTRIBUTE_SIGLA: Record<CardAttributeKey, string> = {
@@ -57,8 +52,7 @@ export const POSITION_ABBREVIATIONS: Record<string, string> = {
   centroavante: 'CA',
 };
 
-const stripDiacritics = (value: string) =>
-  value.normalize('NFD').replace(/\p{Diacritic}/gu, '');
+const stripDiacritics = (value: string) => value.normalize('NFD').replace(/\p{Diacritic}/gu, '');
 
 export function normalizePositionKey(primaryPosition: string): string {
   return stripDiacritics(primaryPosition.trim().toLowerCase()).replace(/\s+/g, ' ');
@@ -77,8 +71,7 @@ export function abbreviatePosition(primaryPosition: string | null | undefined): 
 export const CARD_ASPECT_RATIO = '2 / 3';
 
 /** Caminho do recorte da foto — compartilhado por CardFrame e CardPhoto. */
-export const PHOTO_CLIP_PATH =
-  'M40 96 H360 V150 C360 300 300 372 200 400 C100 372 40 300 40 150 Z';
+export const PHOTO_CLIP_PATH = 'M40 96 H360 V150 C360 300 300 372 200 400 C100 372 40 300 40 150 Z';
 
 /**
  * Largura de referência de cada variante para as container queries; a tipografia

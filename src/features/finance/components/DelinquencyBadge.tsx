@@ -1,7 +1,4 @@
-import {
-  delinquencyBadgeLabel,
-  type DelinquencyBadgeValue,
-} from '@/features/finance/lib/currency';
+import { delinquencyBadgeLabel, type DelinquencyBadgeValue } from '@/features/finance/lib/currency';
 
 interface DelinquencyBadgeProps {
   className?: string;

@@ -30,7 +30,8 @@ const attributeField = z
   .string()
   .trim()
   .refine(
-    (value) => value === '' || (/^\d{1,2}$/.test(value) && Number(value) >= 1 && Number(value) <= 99),
+    (value) =>
+      value === '' || (/^\d{1,2}$/.test(value) && Number(value) >= 1 && Number(value) <= 99),
     'Use um número de 1 a 99, ou deixe em branco.',
   );
 
@@ -121,7 +122,9 @@ export function AttributeEditor({ athleteId, service }: AttributeEditorProps) {
             {...form.register(key)}
           />
           {form.formState.errors[key] ? (
-            <span className="mt-1 block text-destructive">{form.formState.errors[key]?.message}</span>
+            <span className="mt-1 block text-destructive">
+              {form.formState.errors[key]?.message}
+            </span>
           ) : null}
         </label>
       ))}

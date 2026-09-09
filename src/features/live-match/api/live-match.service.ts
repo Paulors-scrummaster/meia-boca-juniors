@@ -229,7 +229,13 @@ export function createLiveMatchService(
         minute: input.minute,
         target_athlete_id: input.targetAthleteId ?? null,
         team_side: input.teamSide ?? 'MBJ',
-      })) as { clientEventId: string; deduped: boolean; eventId: string; eventType: string; minute: number };
+      })) as {
+        clientEventId: string;
+        deduped: boolean;
+        eventId: string;
+        eventType: string;
+        minute: number;
+      };
       return {
         clientEventId: data.clientEventId,
         deduped: data.deduped,

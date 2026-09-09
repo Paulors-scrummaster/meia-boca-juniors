@@ -53,7 +53,10 @@ export function SocialEventDetailPage({
 
   return (
     <div className="space-y-5">
-      <Link className="inline-flex min-h-11 items-center font-semibold text-primary" to="/app/resenhas">
+      <Link
+        className="inline-flex min-h-11 items-center font-semibold text-primary"
+        to="/app/resenhas"
+      >
         ← Voltar às resenhas
       </Link>
 

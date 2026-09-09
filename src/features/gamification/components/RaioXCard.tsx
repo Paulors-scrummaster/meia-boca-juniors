@@ -18,7 +18,10 @@ export function RaioXCard({ opponentName, service }: RaioXCardProps) {
   if (query.isPending) return <LoadingState label="Carregando o Raio-X" />;
   if (query.isError)
     return (
-      <ErrorState message={mapToAppError(query.error).message} onRetry={() => void query.refetch()} />
+      <ErrorState
+        message={mapToAppError(query.error).message}
+        onRetry={() => void query.refetch()}
+      />
     );
 
   const record = query.data;
@@ -28,9 +31,7 @@ export function RaioXCard({ opponentName, service }: RaioXCardProps) {
       <div className="flex items-baseline justify-between">
         <h2 className="font-bold text-foreground">Raio-X · MBJ × {opponentName}</h2>
         {record.hasHistory ? (
-          <span className="text-sm text-muted-foreground">
-            {record.matchesPlayed} confronto(s)
-          </span>
+          <span className="text-sm text-muted-foreground">{record.matchesPlayed} confronto(s)</span>
         ) : null}
       </div>
 
@@ -59,7 +60,9 @@ export function RaioXCard({ opponentName, service }: RaioXCardProps) {
 function Stat({ label, tone, value }: { label: string; tone: string; value: number | string }) {
   return (
     <div className="flex flex-col-reverse">
-      <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</dt>
+      <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </dt>
       <dd className={`font-mono text-2xl font-black tabular-nums ${tone}`}>{value}</dd>
     </div>
   );

@@ -6,7 +6,10 @@
 
 import { useState } from 'react';
 
-import type { FinalizeResult, LiveMatchService } from '@/features/live-match/api/live-match.service';
+import type {
+  FinalizeResult,
+  LiveMatchService,
+} from '@/features/live-match/api/live-match.service';
 import { LIVE_EVENT_LABEL, scoreFromEvents } from '@/features/live-match/lib/event-labels';
 import {
   useAmendLiveEvent,
@@ -64,7 +67,8 @@ export function ReviewScreen({ canFinalize, matchId, pendingCount, service }: Re
       <header className="rounded-2xl border bg-card p-5">
         <h2 className="font-bold text-foreground">Revisão da súmula</h2>
         <p className="mt-1 text-sm text-muted-foreground">
-          Placar corrente {score.mbj} × {score.opponent}. Ajuste o que for preciso antes de finalizar.
+          Placar corrente {score.mbj} × {score.opponent}. Ajuste o que for preciso antes de
+          finalizar.
         </p>
       </header>
 
@@ -75,7 +79,9 @@ export function ReviewScreen({ canFinalize, matchId, pendingCount, service }: Re
           {events.map((event) => (
             <li className="rounded-xl border bg-card p-4" key={event.id}>
               <div className="flex flex-wrap items-center gap-3">
-                <span className="font-black text-primary">{LIVE_EVENT_LABEL[event.event_type]}</span>
+                <span className="font-black text-primary">
+                  {LIVE_EVENT_LABEL[event.event_type]}
+                </span>
                 <label className="text-sm font-semibold text-foreground">
                   Minuto
                   <input
@@ -97,7 +103,9 @@ export function ReviewScreen({ canFinalize, matchId, pendingCount, service }: Re
                   <select
                     className="ml-2 min-h-11 rounded-lg border bg-background px-2"
                     defaultValue={event.athlete_id}
-                    onChange={(input) => amend.mutate({ athleteId: input.target.value, eventId: event.id })}
+                    onChange={(input) =>
+                      amend.mutate({ athleteId: input.target.value, eventId: event.id })
+                    }
                   >
                     {athletes.map((athlete) => (
                       <option key={athlete.id} value={athlete.id}>
@@ -112,7 +120,10 @@ export function ReviewScreen({ canFinalize, matchId, pendingCount, service }: Re
                     className="ml-2 min-h-11 rounded-lg border bg-background px-2"
                     defaultValue={event.target_athlete_id ?? ''}
                     onChange={(input) =>
-                      amend.mutate({ eventId: event.id, targetAthleteId: input.target.value || null })
+                      amend.mutate({
+                        eventId: event.id,
+                        targetAthleteId: input.target.value || null,
+                      })
                     }
                   >
                     <option value="">—</option>

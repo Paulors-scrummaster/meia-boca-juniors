@@ -28,7 +28,10 @@ export function Stopwatch({
       <p className="text-xs font-black uppercase tracking-[0.18em] text-muted-foreground">
         Cronômetro
       </p>
-      <p aria-live="polite" className="mt-1 font-mono text-5xl font-black tabular-nums text-foreground">
+      <p
+        aria-live="polite"
+        className="mt-1 font-mono text-5xl font-black tabular-nums text-foreground"
+      >
         {formatClock(clock, nowMs)}
       </p>
 
@@ -87,7 +90,9 @@ export function Stopwatch({
         ) : null}
 
         {clock.phase === 'STOPPED' ? (
-          <p className="text-sm font-semibold text-muted-foreground">Partida encerrada no cronômetro.</p>
+          <p className="text-sm font-semibold text-muted-foreground">
+            Partida encerrada no cronômetro.
+          </p>
         ) : null}
       </div>
     </section>

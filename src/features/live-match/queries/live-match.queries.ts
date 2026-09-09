@@ -178,7 +178,10 @@ export function useAmendLiveEvent(matchId: string, service: LiveMatchService = d
   });
 }
 
-export function useEnableLiveRecording(matchId: string, service: LiveMatchService = defaultService) {
+export function useEnableLiveRecording(
+  matchId: string,
+  service: LiveMatchService = defaultService,
+) {
   const invalidate = useFeedInvalidation(matchId);
   return useMutation({
     mutationFn: (input: Parameters<LiveMatchService['enableRecording']>[0]) =>
@@ -187,7 +190,10 @@ export function useEnableLiveRecording(matchId: string, service: LiveMatchServic
   });
 }
 
-export function useAssignFieldRecorder(matchId: string, service: LiveMatchService = defaultService) {
+export function useAssignFieldRecorder(
+  matchId: string,
+  service: LiveMatchService = defaultService,
+) {
   const invalidate = useFeedInvalidation(matchId);
   return useMutation({
     mutationFn: (recorderUserId: string) => service.assignRecorder({ matchId, recorderUserId }),
@@ -203,7 +209,10 @@ export function useEndLiveRecording(matchId: string, service: LiveMatchService =
   });
 }
 
-export function useCancelLiveRecording(matchId: string, service: LiveMatchService = defaultService) {
+export function useCancelLiveRecording(
+  matchId: string,
+  service: LiveMatchService = defaultService,
+) {
   const invalidate = useFeedInvalidation(matchId);
   return useMutation({
     mutationFn: (reason?: string) => service.cancelRecording({ matchId, reason }),

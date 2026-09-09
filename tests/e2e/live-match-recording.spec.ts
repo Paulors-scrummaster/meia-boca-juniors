@@ -26,9 +26,30 @@ interface LiveEvent {
 }
 
 const ROSTER = [
-  { id: 'a-1', primary_position: 'Goleiro', shirt_name: 'Um', shirt_number: 1, status: 'ACTIVE', user_id: RECORDER_ID },
-  { id: 'a-9', primary_position: 'Ataque', shirt_name: 'Nove', shirt_number: 9, status: 'ACTIVE', user_id: null },
-  { id: 'a-10', primary_position: 'Meio', shirt_name: 'Dez', shirt_number: 10, status: 'ACTIVE', user_id: null },
+  {
+    id: 'a-1',
+    primary_position: 'Goleiro',
+    shirt_name: 'Um',
+    shirt_number: 1,
+    status: 'ACTIVE',
+    user_id: RECORDER_ID,
+  },
+  {
+    id: 'a-9',
+    primary_position: 'Ataque',
+    shirt_name: 'Nove',
+    shirt_number: 9,
+    status: 'ACTIVE',
+    user_id: null,
+  },
+  {
+    id: 'a-10',
+    primary_position: 'Meio',
+    shirt_name: 'Dez',
+    shirt_number: 10,
+    status: 'ACTIVE',
+    user_id: null,
+  },
 ];
 
 function makeState() {
@@ -85,7 +106,10 @@ function setup(state: ReturnType<typeof makeState>) {
   };
 }
 
-async function routeLive(route: Route, state: ReturnType<typeof makeState>): Promise<'handled' | null> {
+async function routeLive(
+  route: Route,
+  state: ReturnType<typeof makeState>,
+): Promise<'handled' | null> {
   const request = route.request();
   const { pathname } = new URL(request.url());
   const wantsObject = request.headers().accept?.includes('vnd.pgrst.object');
@@ -146,7 +170,9 @@ async function routeLive(route: Route, state: ReturnType<typeof makeState>): Pro
   return null;
 }
 
-test('registrador: cronômetro, desfazer, buffer offline e gate de finalização', async ({ page }) => {
+test('registrador: cronômetro, desfazer, buffer offline e gate de finalização', async ({
+  page,
+}) => {
   test.setTimeout(90_000);
   const state = makeState();
 

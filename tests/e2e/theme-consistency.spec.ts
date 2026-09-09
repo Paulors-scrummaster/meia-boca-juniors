@@ -188,7 +188,9 @@ const POST_MVP_SCREENS = [
 
 test.describe('conformidade de paleta e pt-BR — telas novas de US1–US4 (T097, FR-041)', () => {
   for (const { data, label, path, ptLabels, role } of POST_MVP_SCREENS) {
-    test(`${label} (${path}) não usa cor fora dos tokens e renderiza em pt-BR`, async ({ page }) => {
+    test(`${label} (${path}) não usa cor fora dos tokens e renderiza em pt-BR`, async ({
+      page,
+    }) => {
       await mockAuthenticatedSession(page, role, { routes: data });
       await page.goto(path);
       await page.waitForLoadState('networkidle');

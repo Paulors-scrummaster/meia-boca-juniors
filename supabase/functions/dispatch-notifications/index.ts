@@ -82,9 +82,7 @@ function displayMessage(delivery: ClaimedNotification): PushMessage {
   const routeIsValid =
     typeof delivery.payload.route === 'string' &&
     /^\/app(?:\/[a-z0-9-]+)*(?:\/[0-9a-f-]+)?$/i.test(delivery.payload.route);
-  const route = routeIsValid
-    ? (delivery.payload.route as string)
-    : (defaults?.route ?? '/app');
+  const route = routeIsValid ? (delivery.payload.route as string) : (defaults?.route ?? '/app');
   return {
     body: body.slice(0, 240),
     externalId: delivery.externalId,

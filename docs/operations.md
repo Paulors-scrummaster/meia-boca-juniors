@@ -244,11 +244,11 @@ e `grant execute` restrito a `service_role`. Nenhum recebe entrada externa; todo
 idempotentes por chave de deduplicação / verificação de estado, e uma falha do
 provedor de push (`INTEGRATION_UNAVAILABLE`) nunca aborta o job.
 
-| Job (`cron.job.jobname`)        | Agenda (UTC)   | Equivalente São Paulo | Função                                        | Migração                          |
-| ------------------------------- | -------------- | --------------------- | --------------------------------------------- | --------------------------------- |
-| `mbj-generate-monthly-dues`     | `0 9 1 * *`    | dia 1, 06:00          | `private.generate_monthly_dues(null)`         | `20260908130600_finance_cron.sql` |
-| `mbj-mark-overdue-charges`      | `0 6 * * *`    | diário, 03:00         | `private.mark_overdue_charges()`              | `20260908130600_finance_cron.sql` |
-| `mbj-generate-weekly-highlights`| `0 11 * * 1`   | segunda, 08:00        | `private.generate_weekly_highlights(statement_timestamp())` | `20260908160700_highlights_cron.sql` |
+| Job (`cron.job.jobname`)         | Agenda (UTC) | Equivalente São Paulo | Função                                                      | Migração                             |
+| -------------------------------- | ------------ | --------------------- | ----------------------------------------------------------- | ------------------------------------ |
+| `mbj-generate-monthly-dues`      | `0 9 1 * *`  | dia 1, 06:00          | `private.generate_monthly_dues(null)`                       | `20260908130600_finance_cron.sql`    |
+| `mbj-mark-overdue-charges`       | `0 6 * * *`  | diário, 03:00         | `private.mark_overdue_charges()`                            | `20260908130600_finance_cron.sql`    |
+| `mbj-generate-weekly-highlights` | `0 11 * * 1` | segunda, 08:00        | `private.generate_weekly_highlights(statement_timestamp())` | `20260908160700_highlights_cron.sql` |
 
 - **`mbj-generate-monthly-dues`** — gera a mensalidade do mês para todo atleta `ACTIVE`
   sem cobrança já existente naquele período (INSERT baseado em conjunto, uma passada;
@@ -280,15 +280,15 @@ de header é config de instância, nunca versionado. Usada a **contingência doc
 (`ops/n8n/README.md` §"Contingência local"): disparo manual de `backup.yml` em `main`
 via `workflow_dispatch`, com validação do artefato sanitizado de um dia.
 
-| Campo | Valor |
-| --- | --- |
-| GitHub Actions run | `34408565465` (`Verified Supabase backup`, `main`, `workflow_dispatch`, `success`, 5m59s) |
-| Request ID | `cb36b7b8-7894-4f55-b0ee-0eacdc301454` |
-| Backup ID | `9d29448348f547a193650a142e3c04b7` |
-| Manifest SHA-256 | `40ec51f5163069f1e5a01f700f2583dbca320b75bfd385b63d7c5d32b5a3ed3a` |
-| Objeto privado (R2) | `backups/2026/09/9d29448348f547a193650a142e3c04b7.age` |
-| Verificado em | `2026-09-09T21:50:26Z` |
-| `status` | **`VERIFIED`** |
+| Campo               | Valor                                                                                     |
+| ------------------- | ----------------------------------------------------------------------------------------- |
+| GitHub Actions run  | `34408565465` (`Verified Supabase backup`, `main`, `workflow_dispatch`, `success`, 5m59s) |
+| Request ID          | `cb36b7b8-7894-4f55-b0ee-0eacdc301454`                                                    |
+| Backup ID           | `9d29448348f547a193650a142e3c04b7`                                                        |
+| Manifest SHA-256    | `40ec51f5163069f1e5a01f700f2583dbca320b75bfd385b63d7c5d32b5a3ed3a`                        |
+| Objeto privado (R2) | `backups/2026/09/9d29448348f547a193650a142e3c04b7.age`                                    |
+| Verificado em       | `2026-09-09T21:50:26Z`                                                                    |
+| `status`            | **`VERIFIED`**                                                                            |
 
 As 7 verificações de `specs/001-mbj-mvp-core/contracts/backup-automation.md` passam:
 `contractVersion` suportado; `requestId` == request gerado; `runId` == run correlacionado

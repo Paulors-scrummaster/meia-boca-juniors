@@ -105,7 +105,9 @@ async function routeFinance(route: Route, state: ReturnType<typeof makeState>) {
   const request = route.request();
   const url = new URL(request.url());
   const { pathname } = url;
-  const body = request.postData() ? (JSON.parse(request.postData() as string) as Record<string, unknown>) : {};
+  const body = request.postData()
+    ? (JSON.parse(request.postData() as string) as Record<string, unknown>)
+    : {};
 
   if (pathname === '/rest/v1/athlete_charges') return json(route, state.charges);
   if (pathname === '/rest/v1/finance_overview') return json(route, state.overview());

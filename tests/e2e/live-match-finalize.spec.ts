@@ -11,19 +11,97 @@ const MATCH = '50000000-0000-4000-8000-000000000e01';
 const SUPABASE = 'http://127.0.0.1:54321/**';
 
 const ROSTER = [
-  { id: 'g-1', primary_position: 'Goleiro', shirt_name: 'Um', shirt_number: 1, status: 'ACTIVE', user_id: null },
-  { id: 'g-2', primary_position: 'Goleiro', shirt_name: 'Doze', shirt_number: 12, status: 'ACTIVE', user_id: null },
-  { id: 'g-9', primary_position: 'Ataque', shirt_name: 'Nove', shirt_number: 9, status: 'ACTIVE', user_id: null },
-  { id: 'g-10', primary_position: 'Meio', shirt_name: 'Dez', shirt_number: 10, status: 'ACTIVE', user_id: null },
+  {
+    id: 'g-1',
+    primary_position: 'Goleiro',
+    shirt_name: 'Um',
+    shirt_number: 1,
+    status: 'ACTIVE',
+    user_id: null,
+  },
+  {
+    id: 'g-2',
+    primary_position: 'Goleiro',
+    shirt_name: 'Doze',
+    shirt_number: 12,
+    status: 'ACTIVE',
+    user_id: null,
+  },
+  {
+    id: 'g-9',
+    primary_position: 'Ataque',
+    shirt_name: 'Nove',
+    shirt_number: 9,
+    status: 'ACTIVE',
+    user_id: null,
+  },
+  {
+    id: 'g-10',
+    primary_position: 'Meio',
+    shirt_name: 'Dez',
+    shirt_number: 10,
+    status: 'ACTIVE',
+    user_id: null,
+  },
 ];
 
 function makeState() {
   const events = [
-    { athlete_id: 'g-9', client_event_id: 'c1', event_type: 'GOAL', id: 'e1', minute: 12, recorded_at: '2026-09-09T20:12:00Z', target_athlete_id: 'g-10', team_side: 'MBJ', undone: false },
-    { athlete_id: 'g-10', client_event_id: 'c2', event_type: 'GOAL', id: 'e2', minute: 25, recorded_at: '2026-09-09T20:25:00Z', target_athlete_id: null, team_side: 'MBJ', undone: false },
-    { athlete_id: 'g-1', client_event_id: 'c3', event_type: 'GOAL', id: 'e3', minute: 30, recorded_at: '2026-09-09T20:30:00Z', target_athlete_id: null, team_side: 'OPPONENT', undone: false },
-    { athlete_id: 'g-9', client_event_id: 'c4', event_type: 'YELLOW_CARD', id: 'e4', minute: 40, recorded_at: '2026-09-09T20:40:00Z', target_athlete_id: null, team_side: 'MBJ', undone: false },
-    { athlete_id: 'g-2', client_event_id: 'c5', event_type: 'SUBSTITUTION', id: 'e5', minute: 60, recorded_at: '2026-09-09T20:59:00Z', target_athlete_id: 'g-1', team_side: 'MBJ', undone: false },
+    {
+      athlete_id: 'g-9',
+      client_event_id: 'c1',
+      event_type: 'GOAL',
+      id: 'e1',
+      minute: 12,
+      recorded_at: '2026-09-09T20:12:00Z',
+      target_athlete_id: 'g-10',
+      team_side: 'MBJ',
+      undone: false,
+    },
+    {
+      athlete_id: 'g-10',
+      client_event_id: 'c2',
+      event_type: 'GOAL',
+      id: 'e2',
+      minute: 25,
+      recorded_at: '2026-09-09T20:25:00Z',
+      target_athlete_id: null,
+      team_side: 'MBJ',
+      undone: false,
+    },
+    {
+      athlete_id: 'g-1',
+      client_event_id: 'c3',
+      event_type: 'GOAL',
+      id: 'e3',
+      minute: 30,
+      recorded_at: '2026-09-09T20:30:00Z',
+      target_athlete_id: null,
+      team_side: 'OPPONENT',
+      undone: false,
+    },
+    {
+      athlete_id: 'g-9',
+      client_event_id: 'c4',
+      event_type: 'YELLOW_CARD',
+      id: 'e4',
+      minute: 40,
+      recorded_at: '2026-09-09T20:40:00Z',
+      target_athlete_id: null,
+      team_side: 'MBJ',
+      undone: false,
+    },
+    {
+      athlete_id: 'g-2',
+      client_event_id: 'c5',
+      event_type: 'SUBSTITUTION',
+      id: 'e5',
+      minute: 60,
+      recorded_at: '2026-09-09T20:59:00Z',
+      target_athlete_id: 'g-1',
+      team_side: 'MBJ',
+      undone: false,
+    },
   ];
   return {
     events,
@@ -48,7 +126,10 @@ const SETUP = {
   updated_at: '2026-09-09T20:00:00Z',
 };
 
-async function routeLive(route: Route, state: ReturnType<typeof makeState>): Promise<'handled' | null> {
+async function routeLive(
+  route: Route,
+  state: ReturnType<typeof makeState>,
+): Promise<'handled' | null> {
   const request = route.request();
   const { pathname } = new URL(request.url());
   const wantsObject = request.headers().accept?.includes('vnd.pgrst.object');

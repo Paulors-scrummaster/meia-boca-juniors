@@ -57,12 +57,15 @@ export function MyChargesPage({ service = createFinanceService() }: MyChargesPag
         <DelinquencyBadge value={badgeFor(rows)} />
       </header>
       <p className="text-sm text-muted-foreground">
-        A confirmação de pagamento é feita pela diretoria após o comprovante. Uma
-        pendência aqui não afeta seu acesso a partidas, escalação ou votação.
+        A confirmação de pagamento é feita pela diretoria após o comprovante. Uma pendência aqui não
+        afeta seu acesso a partidas, escalação ou votação.
       </p>
 
       {rows.length === 0 ? (
-        <EmptyState title="Nenhuma cobrança" description="Você não possui mensalidades registradas." />
+        <EmptyState
+          title="Nenhuma cobrança"
+          description="Você não possui mensalidades registradas."
+        />
       ) : (
         <ul className="divide-y divide-border rounded-xl border bg-card">
           {rows.map((charge) => (

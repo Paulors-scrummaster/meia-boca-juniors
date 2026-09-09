@@ -48,9 +48,7 @@ export function HistoryAchievementsPage({ service }: HistoryAchievementsPageProp
             <Stat
               label="Saldo"
               value={
-                record.data.goalDiff > 0
-                  ? `+${record.data.goalDiff}`
-                  : String(record.data.goalDiff)
+                record.data.goalDiff > 0 ? `+${record.data.goalDiff}` : String(record.data.goalDiff)
               }
             />
           </dl>
@@ -99,7 +97,9 @@ export function HistoryAchievementsPage({ service }: HistoryAchievementsPageProp
 function Stat({ label, tone, value }: { label: string; tone?: string; value: number | string }) {
   return (
     <div className="flex flex-col-reverse">
-      <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</dt>
+      <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </dt>
       <dd className={`font-mono text-2xl font-black tabular-nums ${tone ?? 'text-foreground'}`}>
         {value}
       </dd>

@@ -27,16 +27,10 @@ export function AthleteCardPanel({ athleteId, avatarUrl, service }: AthleteCardP
       {card.isPending ? (
         <p className="mt-4 text-sm text-muted-foreground">Carregando cartão…</p>
       ) : card.isError || !card.data ? (
-        <p className="mt-4 text-sm text-muted-foreground">
-          Cartão indisponível no momento.
-        </p>
+        <p className="mt-4 text-sm text-muted-foreground">Cartão indisponível no momento.</p>
       ) : (
         <div className="mt-4 w-full max-w-xs">
-          <AttributeCard
-            avatarUrl={avatarUrl ?? null}
-            card={card.data}
-            variant="detailed"
-          />
+          <AttributeCard avatarUrl={avatarUrl ?? null} card={card.data} variant="detailed" />
         </div>
       )}
     </section>

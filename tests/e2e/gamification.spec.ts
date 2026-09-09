@@ -266,7 +266,9 @@ test('Raio-X mostra o retrospecto quando há histórico e "primeiro confronto" q
   ).toBeVisible();
 });
 
-test('aba "Histórico & Conquistas": retrospecto do clube + galeria de troféus', async ({ page }) => {
+test('aba "Histórico & Conquistas": retrospecto do clube + galeria de troféus', async ({
+  page,
+}) => {
   await installMocks(page);
   await page.goto('/app/historico');
 

@@ -11,7 +11,11 @@ import { saoPauloLocalToUtcIso } from '@/shared/lib/date-time';
 
 const schema = z.object({
   eventAt: z.string().min(1, 'Informe a data e a hora.'),
-  locationName: z.string().trim().min(1, 'Informe o local.').max(160, 'Use no máximo 160 caracteres.'),
+  locationName: z
+    .string()
+    .trim()
+    .min(1, 'Informe o local.')
+    .max(160, 'Use no máximo 160 caracteres.'),
   title: z.string().trim().min(2, 'Informe um título.').max(120, 'Use no máximo 120 caracteres.'),
   totalCost: z.coerce.number().min(0, 'O custo não pode ser negativo.'),
 });

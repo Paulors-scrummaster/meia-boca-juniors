@@ -125,9 +125,7 @@ export function ManualChargeForm({ athletes, onDone, service }: ManualChargeForm
       </label>
 
       {run.isError ? (
-        <p className="text-sm text-destructive sm:col-span-2">
-          {mapToAppError(run.error).message}
-        </p>
+        <p className="text-sm text-destructive sm:col-span-2">{mapToAppError(run.error).message}</p>
       ) : null}
       {feedback ? <p className="text-sm text-success sm:col-span-2">{feedback}</p> : null}
 

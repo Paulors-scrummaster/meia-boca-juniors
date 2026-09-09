@@ -72,7 +72,10 @@ export function LiveRecordingPage({
   if (setup.isPending) return <LoadingState label="Carregando súmula" />;
   if (setup.isError)
     return (
-      <ErrorState message={mapToAppError(setup.error).message} onRetry={() => void setup.refetch()} />
+      <ErrorState
+        message={mapToAppError(setup.error).message}
+        onRetry={() => void setup.refetch()}
+      />
     );
   if (!setup.data)
     return (
@@ -83,7 +86,10 @@ export function LiveRecordingPage({
     );
 
   const backLink = (
-    <Link className="inline-flex min-h-11 items-center font-semibold text-primary" to={`/app/matches/${matchId}`}>
+    <Link
+      className="inline-flex min-h-11 items-center font-semibold text-primary"
+      to={`/app/matches/${matchId}`}
+    >
       ← Voltar à partida
     </Link>
   );
@@ -92,7 +98,12 @@ export function LiveRecordingPage({
     return (
       <div className="space-y-4">
         {backLink}
-        <SumulaReviewPage canFinalize={canManage} matchId={matchId} pendingCount={pendingCount} service={svc} />
+        <SumulaReviewPage
+          canFinalize={canManage}
+          matchId={matchId}
+          pendingCount={pendingCount}
+          service={svc}
+        />
       </div>
     );
   }

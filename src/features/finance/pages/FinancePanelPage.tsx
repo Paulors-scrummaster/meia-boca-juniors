@@ -65,8 +65,8 @@ export function FinancePanelPage({ service = createFinanceService() }: FinancePa
       <header>
         <h1 className="text-xl font-black text-foreground">Financeiro</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Controle de mensalidades e adimplência do elenco. Registro interno — a
-          liquidação é conferida fora do aplicativo.
+          Controle de mensalidades e adimplência do elenco. Registro interno — a liquidação é
+          conferida fora do aplicativo.
         </p>
       </header>
 
@@ -136,7 +136,10 @@ export function FinancePanelPage({ service = createFinanceService() }: FinancePa
           onRetry={() => void overview.refetch()}
         />
       ) : (overview.data?.length ?? 0) === 0 ? (
-        <EmptyState title="Sem atletas ativos" description="Cadastre o elenco para gerar cobranças." />
+        <EmptyState
+          title="Sem atletas ativos"
+          description="Cadastre o elenco para gerar cobranças."
+        />
       ) : (
         <ul className="space-y-4">
           {(overview.data ?? [])
