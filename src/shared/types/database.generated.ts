@@ -165,6 +165,13 @@ export type Database = {
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "athlete_charges_social_event_fk"
+            columns: ["social_event_id"]
+            isOneToOne: false
+            referencedRelation: "social_events"
+            referencedColumns: ["id"]
+          },
         ]
       }
       athlete_invites: {
@@ -1525,6 +1532,145 @@ export type Database = {
         }
         Relationships: []
       }
+      social_event_presences: {
+        Row: {
+          athlete_id: string
+          frozen_share: number | null
+          guests_count: number
+          id: string
+          responded_at: string
+          social_event_id: string
+          status: Database["public"]["Enums"]["event_presence_status"]
+          updated_at: string
+        }
+        Insert: {
+          athlete_id: string
+          frozen_share?: number | null
+          guests_count?: number
+          id?: string
+          responded_at?: string
+          social_event_id: string
+          status: Database["public"]["Enums"]["event_presence_status"]
+          updated_at?: string
+        }
+        Update: {
+          athlete_id?: string
+          frozen_share?: number | null
+          guests_count?: number
+          id?: string
+          responded_at?: string
+          social_event_id?: string
+          status?: Database["public"]["Enums"]["event_presence_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_event_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_event_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "finance_overview"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "social_event_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["candidate_athlete_id"]
+          },
+          {
+            foreignKeyName: "social_event_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voter_athlete_id"]
+          },
+          {
+            foreignKeyName: "social_event_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "social_event_presences_social_event_id_fkey"
+            columns: ["social_event_id"]
+            isOneToOne: false
+            referencedRelation: "social_events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      social_events: {
+        Row: {
+          closed_at: string | null
+          closed_by: string | null
+          created_at: string
+          created_by: string
+          event_at: string
+          frozen_cost_per_person: number | null
+          frozen_people_count: number | null
+          id: string
+          location_name: string
+          status: Database["public"]["Enums"]["social_event_status"]
+          title: string
+          total_cost: number
+          updated_at: string
+        }
+        Insert: {
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by: string
+          event_at: string
+          frozen_cost_per_person?: number | null
+          frozen_people_count?: number | null
+          id?: string
+          location_name: string
+          status?: Database["public"]["Enums"]["social_event_status"]
+          title: string
+          total_cost: number
+          updated_at?: string
+        }
+        Update: {
+          closed_at?: string | null
+          closed_by?: string | null
+          created_at?: string
+          created_by?: string
+          event_at?: string
+          frozen_cost_per_person?: number | null
+          frozen_people_count?: number | null
+          id?: string
+          location_name?: string
+          status?: Database["public"]["Enums"]["social_event_status"]
+          title?: string
+          total_cost?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "social_events_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "social_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           assigned_at: string
@@ -2032,6 +2178,10 @@ export type Database = {
         }
         Returns: Json
       }
+      close_social_event: {
+        Args: { command_idempotency_key: string; event_uuid: string }
+        Returns: Json
+      }
       complete_admin_password_reset: {
         Args: {
           actor_user_id: string
@@ -2147,6 +2297,16 @@ export type Database = {
           match_date_input: string
           opponent_name_input: string
           season_uuid: string
+        }
+        Returns: Json
+      }
+      create_social_event: {
+        Args: {
+          command_idempotency_key: string
+          event_at_input: string
+          location_name_input: string
+          title_input: string
+          total_cost_input: number
         }
         Returns: Json
       }
@@ -2283,6 +2443,15 @@ export type Database = {
         Args: { amount: number; command_idempotency_key: string }
         Returns: Json
       }
+      set_event_presence: {
+        Args: {
+          command_idempotency_key: string
+          event_uuid: string
+          guests_count_input: number
+          status_input: string
+        }
+        Returns: Json
+      }
       set_match_callups: {
         Args: {
           called_athlete_ids: string[]
@@ -2307,6 +2476,24 @@ export type Database = {
           reason_input: string
         }
         Returns: Json
+      }
+      social_event_participants: {
+        Args: { event_uuid: string }
+        Returns: {
+          athlete_id: string
+          guests_count: number
+          share: number
+          shirt_name: string
+          status: Database["public"]["Enums"]["event_presence_status"]
+        }[]
+      }
+      social_event_split: {
+        Args: { event_uuid: string }
+        Returns: {
+          cost_per_person: number
+          people_count: number
+          split_unavailable: boolean
+        }[]
       }
       update_athlete: {
         Args: {
@@ -2339,6 +2526,17 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      update_social_event: {
+        Args: {
+          command_idempotency_key: string
+          event_at_input: string
+          event_uuid: string
+          location_name_input: string
+          title_input: string
+          total_cost_input: number
+        }
+        Returns: Json
+      }
     }
     Enums: {
       account_status: "ACTIVE" | "DISABLED"
@@ -2348,6 +2546,7 @@ export type Database = {
       charge_status: "PENDING" | "PAID" | "OVERDUE" | "CANCELLED"
       charge_type: "MONTHLY_AUTOMATIC" | "MANUAL_OVERRIDE" | "EVENT_FEE"
       consolidation_status: "VALID" | "INVALIDATED"
+      event_presence_status: "CONFIRMED" | "DECLINED"
       lineup_assignment: "STARTER" | "RESERVE"
       lineup_status: "DRAFT" | "PUBLISHED" | "SUPERSEDED"
       match_status: "SCHEDULED" | "COMPLETED" | "CANCELLED"
@@ -2367,6 +2566,7 @@ export type Database = {
         | "SKIPPED"
       presence_status: "PENDING" | "CONFIRMED" | "DECLINED"
       season_status: "ACTIVE" | "CLOSED"
+      social_event_status: "OPEN" | "CLOSED"
       voting_round_status: "OPEN" | "CLOSED" | "INVALIDATED"
     }
     CompositeTypes: {
@@ -2505,6 +2705,7 @@ export const Constants = {
       charge_status: ["PENDING", "PAID", "OVERDUE", "CANCELLED"],
       charge_type: ["MONTHLY_AUTOMATIC", "MANUAL_OVERRIDE", "EVENT_FEE"],
       consolidation_status: ["VALID", "INVALIDATED"],
+      event_presence_status: ["CONFIRMED", "DECLINED"],
       lineup_assignment: ["STARTER", "RESERVE"],
       lineup_status: ["DRAFT", "PUBLISHED", "SUPERSEDED"],
       match_status: ["SCHEDULED", "COMPLETED", "CANCELLED"],
@@ -2526,6 +2727,7 @@ export const Constants = {
       ],
       presence_status: ["PENDING", "CONFIRMED", "DECLINED"],
       season_status: ["ACTIVE", "CLOSED"],
+      social_event_status: ["OPEN", "CLOSED"],
       voting_round_status: ["OPEN", "CLOSED", "INVALIDATED"],
     },
   },
