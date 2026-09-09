@@ -58,9 +58,9 @@ export function RaioXCard({ opponentName, service }: RaioXCardProps) {
 
 function Stat({ label, tone, value }: { label: string; tone: string; value: number | string }) {
   return (
-    <div>
-      <p className={`font-mono text-2xl font-black tabular-nums ${tone}`}>{value}</p>
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+    <div className="flex flex-col-reverse">
+      <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</dt>
+      <dd className={`font-mono text-2xl font-black tabular-nums ${tone}`}>{value}</dd>
     </div>
   );
 }

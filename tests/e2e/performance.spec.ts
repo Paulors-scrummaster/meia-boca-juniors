@@ -133,10 +133,17 @@ test.describe('orçamento de desempenho', () => {
     expect(Date.now() - welcomeStarted).toBeLessThan(2_000);
     await signIn(page);
 
+    // Feature 003 · T102 — SC-003: a aba de conteúdo nova mais pesada (retrospecto
+    // do clube + galeria de troféus) entra no mesmo orçamento de navegação de 2 s.
+    // A latência de evento ao vivo < 2 s é exercida por `live-match-recording.spec.ts`
+    // (o feed Realtime reflete o evento no mesmo tick); o lote mensal de mensalidades
+    // (SC-001) é um único INSERT baseado em conjunto, coberto por pgTAP
+    // `005_finance_commands.test.sql`.
     const screens = [
       ['Elenco', 'Elenco'],
       ['Partidas', 'Partidas'],
       ['Mural', 'Mural de avisos'],
+      ['Histórico & Conquistas', 'Histórico & Conquistas'],
     ] as const;
     // Abaixo de 768px o link fica dentro da gaveta (FR-021), fechada por padrão e
     // reaberta a cada seleção (FR-023). O orçamento mede a navegação em si, não o

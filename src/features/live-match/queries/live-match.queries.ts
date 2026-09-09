@@ -19,8 +19,10 @@ import {
   type OfflineQueue,
   type PendingLiveEvent,
 } from '@/features/live-match/lib/offline-queue';
+import { useAuth } from '@/app/providers/AuthProvider';
 import { supabase } from '@/shared/adapters/supabase/client';
 import { AppError } from '@/shared/lib/app-error';
+import { registerOfflineCleanup } from '@/shared/lib/offline-cache';
 
 const defaultService = createLiveMatchService();
 
@@ -89,6 +91,14 @@ export function useLiveOfflineQueue(matchId: string, service: LiveMatchService =
     [matchId],
   );
   const [pendingCount, setPendingCount] = useState(0);
+
+  // T098: o buffer offline da súmula (só UUIDs + enums, sem PII) é limpo no
+  // logout / troca de conta, junto do cache de query persistido.
+  const userId = useAuth().user?.id ?? '';
+  useEffect(() => {
+    if (!userId) return;
+    return registerOfflineCleanup(userId, () => queue.clear());
+  }, [queue, userId]);
 
   const refreshCount = useCallback(() => {
     void queue.count().then(setPendingCount);

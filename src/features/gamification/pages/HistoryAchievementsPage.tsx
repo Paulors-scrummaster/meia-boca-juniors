@@ -98,11 +98,11 @@ export function HistoryAchievementsPage({ service }: HistoryAchievementsPageProp
 
 function Stat({ label, tone, value }: { label: string; tone?: string; value: number | string }) {
   return (
-    <div>
-      <p className={`font-mono text-2xl font-black tabular-nums ${tone ?? 'text-foreground'}`}>
+    <div className="flex flex-col-reverse">
+      <dt className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</dt>
+      <dd className={`font-mono text-2xl font-black tabular-nums ${tone ?? 'text-foreground'}`}>
         {value}
-      </p>
-      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</p>
+      </dd>
     </div>
   );
 }

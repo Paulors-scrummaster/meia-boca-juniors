@@ -179,3 +179,43 @@ Validação executada em 2026-09-02 no projeto Pages `meia-boca-juniors`:
 
 O banco production continuou vazio e sem migrations do MBJ durante esta validação; sua ativação
 permanece bloqueada pela T179. Nenhuma identidade foi criada e nenhum dado produtivo foi consultado.
+
+## Feature 003 (Post-MVP) — Ordem de migração e backup
+
+### Backup verificado ANTES de aplicar
+
+As migrações de 003 criam tabelas de histórico com triggers de imutabilidade
+(`athlete_trophies`, `match_cards`, `match_substitutions`,
+`match_goalkeeper_assignments`, consolidações estendidas) e três jobs `pg_cron`.
+Nenhuma é destrutiva, mas a imutabilidade torna o rollback de dados inviável depois
+que linhas forem gravadas. Portanto, **antes** de aplicar em produção:
+
+1. Disparar o orquestrador `MBJ verified backup orchestrator` pelo webhook
+   `mbj-backup-pre-migration` (ver `docs/operations.md`, seção T180) e aguardar
+   status `VERIFIED` — Request ID + Manifest SHA-256 registrados.
+2. Só então `supabase db push` (ou o pipeline de migração) contra produção.
+3. `supabase migration list` deve mostrar as 28 migrações de 003 aplicadas, sem drift.
+
+### Ordem das 28 migrações de 003 (aplicam-se em ordem lexicográfica do nome)
+
+`20260908130100_finance_enums` → `130200_finance_schema` → `130300_finance_commands_admin`
+→ `130400_finance_commands_settlement` → `130500_finance_exemptions` → `130600_finance_cron`
+→ `130700_finance_views` → `140100_social_enums` → `140200_social_schema`
+→ `140300_social_commands` → `140400_social_close` → `140500_social_views`
+→ `145000_write_consolidation_refactor` → `150100_live_enums` → `150200_live_setups`
+→ `150300_live_events` → `150400_live_stats_tables` → `150500_live_setup_commands`
+→ `150600_live_event_commands` → `150700_finalize_sumula` → `160100_card_attributes`
+→ `160200_trophy_catalog` → `160300_athlete_trophies` → `160400_evaluate_trophies`
+→ `160500_card_attributes_command` → `160600_gamification_views`
+→ `160650_notification_kinds` → `160700_highlights_cron`.
+
+Pontos sensíveis de ordenação (já refletidos nos nomes):
+
+- `160650_notification_kinds` **precede** `160700_highlights_cron`: os valores de enum
+  `WEEKLY_HIGHLIGHTS` / `PRE_MATCH_HIGHLIGHTS` precisam estar comitados (arquivo próprio)
+  antes de qualquer corpo de função referenciá-los.
+- `160400_evaluate_trophies` substitui o stub da Fase 2 e é referenciado por
+  `150700_finalize_sumula` em runtime (não em tempo de criação), então a ordem entre
+  eles é indiferente para o `push`.
+- `dispatch-notifications` (Edge Function) precisa ser re-deployada com
+  `--import-map supabase/functions/deno.json` para os novos payloads renderizarem.

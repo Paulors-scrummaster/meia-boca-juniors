@@ -18,7 +18,7 @@ function Silhouette({ label }: { label: string }) {
   return (
     <svg
       aria-label={label}
-      className="h-full w-full text-secondary/35"
+      className="h-full w-full text-secondary opacity-40"
       fill="none"
       preserveAspectRatio="xMidYMax meet"
       role="img"

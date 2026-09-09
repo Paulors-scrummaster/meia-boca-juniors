@@ -57,7 +57,7 @@ export function AttributeCard({
       {variant === 'compact' ? (
         <div className="absolute inset-0 flex flex-col items-center px-[9cqw] pb-[7cqw] pt-[10cqw]">
           {isIncomplete ? null : (
-            <span className="font-display absolute left-[9cqw] top-[8cqw] grid h-[20cqw] w-[20cqw] place-items-center rounded-full border border-secondary/70 bg-background/70 text-[10cqw] font-bold leading-none">
+            <span className="font-display absolute left-[9cqw] top-[8cqw] grid h-[20cqw] w-[20cqw] place-items-center rounded-full border border-secondary bg-elevated text-[10cqw] font-bold leading-none">
               {card.overall}
             </span>
           )}

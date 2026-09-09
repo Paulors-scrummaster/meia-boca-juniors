@@ -236,3 +236,36 @@ Antes das variáveis: `athlete-invitations` respondia HTTP 500 (falha de boot) e
 - `OPTIONS` com origem fora da allowlist: **403**;
 - `POST` sem `Authorization`: **401** com corpo `{"error":{"code":"UNAUTHENTICATED",…}}`, confirmando
   que o corpo da função executa e a autorização responde.
+
+## Feature 003 (Post-MVP) — Jobs agendados via `pg_cron`
+
+Três novos jobs criados por migração, todos `security definer` com `search_path = ''`
+e `grant execute` restrito a `service_role`. Nenhum recebe entrada externa; todos são
+idempotentes por chave de deduplicação / verificação de estado, e uma falha do
+provedor de push (`INTEGRATION_UNAVAILABLE`) nunca aborta o job.
+
+| Job (`cron.job.jobname`)        | Agenda (UTC)   | Equivalente São Paulo | Função                                        | Migração                          |
+| ------------------------------- | -------------- | --------------------- | --------------------------------------------- | --------------------------------- |
+| `mbj-generate-monthly-dues`     | `0 9 1 * *`    | dia 1, 06:00          | `private.generate_monthly_dues(null)`         | `20260908130600_finance_cron.sql` |
+| `mbj-mark-overdue-charges`      | `0 6 * * *`    | diário, 03:00         | `private.mark_overdue_charges()`              | `20260908130600_finance_cron.sql` |
+| `mbj-generate-weekly-highlights`| `0 11 * * 1`   | segunda, 08:00        | `private.generate_weekly_highlights(statement_timestamp())` | `20260908160700_highlights_cron.sql` |
+
+- **`mbj-generate-monthly-dues`** — gera a mensalidade do mês para todo atleta `ACTIVE`
+  sem cobrança já existente naquele período (INSERT baseado em conjunto, uma passada;
+  SC-001). Sem valor padrão configurado, não gera nada e não falha.
+- **`mbj-mark-overdue-charges`** — vira `PENDING → OVERDUE` toda cobrança vencida; nunca
+  toca `PAID`/`CANCELLED`. Também um UPDATE baseado em conjunto.
+- **`mbj-generate-weekly-highlights`** — resume os craques dos últimos 7 dias sobre
+  consolidações `VALID` e enfileira uma notificação `WEEKLY_HIGHLIGHTS`
+  (`route=/app/historico`), determinística sobre dados idênticos e idempotente pela
+  `week_key` ISO. Categoria empatada/vazia é omitida.
+
+**Sem novo scheduler para o pré-jogo.** `private.generate_pre_match_highlights(match_id)`
+(payload `PRE_MATCH_HIGHLIGHTS`, `route=/app/partidas/:matchId`) é chamado de dentro da
+rotina MVP de lembretes `private.generate_attendance_reminders` (~24 h antes do
+apito), com `exception when others then null` para não afetar os lembretes. Idempotente
+por `pre-match-highlights:<match_id>`.
+
+**Render das notificações novas:** `supabase/functions/dispatch-notifications` ganhou
+defaults para `WEEKLY_HIGHLIGHTS` e `PRE_MATCH_HIGHLIGHTS`; falha do provedor é no-op
+graciosa (FR-026, SC-007).
