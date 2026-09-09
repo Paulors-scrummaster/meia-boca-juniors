@@ -160,14 +160,14 @@ reviewed data exactly, idempotent on retry. (quickstart Cenários 3 & 4)
 
 ### Implementation for User Story 3
 
-- [ ] T056 [P] [US3] Migration `supabase/migrations/20260908150100_live_enums.sql`: enums `live_sumula_status`, `live_event_type`, `team_side`, `card_type`
-- [ ] T057 [US3] Migration `supabase/migrations/20260908150200_live_setups.sql`: table `live_match_setups` (1:1 with match), RLS, status transitions, `starting_goalkeeper_athlete_id`, indexes
-- [ ] T058 [US3] Migration `supabase/migrations/20260908150300_live_events.sql`: table `live_match_events` with `unique (client_event_id)`, `undone` soft flag, RLS `select` for active accounts, add to the Realtime publication filtered by `match_id`, indexes
-- [ ] T059 [P] [US3] Migration `supabase/migrations/20260908150400_live_stats_tables.sql`: tables `match_cards`, `match_substitutions`, `match_goalkeeper_assignments` bound to `consolidation_id`, immutability triggers (`private.reject_statistics_history_mutation`), indexes
+- [X] T056 [P] [US3] Migration `supabase/migrations/20260908150100_live_enums.sql`: enums `live_sumula_status`, `live_event_type`, `team_side`, `card_type`
+- [X] T057 [US3] Migration `supabase/migrations/20260908150200_live_setups.sql`: table `live_match_setups` (1:1 with match), RLS, status transitions, `starting_goalkeeper_athlete_id`, indexes
+- [X] T058 [US3] Migration `supabase/migrations/20260908150300_live_events.sql`: table `live_match_events` with `unique (client_event_id)`, `undone` soft flag, RLS `select` for active accounts, add to the Realtime publication filtered by `match_id`, indexes
+- [X] T059 [P] [US3] Migration `supabase/migrations/20260908150400_live_stats_tables.sql`: tables `match_cards`, `match_substitutions`, `match_goalkeeper_assignments` bound to `consolidation_id`, immutability triggers (`private.reject_statistics_history_mutation`), indexes
 - [ ] T060 [US3] Migration `supabase/migrations/20260908150500_live_setup_commands.sql`: RPCs `enable_live_recording` (pre-match, published lineup required, any active account as recorder), `assign_field_recorder` (revokes prior authorization)
 - [ ] T061 [US3] Migration `supabase/migrations/20260908150600_live_event_commands.sql`: RPCs `log_live_event`, `undo_live_event`, `amend_live_event` (review only), `end_live_recording`, `cancel_live_recording` per `contracts/live-match.md`
 - [ ] T062 [US3] Migration `supabase/migrations/20260908150700_finalize_sumula.sql`: RPC `finalize_sumula(match_id, reviewed_payload, idempotency_key)` — `COACH`/`PRESIDENT` + AAL2; derive scores from non-undone events; call `private.write_consolidation(...)`; insert `match_cards`/`match_substitutions`/`match_goalkeeper_assignments`; call `private.evaluate_trophies(active_season, affected_athletes)`; `setup.status='FINALIZED'`; audit `SUMULA_FINALIZED`; `command_results`
-- [ ] T063 [US3] Run `npm run db:types`
+- [X] T063 [US3] Run `npm run db:types`
 - [ ] T064 [P] [US3] `src/features/live-match/lib/match-clock.ts`
 - [ ] T065 [P] [US3] `src/features/live-match/lib/offline-queue.ts` (IndexedDB single store `pending_events`, `online` listener drain, pending count)
 - [ ] T066 [P] [US3] `src/features/live-match/api/*.ts` (RPC wrappers incl. `client_event_id` generation)
