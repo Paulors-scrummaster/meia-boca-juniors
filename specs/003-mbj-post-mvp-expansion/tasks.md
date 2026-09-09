@@ -72,22 +72,22 @@ reverse → back to `OVERDUE`; cancel another → leaves badges and totals. (qui
 
 ### Tests for User Story 1
 
-- [ ] T013 [P] [US1] pgTAP `supabase/tests/003_finance_charges.test.sql`: charge state machine (`PENDING⇄OVERDUE`, `→PAID`, `PAID→PENDING/OVERDUE`, `→CANCELLED`), forbidden transitions raise `CHARGE_LOCKED`, every transition writes an audit row with actor/reason
-- [ ] T014 [P] [US1] pgTAP `supabase/tests/003_finance_generation.test.sql`: monthly generation creates one `MONTHLY_AUTOMATIC` charge per non-`INACTIVE` athlete, `due_date` = day 10, idempotent on re-run (`unique (athlete_id, period)`), skips period + indefinite exemptions, `NO_ACTIVE_SEASON` guard
-- [ ] T015 [P] [US1] pgTAP `supabase/tests/003_finance_rls.test.sql`: `ATHLETE` reads only own charges; `PRESIDENT` reads all; non-president write attempts are `FORBIDDEN`; no matches/lineups/voting policy references `athlete_charges` (SC-006)
+- [X] T013 [P] [US1] pgTAP `supabase/tests/003_finance_charges.test.sql`: charge state machine (`PENDING⇄OVERDUE`, `→PAID`, `PAID→PENDING/OVERDUE`, `→CANCELLED`), forbidden transitions raise `CHARGE_LOCKED`, every transition writes an audit row with actor/reason
+- [X] T014 [P] [US1] pgTAP `supabase/tests/003_finance_generation.test.sql`: monthly generation creates one `MONTHLY_AUTOMATIC` charge per non-`INACTIVE` athlete, `due_date` = day 10, idempotent on re-run (`unique (athlete_id, period)`), skips period + indefinite exemptions, `NO_ACTIVE_SEASON` guard
+- [X] T015 [P] [US1] pgTAP `supabase/tests/003_finance_rls.test.sql`: `ATHLETE` reads only own charges; `PRESIDENT` reads all; non-president write attempts are `FORBIDDEN`; no matches/lineups/voting policy references `athlete_charges` (SC-006)
 - [ ] T016 [P] [US1] Unit `tests/unit/finance-format.test.ts`: `pt-BR` currency + `YYYY-MM` period + due-date formatting for `src/features/finance/lib/currency.ts`
 - [ ] T017 [P] [US1] E2E `tests/e2e/finance.spec.ts`: quickstart Cenário 1 end to end (generate, idempotent re-run, exempt, badge non-blocking, settle, reverse, cancel)
 
 ### Implementation for User Story 1
 
-- [ ] T018 [P] [US1] Migration `supabase/migrations/20260908130100_finance_enums.sql`: enums `charge_status` (`PENDING`,`PAID`,`OVERDUE`,`CANCELLED`), `charge_type` (`MONTHLY_AUTOMATIC`,`MANUAL_OVERRIDE`,`EVENT_FEE`)
-- [ ] T019 [US1] Migration `supabase/migrations/20260908130200_finance_schema.sql`: tables `dues_settings` (singleton), `dues_exemptions`, `athlete_charges` with all constraints, `unique (athlete_id, period) where type='MONTHLY_AUTOMATIC'`, indexes from `data-model.md`, RLS policies, and a trigger blocking non-RPC `update`/`delete`
-- [ ] T020 [US1] Migration `supabase/migrations/20260908130300_finance_commands_admin.sql`: RPCs `set_default_dues_amount`, `create_manual_charge`, `adjust_charge_amount` (PRESIDENT + AAL2, audit, `command_results`) per `contracts/finance.md`
-- [ ] T021 [US1] Migration `supabase/migrations/20260908130400_finance_commands_settlement.sql`: RPCs `settle_charge`, `reverse_charge_settlement`, `cancel_charge` with the state-machine guards and audit reasons
-- [ ] T022 [US1] Migration `supabase/migrations/20260908130500_finance_exemptions.sql`: RPCs `grant_dues_exemption` (period or `null` = indefinite), `revoke_dues_exemption`
-- [ ] T023 [US1] Migration `supabase/migrations/20260908130600_finance_cron.sql`: `run_monthly_dues_generation(period, idempotency_key)` RPC + `private.generate_monthly_dues()` + `private.mark_overdue_charges()` + `cron.schedule` entries (monthly day 1 06:00 SP; daily 03:00) — returns `{ created, skippedExempt, skippedExisting, activeAthletes }`
-- [ ] T024 [P] [US1] Migration `supabase/migrations/20260908130700_finance_views.sql`: `public.athlete_delinquency_badge(athlete_id)` and `public.finance_overview` (per-athlete pending/overdue/paidThisSeason/badge), RLS-safe
-- [ ] T025 [US1] Run `npm run db:types`
+- [X] T018 [P] [US1] Migration `supabase/migrations/20260908130100_finance_enums.sql`: enums `charge_status` (`PENDING`,`PAID`,`OVERDUE`,`CANCELLED`), `charge_type` (`MONTHLY_AUTOMATIC`,`MANUAL_OVERRIDE`,`EVENT_FEE`)
+- [X] T019 [US1] Migration `supabase/migrations/20260908130200_finance_schema.sql`: tables `dues_settings` (singleton), `dues_exemptions`, `athlete_charges` with all constraints, `unique (athlete_id, period) where type='MONTHLY_AUTOMATIC'`, indexes from `data-model.md`, RLS policies, and a trigger blocking non-RPC `update`/`delete`
+- [X] T020 [US1] Migration `supabase/migrations/20260908130300_finance_commands_admin.sql`: RPCs `set_default_dues_amount`, `create_manual_charge`, `adjust_charge_amount` (PRESIDENT + AAL2, audit, `command_results`) per `contracts/finance.md`
+- [X] T021 [US1] Migration `supabase/migrations/20260908130400_finance_commands_settlement.sql`: RPCs `settle_charge`, `reverse_charge_settlement`, `cancel_charge` with the state-machine guards and audit reasons
+- [X] T022 [US1] Migration `supabase/migrations/20260908130500_finance_exemptions.sql`: RPCs `grant_dues_exemption` (period or `null` = indefinite), `revoke_dues_exemption`
+- [X] T023 [US1] Migration `supabase/migrations/20260908130600_finance_cron.sql`: `run_monthly_dues_generation(period, idempotency_key)` RPC + `private.generate_monthly_dues()` + `private.mark_overdue_charges()` + `cron.schedule` entries (monthly day 1 06:00 SP; daily 03:00) — returns `{ created, skippedExempt, skippedExisting, activeAthletes }`
+- [X] T024 [P] [US1] Migration `supabase/migrations/20260908130700_finance_views.sql`: `public.athlete_delinquency_badge(athlete_id)` and `public.finance_overview` (per-athlete pending/overdue/paidThisSeason/badge), RLS-safe
+- [X] T025 [US1] Run `npm run db:types`
 - [ ] T026 [P] [US1] `src/features/finance/lib/currency.ts`: `pt-BR` money format, period helpers, due-date computation
 - [ ] T027 [P] [US1] `src/features/finance/api/charges.ts`: service-layer wrappers over the RPCs and reads, normalized `{ data, error }`
 - [ ] T028 [P] [US1] `src/features/finance/queries/`: TanStack Query hooks `useFinanceOverview`, `useAthleteCharges`, `useDelinquencyBadge`, plus mutation hooks with idempotency-key generation

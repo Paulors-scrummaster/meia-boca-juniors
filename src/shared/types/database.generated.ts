@@ -52,6 +52,121 @@ export type Database = {
         }
         Relationships: []
       }
+      athlete_charges: {
+        Row: {
+          amount: number
+          athlete_id: string
+          created_at: string
+          created_by: string | null
+          due_date: string
+          id: string
+          period: string | null
+          season_id: string
+          settled_at: string | null
+          settled_by: string | null
+          social_event_id: string | null
+          status: Database["public"]["Enums"]["charge_status"]
+          type: Database["public"]["Enums"]["charge_type"]
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          athlete_id: string
+          created_at?: string
+          created_by?: string | null
+          due_date: string
+          id?: string
+          period?: string | null
+          season_id: string
+          settled_at?: string | null
+          settled_by?: string | null
+          social_event_id?: string | null
+          status?: Database["public"]["Enums"]["charge_status"]
+          type: Database["public"]["Enums"]["charge_type"]
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          athlete_id?: string
+          created_at?: string
+          created_by?: string | null
+          due_date?: string
+          id?: string
+          period?: string | null
+          season_id?: string
+          settled_at?: string | null
+          settled_by?: string | null
+          social_event_id?: string | null
+          status?: Database["public"]["Enums"]["charge_status"]
+          type?: Database["public"]["Enums"]["charge_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "athlete_charges_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "athlete_charges_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "finance_overview"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "athlete_charges_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["candidate_athlete_id"]
+          },
+          {
+            foreignKeyName: "athlete_charges_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voter_athlete_id"]
+          },
+          {
+            foreignKeyName: "athlete_charges_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "athlete_charges_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "athlete_charges_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["season_id"]
+          },
+          {
+            foreignKeyName: "athlete_charges_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "athlete_charges_settled_by_fkey"
+            columns: ["settled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       athlete_invites: {
         Row: {
           athlete_id: string
@@ -93,6 +208,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "athletes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "athlete_invites_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "finance_overview"
+            referencedColumns: ["athlete_id"]
           },
           {
             foreignKeyName: "athlete_invites_athlete_id_fkey"
@@ -228,6 +350,105 @@ export type Database = {
           },
         ]
       }
+      dues_exemptions: {
+        Row: {
+          athlete_id: string
+          created_at: string
+          created_by: string
+          id: string
+          period: string | null
+          reason: string
+        }
+        Insert: {
+          athlete_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          period?: string | null
+          reason: string
+        }
+        Update: {
+          athlete_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          period?: string | null
+          reason?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dues_exemptions_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "dues_exemptions_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "finance_overview"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "dues_exemptions_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["candidate_athlete_id"]
+          },
+          {
+            foreignKeyName: "dues_exemptions_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voter_athlete_id"]
+          },
+          {
+            foreignKeyName: "dues_exemptions_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "dues_exemptions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      dues_settings: {
+        Row: {
+          default_amount: number
+          id: boolean
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          default_amount: number
+          id?: boolean
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          default_amount?: number
+          id?: boolean
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dues_settings_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lineup_players: {
         Row: {
           assignment: Database["public"]["Enums"]["lineup_assignment"]
@@ -263,6 +484,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "athletes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lineup_players_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "finance_overview"
+            referencedColumns: ["athlete_id"]
           },
           {
             foreignKeyName: "lineup_players_athlete_id_fkey"
@@ -518,6 +746,13 @@ export type Database = {
             foreignKeyName: "match_goals_assistant_athlete_id_fkey"
             columns: ["assistant_athlete_id"]
             isOneToOne: false
+            referencedRelation: "finance_overview"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "match_goals_assistant_athlete_id_fkey"
+            columns: ["assistant_athlete_id"]
+            isOneToOne: false
             referencedRelation: "open_mvp_voting_view"
             referencedColumns: ["candidate_athlete_id"]
           },
@@ -555,6 +790,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "athletes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_goals_scorer_athlete_id_fkey"
+            columns: ["scorer_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "finance_overview"
+            referencedColumns: ["athlete_id"]
           },
           {
             foreignKeyName: "match_goals_scorer_athlete_id_fkey"
@@ -632,6 +874,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "athletes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "finance_overview"
+            referencedColumns: ["athlete_id"]
           },
           {
             foreignKeyName: "match_presences_athlete_id_fkey"
@@ -805,6 +1054,13 @@ export type Database = {
             foreignKeyName: "mvp_awards_athlete_id_fkey"
             columns: ["athlete_id"]
             isOneToOne: false
+            referencedRelation: "finance_overview"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "mvp_awards_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
             referencedRelation: "open_mvp_voting_view"
             referencedColumns: ["candidate_athlete_id"]
           },
@@ -872,6 +1128,13 @@ export type Database = {
             foreignKeyName: "mvp_votes_voted_athlete_id_fkey"
             columns: ["voted_athlete_id"]
             isOneToOne: false
+            referencedRelation: "finance_overview"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "mvp_votes_voted_athlete_id_fkey"
+            columns: ["voted_athlete_id"]
+            isOneToOne: false
             referencedRelation: "open_mvp_voting_view"
             referencedColumns: ["candidate_athlete_id"]
           },
@@ -895,6 +1158,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "athletes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mvp_votes_voter_athlete_id_fkey"
+            columns: ["voter_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "finance_overview"
+            referencedColumns: ["athlete_id"]
           },
           {
             foreignKeyName: "mvp_votes_voter_athlete_id_fkey"
@@ -1293,6 +1563,21 @@ export type Database = {
       }
     }
     Views: {
+      finance_overview: {
+        Row: {
+          athlete_id: string | null
+          badge: string | null
+          full_name: string | null
+          overdue_amount: number | null
+          overdue_count: number | null
+          paid_active_season_amount: number | null
+          pending_amount: number | null
+          pending_count: number | null
+          shirt_name: string | null
+          shirt_number: number | null
+        }
+        Relationships: []
+      }
       next_match_view: {
         Row: {
           applicable_deadline: string | null
@@ -1440,6 +1725,13 @@ export type Database = {
             foreignKeyName: "lineup_players_athlete_id_fkey"
             columns: ["athlete_id"]
             isOneToOne: false
+            referencedRelation: "finance_overview"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "lineup_players_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
             referencedRelation: "open_mvp_voting_view"
             referencedColumns: ["candidate_athlete_id"]
           },
@@ -1507,6 +1799,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "athletes"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "finance_overview"
+            referencedColumns: ["athlete_id"]
           },
           {
             foreignKeyName: "match_presences_athlete_id_fkey"
@@ -1593,6 +1892,13 @@ export type Database = {
             foreignKeyName: "match_presences_athlete_id_fkey"
             columns: ["athlete_id"]
             isOneToOne: false
+            referencedRelation: "finance_overview"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
             referencedRelation: "open_mvp_voting_view"
             referencedColumns: ["candidate_athlete_id"]
           },
@@ -1639,6 +1945,15 @@ export type Database = {
         Args: { invitation_uuid: string; request_trace_id: string }
         Returns: Json
       }
+      adjust_charge_amount: {
+        Args: {
+          amount: number
+          charge_uuid: string
+          command_idempotency_key: string
+          reason_input: string
+        }
+        Returns: Json
+      }
       admin_set_presence: {
         Args: {
           athlete_uuid: string
@@ -1672,6 +1987,18 @@ export type Database = {
           isOneToOne: true
           isSetofReturn: false
         }
+      }
+      athlete_delinquency_badge: {
+        Args: { athlete_uuid: string }
+        Returns: string
+      }
+      cancel_charge: {
+        Args: {
+          charge_uuid: string
+          command_idempotency_key: string
+          reason_input: string
+        }
+        Returns: Json
       }
       cancel_match: {
         Args: { command_idempotency_key: string; match_uuid: string }
@@ -1801,6 +2128,16 @@ export type Database = {
         }
         Returns: Json
       }
+      create_manual_charge: {
+        Args: {
+          amount: number
+          athlete_uuid: string
+          command_idempotency_key: string
+          due_date_input: string
+          type_input: string
+        }
+        Returns: Json
+      }
       create_match: {
         Args: {
           command_idempotency_key: string
@@ -1814,6 +2151,15 @@ export type Database = {
         Returns: Json
       }
       get_user_roles: { Args: { target_user_id: string }; Returns: Json }
+      grant_dues_exemption: {
+        Args: {
+          athlete_uuid: string
+          command_idempotency_key: string
+          period_input: string
+          reason_input: string
+        }
+        Returns: Json
+      }
       open_season: {
         Args: {
           command_idempotency_key: string
@@ -1880,6 +2226,18 @@ export type Database = {
         }
         Returns: Json
       }
+      reverse_charge_settlement: {
+        Args: {
+          charge_uuid: string
+          command_idempotency_key: string
+          reason_input: string
+        }
+        Returns: Json
+      }
+      revoke_dues_exemption: {
+        Args: { command_idempotency_key: string; exemption_uuid: string }
+        Returns: Json
+      }
       revoke_identity_invite: {
         Args: {
           actor_user_id: string
@@ -1887,6 +2245,10 @@ export type Database = {
           command_idempotency_key: string
           request_trace_id: string
         }
+        Returns: Json
+      }
+      run_monthly_dues_generation: {
+        Args: { command_idempotency_key: string; period_input: string }
         Returns: Json
       }
       set_athlete_status: {
@@ -1917,6 +2279,10 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      set_default_dues_amount: {
+        Args: { amount: number; command_idempotency_key: string }
+        Returns: Json
+      }
       set_match_callups: {
         Args: {
           called_athlete_ids: string[]
@@ -1931,6 +2297,14 @@ export type Database = {
           should_assign: boolean
           target_role: Database["public"]["Enums"]["app_role"]
           target_user_id: string
+        }
+        Returns: Json
+      }
+      settle_charge: {
+        Args: {
+          charge_uuid: string
+          command_idempotency_key: string
+          reason_input: string
         }
         Returns: Json
       }
@@ -1971,6 +2345,8 @@ export type Database = {
       app_role: "PRESIDENT" | "COACH" | "ATHLETE"
       athlete_status: "ACTIVE" | "INJURED" | "SUSPENDED" | "INACTIVE"
       call_status: "CALLED" | "NOT_CALLED"
+      charge_status: "PENDING" | "PAID" | "OVERDUE" | "CANCELLED"
+      charge_type: "MONTHLY_AUTOMATIC" | "MANUAL_OVERRIDE" | "EVENT_FEE"
       consolidation_status: "VALID" | "INVALIDATED"
       lineup_assignment: "STARTER" | "RESERVE"
       lineup_status: "DRAFT" | "PUBLISHED" | "SUPERSEDED"
@@ -2126,6 +2502,8 @@ export const Constants = {
       app_role: ["PRESIDENT", "COACH", "ATHLETE"],
       athlete_status: ["ACTIVE", "INJURED", "SUSPENDED", "INACTIVE"],
       call_status: ["CALLED", "NOT_CALLED"],
+      charge_status: ["PENDING", "PAID", "OVERDUE", "CANCELLED"],
+      charge_type: ["MONTHLY_AUTOMATIC", "MANUAL_OVERRIDE", "EVENT_FEE"],
       consolidation_status: ["VALID", "INVALIDATED"],
       lineup_assignment: ["STARTER", "RESERVE"],
       lineup_status: ["DRAFT", "PUBLISHED", "SUPERSEDED"],
