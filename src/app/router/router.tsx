@@ -242,6 +242,24 @@ const featureRoutes: RouteObject[] = [
               { path: 'matches/:matchId', element: <MatchDetailRoutePage /> },
               { path: 'matches/:matchId/lineup', element: <PublishedLineupRoutePage /> },
               { path: 'statistics', element: <SeasonRankingsPage /> },
+              {
+                path: 'historico',
+                element: (
+                  <Placeholder
+                    title="Histórico & Conquistas"
+                    description="Retrospecto do clube e galeria de troféus. Em construção."
+                  />
+                ),
+              },
+              {
+                path: 'resenhas',
+                element: (
+                  <Placeholder
+                    title="Resenhas"
+                    description="Churrascos e resenhas pós-jogo, com confirmação de presença e rateio. Em construção."
+                  />
+                ),
+              },
               { path: 'notices', element: <NoticesRoutePage /> },
               { path: 'notification-preferences', element: <PushPermissionCard /> },
               {
@@ -286,6 +304,15 @@ const featureRoutes: RouteObject[] = [
                         path: 'staff/matches/:matchId/lineup',
                         element: <LineupEditorRoutePage />,
                       },
+                      {
+                        path: 'partidas/:matchId/sumula',
+                        element: (
+                          <Placeholder
+                            title="Súmula ao vivo"
+                            description="Cronômetro, registro de eventos e revisão pós-jogo. Em construção."
+                          />
+                        ),
+                      },
                     ],
                   },
                 ],
@@ -297,6 +324,15 @@ const featureRoutes: RouteObject[] = [
                     element: <Aal2RouteGuard />,
                     children: [
                       { path: 'admin', element: <RoleAdministrationPage /> },
+                      {
+                        path: 'financeiro',
+                        element: (
+                          <Placeholder
+                            title="Financeiro"
+                            description="Mensalidades, cobranças e inadimplência do elenco. Em construção."
+                          />
+                        ),
+                      },
                       { path: 'admin/roster/new', element: <CreateAthletePage /> },
                       { path: 'admin/roster/:athleteId/edit', element: <EditAthletePage /> },
                       {

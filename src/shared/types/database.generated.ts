@@ -1228,20 +1228,29 @@ export type Database = {
       seasons: {
         Row: {
           created_at: string
+          ends_on: string | null
           id: string
           is_active: boolean
+          starts_on: string
+          status: Database["public"]["Enums"]["season_status"]
           year: number
         }
         Insert: {
           created_at?: string
+          ends_on?: string | null
           id?: string
           is_active?: boolean
+          starts_on?: string
+          status: Database["public"]["Enums"]["season_status"]
           year: number
         }
         Update: {
           created_at?: string
+          ends_on?: string | null
           id?: string
           is_active?: boolean
+          starts_on?: string
+          status?: Database["public"]["Enums"]["season_status"]
           year?: number
         }
         Relationships: []
@@ -1688,6 +1697,14 @@ export type Database = {
         }[]
       }
       close_mvp_voting: { Args: { voting_round_uuid: string }; Returns: Json }
+      close_season: {
+        Args: {
+          command_idempotency_key: string
+          ends_on_input: string
+          season_uuid: string
+        }
+        Returns: Json
+      }
       complete_admin_password_reset: {
         Args: {
           actor_user_id: string
@@ -1797,6 +1814,14 @@ export type Database = {
         Returns: Json
       }
       get_user_roles: { Args: { target_user_id: string }; Returns: Json }
+      open_season: {
+        Args: {
+          command_idempotency_key: string
+          starts_on_input: string
+          year_input: number
+        }
+        Returns: Json
+      }
       publish_lineup: {
         Args: {
           command_idempotency_key: string
@@ -1965,6 +1990,7 @@ export type Database = {
         | "FAILED"
         | "SKIPPED"
       presence_status: "PENDING" | "CONFIRMED" | "DECLINED"
+      season_status: "ACTIVE" | "CLOSED"
       voting_round_status: "OPEN" | "CLOSED" | "INVALIDATED"
     }
     CompositeTypes: {
@@ -2121,6 +2147,7 @@ export const Constants = {
         "SKIPPED",
       ],
       presence_status: ["PENDING", "CONFIRMED", "DECLINED"],
+      season_status: ["ACTIVE", "CLOSED"],
       voting_round_status: ["OPEN", "CLOSED", "INVALIDATED"],
     },
   },
