@@ -114,7 +114,7 @@ test('comissão revisa, ajusta assistência e finaliza a súmula (idempotente na
 
   // Ajustar o autor da assistência do primeiro gol.
   await page
-    .getByRole('combobox', { name: 'Assistência / quem sai' })
+    .getByRole('combobox', { name: 'Assistência' })
     .first()
     .selectOption({ label: '#9 Nove' });
   await expect.poll(() => state.amendCalls).toBeGreaterThan(0);

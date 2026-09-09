@@ -5,6 +5,111 @@ privacidade). Feita sobre o branch `003-mbj-post-mvp-expansion`.
 
 ---
 
+## Code review pré-merge — dispositions (PR #209)
+
+Revisão de code-review / release-readiness realizada sobre o diff completo contra `main`.
+Achados classificados BLOCKER / HIGH / MEDIUM / LOW / INFO. Nenhum BLOCKER.
+
+### HIGH — H1 · `ASSIST` avulso não consolidado → **CORRIGIDO (UI-only)**
+
+- **Problema:** a UI da Súmula Live oferecia um botão "Assistência" que criava um
+  evento `event_type='ASSIST'`; `finalize_sumula` só consolida GOAL/YELLOW/RED/SUB e
+  deriva a assistência de `GOAL.target_athlete_id`. Fluxo "Gol #9" → "Assistência #10"
+  gerava um gol **sem** assistência ⇒ GARCOM / leaderboards de assistência subcontavam
+  (risco a SC-004).
+- **Correção (solução preferencial, sem tocar no servidor):**
+  - `src/features/live-match/lib/event-labels.ts` — `LIVE_EVENT_TYPES` deixa de incluir
+    `'ASSIST'` (passa a `['GOAL','YELLOW_CARD','RED_CARD','SUBSTITUTION']`).
+    `LIVE_EVENT_LABEL` mantém a chave `ASSIST` só para rotular linhas legadas no feed /
+    revisão.
+  - `src/features/live-match/components/QuickActions.tsx` — some o botão "Assistência";
+    o segundo campo do gol passa a se chamar **"Assistência (opcional)"** e continua
+    mapeando para `target_athlete_id`. Gol sem assistência segue válido
+    (`requiresTargetAthlete` só é `true` para SUBSTITUTION).
+  - `finalize_sumula` **não** foi alterado — a consolidação já lê a assistência do
+    `target_athlete_id` do gol; o enum `live_event_type` do banco mantém `ASSIST` (sem
+    migração).
+- **Garantias:** não há mais fluxo visível que crie `ASSIST` avulso; gol com
+  assistência consolida `match_goals.assistant_athlete_id`; gol sem assistência
+  permanece válido; revisão e consolidação sem divergência nesse aspecto (pgTAP
+  `011_finalize_sumula`, e2e `live-match-recording` / `live-match-finalize`).
+
+### MEDIUM — M7 · labels de substituição ambíguas → **CORRIGIDO**
+
+- **Problema:** campo principal genérico "Atleta" e secundário "Assistência / quem sai"
+  serviam a dois papéis; inverter a substituição corrompia `match_substitutions` e a
+  linha do tempo do goleiro (MURALHA / VETERANO).
+- **Correção (sem tocar no contrato server-side):**
+  - `QuickActions.tsx` — "Substituição" abre um passo dedicado (`aria-pressed`); nesse
+    modo o campo principal vira **"Quem entra"** e o secundário **"Quem sai"**, com botão
+    "Registrar substituição". Gol/cartão continuam a um toque. `athlete_id` = quem
+    entra, `target_athlete_id` = quem sai — igual a `log_live_event` / `finalize_sumula`.
+  - `ReviewScreen.tsx` — na linha de um evento `SUBSTITUTION` os rótulos de edição viram
+    "Quem entra" / "Quem sai"; nos demais, "Autor" / "Assistência".
+  - e2e ajustados: `live-match-recording.spec.ts` (passo de substituição) e
+    `live-match-finalize.spec.ts` (`combobox` "Assistência").
+
+### MEDIUM — M4 · `generate_attendance_reminders` `create or replace` → **CONFIRMADO OK**
+
+- Só existem **duas** definições da função em migrações: `20260825002400`
+  (`notification_reminders`, MVP) e `20260908160700` (`highlights_cron`, 003). Nenhuma
+  migração intermediária a toca — não há mudança pós-MVP para reverter.
+- O corpo da rotina de lembrete de presença em 003 é **idêntico** ao MVP (mesmo SELECT,
+  mesmos filtros, mesma dedup key, mesmo payload, mesma contagem `event_before/after`);
+  a única diferença é `declare upcoming record;` + um laço guardado
+  (`exception when others then null`) que dispara `generate_pre_match_highlights` ~24 h
+  antes do apito. O valor de retorno (`generated_count`) **não muda**.
+- O cron que invoca a rotina (`generate-attendance-reminders`, criado em
+  `20260825002400`) roda a cada **5 minutos** (`*/5 * * * *`) — ≤ 10 min, dentro da
+  janela de 10 min do laço de pré-jogo. 003 não re-agenda o job; o `create or replace`
+  só troca o corpo que o job existente chama.
+- **Sem alteração** — apenas documentado.
+
+### MEDIUM — M6 · dois seasons `ACTIVE` via `status`/`is_active` → **CONFIRMADO OK**
+
+- Escritores de `public.seasons` em 003: só o backfill único em `20260908120100` e
+  `open_season` / `close_season` em `20260908120200`. Nenhum outro caminho 003 escreve
+  `status` / `is_active` (views e crons só fazem `select ... where status='ACTIVE'`).
+- `open_season` **recusa** (`SEASON_ALREADY_ACTIVE`) se já existe qualquer season
+  `ACTIVE` — não abre uma segunda; o operador fecha a anterior com `close_season` e só
+  então abre a nova.
+- Backstop de banco: `seasons_one_active_key` (`unique index on seasons(is_active)
+  where is_active`, MVP `20260825000700`) + o trigger `sync_season_status_and_flag`
+  derivando `is_active = (status='ACTIVE')` impedem, no nível do banco, duas linhas
+  `ACTIVE` mesmo sob corrida (o segundo INSERT falha com violação de unicidade).
+- **Sem alteração** — apenas documentado.
+
+### Demais achados (M1–M3, M5, L1–L8) — não corrigidos neste lote
+
+Fora do escopo desta correção pré-merge (H1 + M7). Recomendados como issues de
+follow-up:
+- **M1** `finalize_sumula` sempre devolve `trophiesAwarded: '[]'` (dados corretos; só o
+  payload de resposta não reflete os troféus — a galeria atualiza no refetch).
+- **M2** `/app/roster` faz uma RPC `athlete_card` por tile (N+1; tolerável no porte do
+  clube).
+- **M3** sem tela de feed ao vivo para torcedor/atleta (transporte Realtime pronto e
+  testado; FR-4.4 parcialmente atendido — decisão de escopo do time).
+- **M5** lote mensal de mensalidades levanta exceção (não retorna) em
+  `NO_ACTIVE_SEASON` / `DUES_NOT_CONFIGURED` no caminho do cron, sem alerta.
+- **L1** motivo textual de baixa/estorno validado mas não persistido no audit log.
+- **L2** `log_live_event` aceita `idempotency_key` que ignora (dedup é por
+  `client_event_id`).
+- **L3** `amend_live_event` levanta `NOT_FOUND` antes da autorização.
+- **L4** `mark_overdue_charges` vira em meia-noite UTC, não São Paulo.
+- **L5** `costPerPerson` do rateio é valor de exibição arredondado (Σ`frozen_share` é
+  exato).
+- **L6** `exception when others then null` do pré-jogo engole bugs sem log.
+- **L7** invariante "conjunto de navegação fechado" da feature 002 agora estendido —
+  atualizar `data-model.md` §3.2 / `contracts/navigation-shell.md` da 002.
+- **L8** `/app/staff` mudou de placeholder para `SeasonAdminPage` sem renomear o item de
+  nav.
+
+INFO: os advisors do Supabase (security e performance) **não** apontam nada novo
+introduzido pela feature 003; todos os achados são de tabelas/funções pré-existentes do
+MVP. Todas as funções `security definer` de 003 usam `set search_path = ''`.
+
+---
+
 ## T099 — RLS & privacidade
 
 ### Tabelas novas e políticas

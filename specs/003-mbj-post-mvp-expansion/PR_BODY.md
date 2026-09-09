@@ -174,6 +174,27 @@ Full detail in `specs/003-mbj-post-mvp-expansion/pr-review-notes.md`.
   a standardized mutation queue once generic offline-sync infrastructure exists; until
   then the buffer carries no PII and is purged on logout.
 
+## Pre-merge code review
+
+A code-review / release-readiness pass over the full diff produced 0 BLOCKERS, 1 HIGH,
+7 MEDIUM, 8 LOW. Dispositioned in `specs/003-mbj-post-mvp-expansion/pr-review-notes.md`:
+
+- **H1 (HIGH) — FIXED (UI-only):** standalone "Assistência" quick-action removed from the
+  live-súmula UI; the assist is now only the goal's second athlete (`target_athlete_id`),
+  which is exactly what `finalize_sumula` consolidates. Goal-without-assist still valid.
+  No server / migration change (`live_event_type` keeps `ASSIST` for legacy feed rows).
+- **M7 (MEDIUM) — FIXED:** substitution is a dedicated step in `QuickActions` with
+  explicit **"Quem entra" / "Quem sai"** labels (and in `ReviewScreen` per-row);
+  `athlete_id`=in, `target_athlete_id`=out — server contract unchanged.
+- **M4 — CONFIRMED OK:** the copied `generate_attendance_reminders` body is identical to
+  the single pre-003 definition (only an additive guarded pre-match loop; return value
+  unchanged) and its cron runs every 5 min (≤10).
+- **M6 — CONFIRMED OK:** `open_season` refuses when a season is already `ACTIVE`; the MVP
+  `seasons_one_active_key` unique index + sync trigger are the DB backstop. No other 003
+  path writes `seasons.status`/`is_active`.
+- **M1–M3, M5, L1–L8** — left as follow-up issues (data-correct; ergonomics / ops /
+  docs). Listed in the review note.
+
 ## Testing
 
 | Gate | Result |
@@ -186,7 +207,7 @@ Full detail in `specs/003-mbj-post-mvp-expansion/pr-review-notes.md`.
 | build (`tsc -b && vite build`) | **PASS** |
 | `db:types:check` | **current** |
 
-Run against a fresh `supabase db reset` (T096). Pre-existing `MatchForm` "Data ou hora
+Run against a fresh `supabase db reset`. Pre-existing `MatchForm` "Data ou hora
 inválida" console noise on two feature-002 routes is unrelated (date parsing) and those
 tests pass.
 

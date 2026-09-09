@@ -93,7 +93,7 @@ export function ReviewScreen({ canFinalize, matchId, pendingCount, service }: Re
                   />
                 </label>
                 <label className="text-sm font-semibold text-foreground">
-                  Autor
+                  {event.event_type === 'SUBSTITUTION' ? 'Quem entra' : 'Autor'}
                   <select
                     className="ml-2 min-h-11 rounded-lg border bg-background px-2"
                     defaultValue={event.athlete_id}
@@ -107,7 +107,7 @@ export function ReviewScreen({ canFinalize, matchId, pendingCount, service }: Re
                   </select>
                 </label>
                 <label className="text-sm font-semibold text-foreground">
-                  Assistência / quem sai
+                  {event.event_type === 'SUBSTITUTION' ? 'Quem sai' : 'Assistência'}
                   <select
                     className="ml-2 min-h-11 rounded-lg border bg-background px-2"
                     defaultValue={event.target_athlete_id ?? ''}

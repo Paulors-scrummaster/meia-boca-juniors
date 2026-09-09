@@ -176,8 +176,11 @@ test('registrador: cronômetro, desfazer, buffer offline e gate de finalização
   await page.context().setOffline(true);
   state.online = false;
   await page.getByRole('button', { name: 'Cartão amarelo' }).click();
-  await page.getByLabel('Assistência / quem sai').selectOption({ label: '#10 Dez' });
+  // Substituição é um passo dedicado com papéis explícitos (M7): "Quem entra"
+  // fica com o #9 já selecionado; escolhe-se "Quem sai".
   await page.getByRole('button', { name: 'Substituição' }).click();
+  await page.getByLabel('Quem sai').selectOption({ label: '#10 Dez' });
+  await page.getByRole('button', { name: 'Registrar substituição' }).click();
   await expect(page.getByText(/pendência\(s\) de sincronização/)).toContainText('2');
 
   // Volta a conexão → a fila drena e o contador zera.

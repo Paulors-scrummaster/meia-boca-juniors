@@ -1,5 +1,9 @@
 // Feature 003 · US3 (Súmula Live) · T068
 // Botões de ação rápida — carimbam o minuto corrente do cronômetro (FR-4.2).
+// Gol / cartões: um toque. Substituição: exige os dois atletas com papéis
+// explícitos ("Quem entra" / "Quem sai"), então abre um passo dedicado (M7).
+// Não há mais ação de "Assistência" avulsa (H1): a assistência é o segundo
+// atleta do gol e vira `target_athlete_id`.
 
 import { useId, useState } from 'react';
 
@@ -26,6 +30,8 @@ interface QuickActionsProps {
   onLog: (input: QuickActionInput) => void;
 }
 
+const INSTANT_TYPES = LIVE_EVENT_TYPES.filter((type) => type !== 'SUBSTITUTION');
+
 export function QuickActions({ athletes, disabled = false, minute, onLog }: QuickActionsProps) {
   const athleteFieldId = useId();
   const targetFieldId = useId();
@@ -33,15 +39,17 @@ export function QuickActions({ athletes, disabled = false, minute, onLog }: Quic
   const [athleteId, setAthleteId] = useState('');
   const [targetAthleteId, setTargetAthleteId] = useState('');
   const [teamSide, setTeamSide] = useState<TeamSide>('MBJ');
+  const [subMode, setSubMode] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   function handle(eventType: LiveEventType) {
+    const isSub = eventType === 'SUBSTITUTION';
     if (!athleteId) {
-      setError('Escolha o atleta.');
+      setError(isSub ? 'Escolha quem entra.' : 'Escolha o atleta.');
       return;
     }
     if (requiresTargetAthlete(eventType) && !targetAthleteId) {
-      setError('Substituição precisa de quem sai.');
+      setError('Escolha quem sai.');
       return;
     }
     if (targetAthleteId && targetAthleteId === athleteId) {
@@ -53,9 +61,15 @@ export function QuickActions({ athletes, disabled = false, minute, onLog }: Quic
       athleteId,
       eventType,
       minute,
+      // athlete_id = quem entra (sub) / autor (gol, cartão);
+      // target_athlete_id = quem sai (sub) / assistência (gol).
       targetAthleteId: targetAthleteId || null,
       teamSide,
     });
+    if (isSub) {
+      setSubMode(false);
+      setTargetAthleteId('');
+    }
   }
 
   return (
@@ -67,7 +81,7 @@ export function QuickActions({ athletes, disabled = false, minute, onLog }: Quic
 
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
         <label className="text-sm font-semibold text-foreground" htmlFor={athleteFieldId}>
-          Atleta
+          {subMode ? 'Quem entra' : 'Atleta'}
           <select
             className="mt-1 min-h-11 w-full rounded-lg border bg-background px-2"
             disabled={disabled}
@@ -85,7 +99,7 @@ export function QuickActions({ athletes, disabled = false, minute, onLog }: Quic
         </label>
 
         <label className="text-sm font-semibold text-foreground" htmlFor={targetFieldId}>
-          Assistência / quem sai
+          {subMode ? 'Quem sai' : 'Assistência (opcional)'}
           <select
             className="mt-1 min-h-11 w-full rounded-lg border bg-background px-2"
             disabled={disabled}
@@ -106,7 +120,7 @@ export function QuickActions({ athletes, disabled = false, minute, onLog }: Quic
           Lado
           <select
             className="mt-1 min-h-11 w-full rounded-lg border bg-background px-2"
-            disabled={disabled}
+            disabled={disabled || subMode}
             id={sideFieldId}
             onChange={(event) => setTeamSide(event.target.value as TeamSide)}
             value={teamSide}
@@ -118,10 +132,10 @@ export function QuickActions({ athletes, disabled = false, minute, onLog }: Quic
       </div>
 
       <div className="mt-4 flex flex-wrap gap-2">
-        {LIVE_EVENT_TYPES.map((type) => (
+        {INSTANT_TYPES.map((type) => (
           <button
             className="min-h-11 rounded-lg bg-primary px-4 font-bold text-primary-foreground disabled:opacity-60"
-            disabled={disabled}
+            disabled={disabled || subMode}
             key={type}
             onClick={() => handle(type)}
             type="button"
@@ -129,7 +143,32 @@ export function QuickActions({ athletes, disabled = false, minute, onLog }: Quic
             {LIVE_EVENT_LABEL[type]}
           </button>
         ))}
+        <button
+          aria-pressed={subMode}
+          className={`min-h-11 rounded-lg border border-primary px-4 font-bold disabled:opacity-60 ${
+            subMode ? 'bg-primary text-primary-foreground' : 'text-primary'
+          }`}
+          disabled={disabled}
+          onClick={() => {
+            setError(null);
+            setSubMode((open) => !open);
+          }}
+          type="button"
+        >
+          {LIVE_EVENT_LABEL.SUBSTITUTION}
+        </button>
       </div>
+
+      {subMode ? (
+        <button
+          className="mt-3 min-h-11 rounded-lg bg-primary px-4 font-bold text-primary-foreground disabled:opacity-60"
+          disabled={disabled}
+          onClick={() => handle('SUBSTITUTION')}
+          type="button"
+        >
+          Registrar substituição
+        </button>
+      ) : null}
 
       {error ? <p className="mt-2 text-sm font-semibold text-destructive">{error}</p> : null}
     </section>

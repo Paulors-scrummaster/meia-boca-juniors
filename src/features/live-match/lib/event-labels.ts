@@ -3,6 +3,11 @@
 import type { LiveMatchEvent } from '@/features/live-match/api/live-match.service';
 import type { LiveEventType } from '@/features/live-match/lib/offline-queue';
 
+// Cobre todo o enum `live_event_type` do banco — inclusive `ASSIST` — para que o
+// feed / a revisão consigam rotular qualquer linha existente. `ASSIST` como
+// evento independente NÃO é mais criável pela UI (H1): a assistência entra
+// vinculada ao GOAL, via `target_athlete_id`, e é isso que `finalize_sumula`
+// consolida em `match_goals.assistant_athlete_id`.
 export const LIVE_EVENT_LABEL: Record<LiveEventType, string> = {
   ASSIST: 'Assistência',
   GOAL: 'Gol',
@@ -11,9 +16,12 @@ export const LIVE_EVENT_LABEL: Record<LiveEventType, string> = {
   YELLOW_CARD: 'Cartão amarelo',
 };
 
+/**
+ * Tipos que o Registrador pode criar pelo cronômetro (FR-4.2). Sem `ASSIST`
+ * avulso — a assistência é o `target_athlete_id` do gol.
+ */
 export const LIVE_EVENT_TYPES: LiveEventType[] = [
   'GOAL',
-  'ASSIST',
   'YELLOW_CARD',
   'RED_CARD',
   'SUBSTITUTION',
