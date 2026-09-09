@@ -5,23 +5,32 @@ import { mockAuthenticatedSession } from './support/auth-mock';
 /**
  * Verificação da barra lateral desktop (contracts/navigation-shell.md), User Story 2.
  * PRESIDENT+ATHLETE combinados são o "papel de maior alcance" (E-04): sozinho,
- * PRESIDENT vê 8 dos 10 itens — os dois exclusivos de ATHLETE exigem esse papel.
+ * PRESIDENT vê 11 dos 14 itens — os três exclusivos de ATHLETE exigem esse papel.
+ *
+ * O conjunto de itens é o vigente em data-model §3.2, estendido pela feature 003
+ * (Post-MVP Modules Expansion) com "Histórico & Conquistas", "Resenhas", "Minhas
+ * mensalidades" e "Financeiro" — ver a lista em `NavigationList.tsx` (contrato P-01).
  */
 const PRESIDENT_MAX_REACH = {
   role: 'PRESIDENT' as const,
   roles: ['PRESIDENT', 'ATHLETE'] as const,
 };
 
+// Ordem exata do DOM em `NavigationList.tsx` para o papel de maior alcance.
 const NAVIGATION_LABELS = [
   'Início',
   'Elenco',
   'Partidas',
   'Estatísticas',
+  'Histórico & Conquistas',
+  'Resenhas',
   'Mural',
   'Notificações',
   'Área do atleta',
   'Craque do Jogo',
+  'Minhas mensalidades',
   'Comissão técnica',
+  'Financeiro',
   'Administração',
 ];
 
@@ -108,7 +117,7 @@ test.describe('barra lateral desktop', () => {
     { height: 1080, width: 1920 },
     { height: 768, width: 1366 },
   ]) {
-    test(`mostra os 10 itens do papel de maior alcance sem rolagem em ${width}x${height}`, async ({
+    test(`expõe todos os itens do papel de maior alcance; topo e rodapé ficam fixos em ${width}x${height}`, async ({
       page,
     }) => {
       await page.setViewportSize({ width, height });
@@ -116,15 +125,40 @@ test.describe('barra lateral desktop', () => {
       await page.goto('/app/roster');
 
       const nav = sidebar(page).getByRole('navigation', { name: 'Navegação principal' });
-      for (const label of NAVIGATION_LABELS) {
-        await expect(nav.getByRole('link', { name: label })).toBeVisible();
-      }
+
+      // O conjunto exato é o definido pela feature (data-model §3.2 + feature 003).
       await expect(nav.getByRole('link')).toHaveCount(NAVIGATION_LABELS.length);
 
-      const overflows = await nav.evaluate((el) => el.scrollHeight > el.clientHeight + 1);
-      expect(overflows, 'a lista de itens não deve exigir rolagem interna nesta largura').toBe(
+      // Todo destino é alcançável — o corpo rola até ele quando necessário (o
+      // contrato navigation-shell §Estrutura: "apenas o corpo rola, e apenas
+      // quando o conteúdo excede a altura", FR-020 / E-02).
+      for (const label of NAVIGATION_LABELS) {
+        const link = nav.getByRole('link', { name: label });
+        await link.scrollIntoViewIfNeeded();
+        await expect(link).toBeVisible();
+      }
+
+      // Só o CORPO pode rolar. A barra lateral como um todo nunca rola, então
+      // topo (escudo) e rodapé ("Sair") permanecem fixos e visíveis mesmo com o
+      // corpo rolado.
+      const asideOverflows = await sidebar(page).evaluate(
+        (el) => el.scrollHeight > el.clientHeight + 1,
+      );
+      expect(asideOverflows, 'a barra lateral inteira nunca rola — topo e rodapé são fixos').toBe(
         false,
       );
+      await expect(sidebar(page).getByAltText('Escudo do MBJ')).toBeVisible();
+      await expect(sidebar(page).getByRole('button', { name: /Sair/ })).toBeVisible();
+
+      // Em altura de desktop cheia (1080) os 14 itens cabem sem rolagem interna;
+      // em 768 o corpo pode rolar — comportamento contratado, não regressão.
+      const bodyOverflows = await nav.evaluate((el) => el.scrollHeight > el.clientHeight + 1);
+      if (height >= 1000) {
+        expect(
+          bodyOverflows,
+          'com altura de desktop cheia o corpo acomoda todos os itens sem rolagem',
+        ).toBe(false);
+      }
     });
   }
 
@@ -172,12 +206,13 @@ test.describe('gaveta de navegação mobile', () => {
     await expect(menuButton(page)).toHaveAttribute('aria-expanded', 'false');
   });
 
-  test('abre com showModal, expõe os 10 itens e reflete o estado em aria-expanded', async ({
+  test('abre com showModal, expõe todos os itens e reflete o estado em aria-expanded', async ({
     page,
   }) => {
     await menuButton(page).click();
     await expect(menuButton(page)).toHaveAttribute('aria-expanded', 'true');
     await expect(drawerNav(page)).toBeVisible();
+    await expect(drawerNav(page).getByRole('link')).toHaveCount(NAVIGATION_LABELS.length);
     for (const label of NAVIGATION_LABELS) {
       await expect(drawerNav(page).getByRole('link', { name: label })).toBeVisible();
     }
