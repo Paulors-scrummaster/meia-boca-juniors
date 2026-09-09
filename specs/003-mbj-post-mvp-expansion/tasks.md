@@ -155,8 +155,8 @@ reviewed data exactly, idempotent on retry. (quickstart Cenários 3 & 4)
 - [X] T051 [P] [US3] pgTAP `supabase/tests/003_finalize_sumula.test.sql`: `finalize_sumula` is atomic + idempotent (`command_results`), derives scores from non-undone events, writes one `match_consolidations` revision + `match_goals` + `match_cards` + `match_substitutions` + `match_goalkeeper_assignments` matching the payload exactly (SC-004), sets `status=FINALIZED`, opens voting, blocks with `PENDING_OFFLINE_EVENTS`
 - [X] T052 [P] [US3] Unit `tests/unit/match-clock.test.ts`: `src/features/live-match/lib/match-clock.ts` start / elapsed-minute / pause-resume for half-time
 - [X] T053 [P] [US3] Unit `tests/unit/offline-queue.test.ts`: `src/features/live-match/lib/offline-queue.ts` IndexedDB store add / dedupe by `client_event_id` / drain in `created_at` order / empty-state
-- [ ] T054 [P] [US3] E2E `tests/e2e/live-match-recording.spec.ts`: quickstart Cenário 3 (live, undo, offline buffer + gate, recorder cannot finalize)
-- [ ] T055 [P] [US3] E2E `tests/e2e/live-match-finalize.spec.ts`: quickstart Cenário 4 (review edit, committee finalize, 0 % divergence, idempotent retry, goalkeeper-substitution voids clean sheet)
+- [X] T054 [P] [US3] E2E `tests/e2e/live-match-recording.spec.ts`: quickstart Cenário 3 (live, undo, offline buffer + gate, recorder cannot finalize)
+- [X] T055 [P] [US3] E2E `tests/e2e/live-match-finalize.spec.ts`: quickstart Cenário 4 (review edit, committee finalize, 0 % divergence, idempotent retry, goalkeeper-substitution voids clean sheet)
 
 ### Implementation for User Story 3
 
@@ -172,11 +172,11 @@ reviewed data exactly, idempotent on retry. (quickstart Cenários 3 & 4)
 - [X] T065 [P] [US3] `src/features/live-match/lib/offline-queue.ts` (IndexedDB single store `pending_events`, `online` listener drain, pending count)
 - [X] T066 [P] [US3] `src/features/live-match/api/*.ts` (RPC wrappers incl. `client_event_id` generation)
 - [X] T067 [P] [US3] `src/features/live-match/queries/*.ts` incl. `useLiveSumulaFeed` (Supabase Realtime Postgres Changes subscription, ignores `undone`)
-- [ ] T068 [US3] `src/features/live-match/components/`: `Stopwatch.tsx`, `QuickActions.tsx` (GOAL/ASSIST/YELLOW/RED/SUBSTITUTION with current minute + athlete picker), `UndoButton.tsx` (floating, 30 s window)
-- [ ] T069 [US3] `src/features/live-match/components/ReviewScreen.tsx`: editable minute / author / assist author; "Confirmar e Finalizar Súmula" disabled while offline queue non-empty or user lacks committee/admin role
-- [ ] T070 [US3] `src/features/live-match/components/SpectatorFeed.tsx`: real-time event list for athletes/viewers (< 2 s), undone events hidden
-- [ ] T071 [US3] `src/features/live-match/pages/`: `LiveRecordingPage.tsx` + `SumulaReviewPage.tsx`, wired into `/app/partidas/:matchId/sumula`
-- [ ] T072 [US3] Add the pre-match "registrar ao vivo" toggle + recorder + starting-goalkeeper picker to the match detail screen in `src/features/matches/`
+- [X] T068 [US3] `src/features/live-match/components/`: `Stopwatch.tsx`, `QuickActions.tsx` (GOAL/ASSIST/YELLOW/RED/SUBSTITUTION with current minute + athlete picker), `UndoButton.tsx` (floating, 30 s window)
+- [X] T069 [US3] `src/features/live-match/components/ReviewScreen.tsx`: editable minute / author / assist author; "Confirmar e Finalizar Súmula" disabled while offline queue non-empty or user lacks committee/admin role
+- [X] T070 [US3] `src/features/live-match/components/SpectatorFeed.tsx`: real-time event list for athletes/viewers (< 2 s), undone events hidden
+- [X] T071 [US3] `src/features/live-match/pages/`: `LiveRecordingPage.tsx` + `SumulaReviewPage.tsx`, wired into `/app/partidas/:matchId/sumula`
+- [X] T072 [US3] Add the pre-match "registrar ao vivo" toggle + recorder + starting-goalkeeper picker to the match detail screen in `src/features/matches/`
 
 **Checkpoint**: US1, US2, US3 each independently functional. Trophies are not yet awarded on finalize (stub) — added in US4.
 

@@ -29,6 +29,7 @@ import { createMatchesService, matchKeys } from '@/features/matches/api/matches.
 import { MatchForm } from '@/features/matches/components/MatchForm';
 import { MatchDetailPage } from '@/features/matches/pages/MatchDetailPage';
 import { MatchesPage } from '@/features/matches/pages/MatchesPage';
+import { LiveRecordingPage } from '@/features/live-match/pages/LiveRecordingPage';
 import { LineupEditorPage } from '@/features/lineups/pages/LineupEditorPage';
 import { PublishedLineupPage } from '@/features/lineups/pages/PublishedLineupPage';
 import { MvpVotingPage } from '@/features/mvp-voting/pages/MvpVotingPage';
@@ -189,6 +190,18 @@ function SocialEventDetailRoutePage() {
   );
 }
 
+function LiveSumulaRoutePage() {
+  const { isAal2, roles, user } = useAuth();
+  const { matchId = '' } = useParams();
+  return (
+    <LiveRecordingPage
+      canManage={isAal2 && roles.some((role) => role === 'COACH' || role === 'PRESIDENT')}
+      currentUserId={user?.id ?? ''}
+      matchId={matchId}
+    />
+  );
+}
+
 function EditMatchRoutePage() {
   const { matchId = '' } = useParams();
   const service = createMatchesService();
@@ -272,6 +285,7 @@ const featureRoutes: RouteObject[] = [
               },
               { path: 'resenhas', element: <SocialEventsListRoutePage /> },
               { path: 'resenhas/:eventId', element: <SocialEventDetailRoutePage /> },
+              { path: 'partidas/:matchId/sumula', element: <LiveSumulaRoutePage /> },
               { path: 'notices', element: <NoticesRoutePage /> },
               { path: 'notification-preferences', element: <PushPermissionCard /> },
               {
@@ -316,15 +330,6 @@ const featureRoutes: RouteObject[] = [
                       {
                         path: 'staff/matches/:matchId/lineup',
                         element: <LineupEditorRoutePage />,
-                      },
-                      {
-                        path: 'partidas/:matchId/sumula',
-                        element: (
-                          <Placeholder
-                            title="Súmula ao vivo"
-                            description="Cronômetro, registro de eventos e revisão pós-jogo. Em construção."
-                          />
-                        ),
                       },
                     ],
                   },

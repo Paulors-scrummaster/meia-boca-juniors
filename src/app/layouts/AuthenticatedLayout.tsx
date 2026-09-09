@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 
 import { MobileTopBar } from '@/app/layouts/navigation/MobileTopBar';
 import { NavigationDrawer } from '@/app/layouts/navigation/NavigationDrawer';
@@ -28,6 +28,13 @@ export function AuthenticatedLayout({
 }: AuthenticatedLayoutProps = {}) {
   const { roles } = useAuth();
   const { isOnline } = useConnectivity();
+  const { pathname } = useLocation();
+
+  // Exceção aprovada ao Princípio V (plan.md, Complexity Tracking): a tela de
+  // súmula ao vivo continua interativa offline — o buffer IndexedDB dela é o
+  // único write offline permitido. Todo o resto do app segue read-only offline.
+  const isLiveSumulaRoute = /^\/app\/partidas\/[^/]+\/sumula$/.test(pathname);
+  const writesBlocked = !isOnline && !isLiveSumulaRoute;
   const [isDrawerOpen, setDrawerOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -112,9 +119,9 @@ export function AuthenticatedLayout({
       >
         <OfflineIndicator />
         <fieldset
-          aria-describedby={!isOnline ? 'authenticated-offline-write-block' : undefined}
+          aria-describedby={writesBlocked ? 'authenticated-offline-write-block' : undefined}
           className="m-0 min-w-0 border-0 p-0"
-          disabled={!isOnline}
+          disabled={writesBlocked}
         >
           <legend className="sr-only">Conteúdo autenticado</legend>
           {pendingActionsService ? (
@@ -124,7 +131,7 @@ export function AuthenticatedLayout({
           )}
           <Outlet />
         </fieldset>
-        {!isOnline ? (
+        {writesBlocked ? (
           <p
             className="mt-4 text-sm font-medium text-muted-foreground"
             id="authenticated-offline-write-block"

@@ -14,7 +14,6 @@ import {
   type LogLiveEventInput,
 } from '@/features/live-match/api/live-match.service';
 import {
-  attachOnlineDrain,
   createOfflineQueue,
   type EnqueueInput,
   type OfflineQueue,
@@ -31,6 +30,10 @@ export function useLiveMatchSetup(matchId: string, service: LiveMatchService = d
     queryFn: () => service.getSetup(matchId),
     queryKey: liveMatchKeys.setup(matchId),
   });
+}
+
+export function useLiveRoster(service: LiveMatchService = defaultService) {
+  return useQuery({ queryFn: () => service.listRoster(), queryKey: liveMatchKeys.roster() });
 }
 
 export function useLiveSumulaFeed(matchId: string, service: LiveMatchService = defaultService) {
@@ -108,13 +111,17 @@ export function useLiveOfflineQueue(matchId: string, service: LiveMatchService =
 
   useEffect(() => {
     refreshCount();
-    const detach = attachOnlineDrain(queue, async (event) => {
-      await send(event);
-    });
-    return () => {
-      detach();
+    if (typeof window === 'undefined') return;
+    const handler = () => {
+      void (async () => {
+        const result = await queue.drain(send);
+        refreshCount();
+        if (result.sent > 0) invalidate();
+      })();
     };
-  }, [queue, refreshCount, send]);
+    window.addEventListener('online', handler);
+    return () => window.removeEventListener('online', handler);
+  }, [invalidate, queue, refreshCount, send]);
 
   const enqueue = useCallback(
     async (event: EnqueueInput) => {
@@ -137,7 +144,10 @@ export function useLiveOfflineQueue(matchId: string, service: LiveMatchService =
 export function useLogLiveEvent(matchId: string, service: LiveMatchService = defaultService) {
   const invalidate = useFeedInvalidation(matchId);
   return useMutation({
+    // A súmula precisa responder ao clique mesmo sem rede — a falha vira enfileiramento
+    // offline no chamador (R8), então não deixamos o react-query pausar a mutação.
     mutationFn: (input: LogLiveEventInput) => service.logEvent(input),
+    networkMode: 'always',
     onSuccess: invalidate,
   });
 }

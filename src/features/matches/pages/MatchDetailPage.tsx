@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { PresenceResponsePanel } from '@/features/attendance/components/PresenceResponsePanel';
 import { useAttendanceRealtime } from '@/features/attendance/hooks/use-attendance-realtime';
+import { LiveRecordingToggle } from '@/features/live-match/components/LiveRecordingToggle';
 import {
   createMatchesService,
   matchKeys,
@@ -85,6 +86,9 @@ export function MatchDetailPage({
           </div>
         ) : null}
       </article>
+      {canManage && match.status === 'SCHEDULED' ? (
+        <LiveRecordingToggle matchId={match.id} />
+      ) : null}
       {isAthlete ? <PresenceResponsePanel matchId={match.id} /> : null}
     </div>
   );

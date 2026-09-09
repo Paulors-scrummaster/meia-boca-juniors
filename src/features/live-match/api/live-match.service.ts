@@ -48,6 +48,14 @@ export interface FinalizeResult {
   trophiesAwarded: { athleteId: string; trophyCode: string }[];
 }
 
+export interface RosterAthlete {
+  id: string;
+  primaryPosition: string;
+  shirtName: string;
+  shirtNumber: number;
+  userId: string | null;
+}
+
 export interface LiveMatchService {
   amendEvent(input: {
     athleteId?: string;
@@ -66,6 +74,7 @@ export interface LiveMatchService {
   finalize(input: { matchId: string; pendingOfflineEvents: number }): Promise<FinalizeResult>;
   getSetup(matchId: string): Promise<LiveMatchSetup | null>;
   listEvents(matchId: string): Promise<LiveMatchEvent[]>;
+  listRoster(): Promise<RosterAthlete[]>;
   logEvent(input: LogLiveEventInput): Promise<LoggedLiveEvent>;
   undoEvent(matchId: string): Promise<UndoneLiveEvent>;
 }
@@ -73,6 +82,7 @@ export interface LiveMatchService {
 export const liveMatchKeys = {
   all: ['live-match'] as const,
   feed: (matchId: string) => ['live-match', 'feed', matchId] as const,
+  roster: () => ['live-match', 'roster'] as const,
   setup: (matchId: string) => ['live-match', 'setup', matchId] as const,
 };
 
@@ -192,6 +202,21 @@ export function createLiveMatchService(
         .order('recorded_at', { ascending: true });
       if (error) throw mapLiveError(error);
       return data ?? [];
+    },
+    async listRoster() {
+      const { data, error } = await client
+        .from('athletes')
+        .select('id, shirt_name, shirt_number, primary_position, user_id')
+        .eq('status', 'ACTIVE')
+        .order('shirt_number', { ascending: true });
+      if (error) throw mapLiveError(error);
+      return (data ?? []).map((row) => ({
+        id: row.id,
+        primaryPosition: row.primary_position,
+        shirtName: row.shirt_name,
+        shirtNumber: row.shirt_number,
+        userId: row.user_id,
+      }));
     },
     async logEvent(input) {
       const clientEventId = input.clientEventId ?? newId();
