@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 20" aria-hidden="true">
+  <!--
+    Bandeira do Brasil — símbolo nacional (domínio público, Lei 5.700/1971).
+    Exceção deliberada ao sistema de tokens: as cores são as oficiais da bandeira,
+    exigidas por FR-019c. Versão simplificada (sem legenda "ORDEM E PROGRESSO").
+  -->
+  <rect width="28" height="20" fill="#009c3b" />
+  <path d="M14 2 L26 10 L14 18 L2 10 Z" fill="#ffdf00" />
+  <circle cx="14" cy="10" r="4.2" fill="#002776" />
+  <path d="M9.9 8.6 A5 5 0 0 0 18.1 11.9 A6.2 6.2 0 0 1 9.9 8.6 Z" fill="#fff" />
+</svg>

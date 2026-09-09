@@ -59,3 +59,23 @@ describe('paridade de tokens entre a folha de estilo e a configuração do clube
     expect(clubConfig.theme.input).not.toBe(clubConfig.theme.border);
   });
 });
+
+describe('tipografia de display (FR-019f, T088b)', () => {
+  const normalize = (value: string) => value.replace(/\s+/g, ' ').trim();
+
+  it('espelha o token --font-display de src/index.css em clubConfig.typography.display', () => {
+    const declared = /--font-display:\s*([^;]+);/.exec(themeStylesheet)?.[1];
+    expect(declared, '--font-display ausente em src/index.css').toBeDefined();
+    expect(normalize(declared ?? '')).toBe(normalize(clubConfig.typography.display));
+  });
+
+  it('auto-hospeda a família de display com font-display: swap e woff2 local', () => {
+    const faces = [...themeStylesheet.matchAll(/@font-face\s*\{([\s\S]*?)\}/g)].map((m) => m[1]);
+    expect(faces.length).toBeGreaterThanOrEqual(1);
+    for (const face of faces) {
+      expect(face).toMatch(/font-display:\s*swap/);
+      expect(face).toMatch(/url\(['"]\/fonts\/[^)]+\.woff2['"]\)/);
+      expect(face).not.toMatch(/https?:/);
+    }
+  });
+});

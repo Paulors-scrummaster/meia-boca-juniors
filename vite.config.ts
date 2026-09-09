@@ -63,6 +63,8 @@ export default defineConfig(({ mode }) => {
           'brand/mbj-icon-192.png',
           'brand/mbj-icon-512.png',
           'brand/mbj-icon-maskable-512.png',
+          'fonts/rajdhani-600.woff2',
+          'fonts/rajdhani-700.woff2',
         ],
         injectRegister: false,
         manifest: {
