@@ -76,7 +76,7 @@ reverse → back to `OVERDUE`; cancel another → leaves badges and totals. (qui
 - [X] T014 [P] [US1] pgTAP `supabase/tests/003_finance_generation.test.sql`: monthly generation creates one `MONTHLY_AUTOMATIC` charge per non-`INACTIVE` athlete, `due_date` = day 10, idempotent on re-run (`unique (athlete_id, period)`), skips period + indefinite exemptions, `NO_ACTIVE_SEASON` guard
 - [X] T015 [P] [US1] pgTAP `supabase/tests/003_finance_rls.test.sql`: `ATHLETE` reads only own charges; `PRESIDENT` reads all; non-president write attempts are `FORBIDDEN`; no matches/lineups/voting policy references `athlete_charges` (SC-006)
 - [X] T016 [P] [US1] Unit `tests/unit/finance-format.test.ts`: `pt-BR` currency + `YYYY-MM` period + due-date formatting for `src/features/finance/lib/currency.ts`
-- [ ] T017 [P] [US1] E2E `tests/e2e/finance.spec.ts`: quickstart Cenário 1 end to end (generate, idempotent re-run, exempt, badge non-blocking, settle, reverse, cancel)
+- [X] T017 [P] [US1] E2E `tests/e2e/finance.spec.ts`: quickstart Cenário 1 end to end (generate, idempotent re-run, exempt, badge non-blocking, settle, reverse, cancel)
 
 ### Implementation for User Story 1
 
@@ -92,10 +92,10 @@ reverse → back to `OVERDUE`; cancel another → leaves badges and totals. (qui
 - [X] T027 [P] [US1] `src/features/finance/api/charges.ts`: service-layer wrappers over the RPCs and reads, normalized `{ data, error }`
 - [X] T028 [P] [US1] `src/features/finance/queries/`: TanStack Query hooks `useFinanceOverview`, `useAthleteCharges`, `useDelinquencyBadge`, plus mutation hooks with idempotency-key generation
 - [X] T029 [P] [US1] `src/features/finance/components/DelinquencyBadge.tsx`: discreet "Pendente"/"Em Atraso" chip, Dark Navy tokens, WCAG AA contrast/labels
-- [ ] T030 [US1] `src/features/finance/components/`: `ChargeList.tsx`, `SettleDialog.tsx`, `ManualChargeForm.tsx`, `AdjustAmountDialog.tsx`, `ExemptionDialog.tsx` (React Hook Form + Zod)
+- [X] T030 [US1] `src/features/finance/components/`: `ChargeList.tsx`, `SettleDialog.tsx`, `ManualChargeForm.tsx`, `AdjustAmountDialog.tsx`, `ExemptionDialog.tsx` (React Hook Form + Zod)
 - [X] T031 [US1] `src/features/finance/pages/FinancePanelPage.tsx`: directorate panel (list + filters + actions + "rodar geração agora"), wired into the `/app/financeiro` route
 - [X] T032 [US1] Integrate `DelinquencyBadge` into the athlete profile in `src/features/roster/` (read-only, never gates navigation)
-- [ ] T033 [US1] `src/features/finance/pages/MyChargesPage.tsx` (or profile section): athlete view of own charges only
+- [X] T033 [US1] `src/features/finance/pages/MyChargesPage.tsx` (or profile section): athlete view of own charges only
 
 **Checkpoint**: US1 fully functional and independently testable — this is the shippable MVP.
 

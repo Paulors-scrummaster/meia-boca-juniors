@@ -85,6 +85,7 @@ describe('AuthenticatedLayout', () => {
       'Notificações',
       'Área do atleta',
       'Craque do Jogo',
+      'Minhas mensalidades',
       'Comissão técnica',
       'Financeiro',
       'Administração',

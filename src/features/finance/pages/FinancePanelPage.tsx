@@ -1,34 +1,23 @@
 import { useState } from 'react';
 
-import { DelinquencyBadge } from '@/features/finance/components/DelinquencyBadge';
 import {
   createFinanceService,
   type AthleteCharge,
   type FinanceService,
 } from '@/features/finance/api/charges.service';
+import { ChargeList } from '@/features/finance/components/ChargeList';
+import { DelinquencyBadge } from '@/features/finance/components/DelinquencyBadge';
+import { ExemptionDialog } from '@/features/finance/components/ExemptionDialog';
+import { ManualChargeForm } from '@/features/finance/components/ManualChargeForm';
 import { formatBrl } from '@/features/finance/lib/currency';
 import {
   useAllCharges,
-  useCancelCharge,
   useFinanceOverview,
-  useReverseSettlement,
   useRunMonthlyGeneration,
   useSetDefaultDuesAmount,
-  useSettleCharge,
 } from '@/features/finance/queries/charges.queries';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/feedback';
 import { mapToAppError } from '@/shared/lib/app-error';
-import { formatSaoPauloDate } from '@/shared/lib/date-time';
-import type { Database } from '@/shared/types/database.generated';
-
-type ChargeStatus = Database['public']['Enums']['charge_status'];
-
-const STATUS_LABEL: Record<ChargeStatus, string> = {
-  CANCELLED: 'Cancelada',
-  OVERDUE: 'Em atraso',
-  PAID: 'Paga',
-  PENDING: 'Pendente',
-};
 
 interface FinancePanelPageProps {
   service?: FinanceService;
@@ -39,13 +28,11 @@ export function FinancePanelPage({ service = createFinanceService() }: FinancePa
   const charges = useAllCharges(service);
   const generate = useRunMonthlyGeneration(service);
   const setAmount = useSetDefaultDuesAmount(service);
-  const settle = useSettleCharge(service);
-  const reverse = useReverseSettlement(service);
-  const cancel = useCancelCharge(service);
 
   const [amount, setAmountValue] = useState('');
   const [feedback, setFeedback] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [exemptionOpen, setExemptionOpen] = useState(false);
 
   function run<T>(promise: Promise<T>, onOk: (result: T) => void) {
     setActionError(null);
@@ -53,12 +40,25 @@ export function FinancePanelPage({ service = createFinanceService() }: FinancePa
     promise.then(onOk).catch((error) => setActionError(mapToAppError(error).message));
   }
 
+  const refetchAll = () => {
+    void overview.refetch();
+    void charges.refetch();
+  };
+
   const chargesByAthlete = new Map<string, AthleteCharge[]>();
   for (const charge of charges.data ?? []) {
     const list = chargesByAthlete.get(charge.athlete_id) ?? [];
     list.push(charge);
     chargesByAthlete.set(charge.athlete_id, list);
   }
+
+  const athletes = (overview.data ?? [])
+    .filter((row): row is typeof row & { athlete_id: string } => row.athlete_id != null)
+    .map((row) => ({
+      fullName: row.full_name ?? 'Atleta',
+      id: row.athlete_id,
+      shirtNumber: row.shirt_number,
+    }));
 
   return (
     <div className="space-y-6">
@@ -109,9 +109,23 @@ export function FinancePanelPage({ service = createFinanceService() }: FinancePa
           >
             Gerar mensalidades do mês
           </button>
+          <button
+            className="min-h-11 rounded-lg border border-border px-4 font-semibold text-foreground"
+            onClick={() => setExemptionOpen(true)}
+            type="button"
+          >
+            Conceder isenção
+          </button>
         </div>
         {feedback ? <p className="mt-3 text-sm text-success">{feedback}</p> : null}
         {actionError ? <p className="mt-3 text-sm text-destructive">{actionError}</p> : null}
+      </section>
+
+      <section className="rounded-xl border bg-card p-5">
+        <h2 className="font-bold text-foreground">Cobrança avulsa</h2>
+        <div className="mt-3">
+          <ManualChargeForm athletes={athletes} onDone={refetchAll} service={service} />
+        </div>
       </section>
 
       {overview.isPending || charges.isPending ? (
@@ -128,98 +142,46 @@ export function FinancePanelPage({ service = createFinanceService() }: FinancePa
           {(overview.data ?? [])
             .filter((row): row is typeof row & { athlete_id: string } => row.athlete_id != null)
             .map((row) => (
-            <li key={row.athlete_id} className="rounded-xl border bg-card p-5">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="font-bold text-foreground">
-                    {row.shirt_number != null ? `#${row.shirt_number} ` : ''}
-                    {row.full_name}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Pendente {formatBrl(row.pending_amount ?? 0)} · Em atraso{' '}
-                    {formatBrl(row.overdue_amount ?? 0)} · Pago na temporada{' '}
-                    {formatBrl(row.paid_active_season_amount ?? 0)}
-                  </p>
+              <li key={row.athlete_id} className="rounded-xl border bg-card p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-bold text-foreground">
+                      {row.shirt_number != null ? `#${row.shirt_number} ` : ''}
+                      {row.full_name}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Pendente {formatBrl(row.pending_amount ?? 0)} · Em atraso{' '}
+                      {formatBrl(row.overdue_amount ?? 0)} · Pago na temporada{' '}
+                      {formatBrl(row.paid_active_season_amount ?? 0)}
+                    </p>
+                  </div>
+                  <DelinquencyBadge value={row.badge as 'NONE' | 'PENDING' | 'OVERDUE'} />
                 </div>
-                <DelinquencyBadge value={row.badge as 'NONE' | 'PENDING' | 'OVERDUE'} />
-              </div>
 
-              <ul className="mt-3 divide-y divide-border border-t border-border">
-                {(chargesByAthlete.get(row.athlete_id) ?? []).map((charge) => (
-                  <li
-                    key={charge.id}
-                    className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm"
-                  >
-                    <span className="text-foreground">
-                      {formatBrl(charge.amount)} · vence {formatSaoPauloDate(charge.due_date)} ·{' '}
-                      <span className="text-muted-foreground">
-                        {STATUS_LABEL[charge.status]}
-                        {charge.period ? ` (${charge.period})` : ''}
-                      </span>
-                    </span>
-                    <span className="flex gap-2">
-                      {charge.status === 'PENDING' || charge.status === 'OVERDUE' ? (
-                        <button
-                          className="min-h-9 rounded-lg border border-primary px-3 font-semibold text-primary"
-                          onClick={() =>
-                            run(
-                              settle.mutateAsync({
-                                chargeId: charge.id,
-                                reason: 'Baixa manual após conferência do comprovante.',
-                              }),
-                              () => setFeedback('Cobrança baixada.'),
-                            )
-                          }
-                          type="button"
-                        >
-                          Dar baixa
-                        </button>
-                      ) : null}
-                      {charge.status === 'PAID' ? (
-                        <button
-                          className="min-h-9 rounded-lg border border-border px-3 font-semibold text-foreground"
-                          onClick={() =>
-                            run(
-                              reverse.mutateAsync({
-                                chargeId: charge.id,
-                                reason: 'Estorno de baixa lançada por engano.',
-                              }),
-                              () => setFeedback('Baixa estornada.'),
-                            )
-                          }
-                          type="button"
-                        >
-                          Estornar
-                        </button>
-                      ) : null}
-                      {charge.status !== 'CANCELLED' ? (
-                        <button
-                          className="min-h-9 rounded-lg border border-border px-3 font-semibold text-muted-foreground"
-                          onClick={() =>
-                            run(
-                              cancel.mutateAsync({
-                                chargeId: charge.id,
-                                reason: 'Cobrança cancelada pela diretoria.',
-                              }),
-                              () => setFeedback('Cobrança cancelada.'),
-                            )
-                          }
-                          type="button"
-                        >
-                          Cancelar
-                        </button>
-                      ) : null}
-                    </span>
-                  </li>
-                ))}
-                {(chargesByAthlete.get(row.athlete_id) ?? []).length === 0 ? (
-                  <li className="py-2 text-sm text-muted-foreground">Sem cobranças.</li>
-                ) : null}
-              </ul>
-            </li>
-          ))}
+                <div className="mt-3">
+                  <ChargeList
+                    charges={chargesByAthlete.get(row.athlete_id) ?? []}
+                    onChanged={refetchAll}
+                    service={service}
+                  />
+                </div>
+              </li>
+            ))}
         </ul>
       )}
+
+      {exemptionOpen ? (
+        <ExemptionDialog
+          athletes={athletes}
+          onClose={() => setExemptionOpen(false)}
+          onDone={() => {
+            setExemptionOpen(false);
+            setFeedback('Isenção concedida.');
+          }}
+          open
+          service={service}
+        />
+      ) : null}
     </div>
   );
 }

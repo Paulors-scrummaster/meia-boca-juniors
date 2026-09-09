@@ -14,6 +14,7 @@ import {
 } from '@/app/router/guards';
 import { RoleAdministrationPage } from '@/features/auth/components/RoleManager';
 import { FinancePanelPage } from '@/features/finance/pages/FinancePanelPage';
+import { MyChargesPage } from '@/features/finance/pages/MyChargesPage';
 import { CallUpManager } from '@/features/attendance/components/CallUpManager';
 import { PresenceResponsePanel } from '@/features/attendance/components/PresenceResponsePanel';
 import { AttendanceDashboardPage } from '@/features/attendance/pages/AttendanceDashboardPage';
@@ -278,6 +279,7 @@ const featureRoutes: RouteObject[] = [
                   },
                   { path: 'matches/:matchId/attendance', element: <AthleteAttendanceRoutePage /> },
                   { path: 'mvp-voting', element: <MvpVotingPage /> },
+                  { path: 'financeiro', element: <MyChargesPage /> },
                 ],
               },
               {

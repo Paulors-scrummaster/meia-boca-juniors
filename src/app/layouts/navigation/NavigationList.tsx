@@ -12,6 +12,7 @@ import {
   Trophy,
   UserCircle,
   Users,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
@@ -67,6 +68,13 @@ const NAVIGATION_ITEMS: readonly NavigationItem[] = [
     icon: Trophy,
     label: 'Craque do Jogo',
     to: '/app/athlete/mvp-voting',
+    visibleFor: ['ATHLETE'],
+  },
+  {
+    end: false,
+    icon: Wallet,
+    label: 'Minhas mensalidades',
+    to: '/app/athlete/financeiro',
     visibleFor: ['ATHLETE'],
   },
   {
