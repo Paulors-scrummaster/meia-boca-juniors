@@ -13,6 +13,7 @@ import {
   RoleRouteGuard,
 } from '@/app/router/guards';
 import { RoleAdministrationPage } from '@/features/auth/components/RoleManager';
+import { FinancePanelPage } from '@/features/finance/pages/FinancePanelPage';
 import { CallUpManager } from '@/features/attendance/components/CallUpManager';
 import { PresenceResponsePanel } from '@/features/attendance/components/PresenceResponsePanel';
 import { AttendanceDashboardPage } from '@/features/attendance/pages/AttendanceDashboardPage';
@@ -324,15 +325,7 @@ const featureRoutes: RouteObject[] = [
                     element: <Aal2RouteGuard />,
                     children: [
                       { path: 'admin', element: <RoleAdministrationPage /> },
-                      {
-                        path: 'financeiro',
-                        element: (
-                          <Placeholder
-                            title="Financeiro"
-                            description="Mensalidades, cobranças e inadimplência do elenco. Em construção."
-                          />
-                        ),
-                      },
+                      { path: 'financeiro', element: <FinancePanelPage /> },
                       { path: 'admin/roster/new', element: <CreateAthletePage /> },
                       { path: 'admin/roster/:athleteId/edit', element: <EditAthletePage /> },
                       {

@@ -3,6 +3,8 @@ import { Link, useParams } from 'react-router-dom';
 
 import type { AuthService } from '@/features/auth/api/auth.service';
 import { InvitationManager } from '@/features/auth/components/InvitationManager';
+import { DelinquencyBadge } from '@/features/finance/components/DelinquencyBadge';
+import { useDelinquencyBadge } from '@/features/finance/queries/charges.queries';
 import type { RosterService } from '@/features/roster/api/roster.service';
 import { AthleteAvatar } from '@/features/roster/components/AthleteAvatar';
 import { useAthlete } from '@/features/roster/queries/roster.queries';
@@ -27,6 +29,7 @@ export function AthleteProfilePage({
   const params = useParams();
   const id = athleteId ?? params.athleteId ?? '';
   const query = useAthlete(id, service);
+  const delinquency = useDelinquencyBadge(id);
   if (query.isPending) return <LoadingState label="Carregando ficha esportiva" />;
   if (query.isError)
     return (
@@ -54,8 +57,11 @@ export function AthleteProfilePage({
             url={athlete.avatar_url}
           />
           <div className="flex-1">
-            <span className="rounded-full bg-muted px-3 py-1 text-xs font-bold">
-              {domainLabels.athleteStatus[athlete.status]}
+            <span className="inline-flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-muted px-3 py-1 text-xs font-bold">
+                {domainLabels.athleteStatus[athlete.status]}
+              </span>
+              <DelinquencyBadge value={delinquency.data} />
             </span>
             <h1 className="mt-3 text-3xl font-black">{athlete.full_name}</h1>
             <p className="mt-1 text-lg text-muted-foreground">

@@ -75,7 +75,7 @@ reverse → back to `OVERDUE`; cancel another → leaves badges and totals. (qui
 - [X] T013 [P] [US1] pgTAP `supabase/tests/003_finance_charges.test.sql`: charge state machine (`PENDING⇄OVERDUE`, `→PAID`, `PAID→PENDING/OVERDUE`, `→CANCELLED`), forbidden transitions raise `CHARGE_LOCKED`, every transition writes an audit row with actor/reason
 - [X] T014 [P] [US1] pgTAP `supabase/tests/003_finance_generation.test.sql`: monthly generation creates one `MONTHLY_AUTOMATIC` charge per non-`INACTIVE` athlete, `due_date` = day 10, idempotent on re-run (`unique (athlete_id, period)`), skips period + indefinite exemptions, `NO_ACTIVE_SEASON` guard
 - [X] T015 [P] [US1] pgTAP `supabase/tests/003_finance_rls.test.sql`: `ATHLETE` reads only own charges; `PRESIDENT` reads all; non-president write attempts are `FORBIDDEN`; no matches/lineups/voting policy references `athlete_charges` (SC-006)
-- [ ] T016 [P] [US1] Unit `tests/unit/finance-format.test.ts`: `pt-BR` currency + `YYYY-MM` period + due-date formatting for `src/features/finance/lib/currency.ts`
+- [X] T016 [P] [US1] Unit `tests/unit/finance-format.test.ts`: `pt-BR` currency + `YYYY-MM` period + due-date formatting for `src/features/finance/lib/currency.ts`
 - [ ] T017 [P] [US1] E2E `tests/e2e/finance.spec.ts`: quickstart Cenário 1 end to end (generate, idempotent re-run, exempt, badge non-blocking, settle, reverse, cancel)
 
 ### Implementation for User Story 1
@@ -88,13 +88,13 @@ reverse → back to `OVERDUE`; cancel another → leaves badges and totals. (qui
 - [X] T023 [US1] Migration `supabase/migrations/20260908130600_finance_cron.sql`: `run_monthly_dues_generation(period, idempotency_key)` RPC + `private.generate_monthly_dues()` + `private.mark_overdue_charges()` + `cron.schedule` entries (monthly day 1 06:00 SP; daily 03:00) — returns `{ created, skippedExempt, skippedExisting, activeAthletes }`
 - [X] T024 [P] [US1] Migration `supabase/migrations/20260908130700_finance_views.sql`: `public.athlete_delinquency_badge(athlete_id)` and `public.finance_overview` (per-athlete pending/overdue/paidThisSeason/badge), RLS-safe
 - [X] T025 [US1] Run `npm run db:types`
-- [ ] T026 [P] [US1] `src/features/finance/lib/currency.ts`: `pt-BR` money format, period helpers, due-date computation
-- [ ] T027 [P] [US1] `src/features/finance/api/charges.ts`: service-layer wrappers over the RPCs and reads, normalized `{ data, error }`
-- [ ] T028 [P] [US1] `src/features/finance/queries/`: TanStack Query hooks `useFinanceOverview`, `useAthleteCharges`, `useDelinquencyBadge`, plus mutation hooks with idempotency-key generation
-- [ ] T029 [P] [US1] `src/features/finance/components/DelinquencyBadge.tsx`: discreet "Pendente"/"Em Atraso" chip, Dark Navy tokens, WCAG AA contrast/labels
+- [X] T026 [P] [US1] `src/features/finance/lib/currency.ts`: `pt-BR` money format, period helpers, due-date computation
+- [X] T027 [P] [US1] `src/features/finance/api/charges.ts`: service-layer wrappers over the RPCs and reads, normalized `{ data, error }`
+- [X] T028 [P] [US1] `src/features/finance/queries/`: TanStack Query hooks `useFinanceOverview`, `useAthleteCharges`, `useDelinquencyBadge`, plus mutation hooks with idempotency-key generation
+- [X] T029 [P] [US1] `src/features/finance/components/DelinquencyBadge.tsx`: discreet "Pendente"/"Em Atraso" chip, Dark Navy tokens, WCAG AA contrast/labels
 - [ ] T030 [US1] `src/features/finance/components/`: `ChargeList.tsx`, `SettleDialog.tsx`, `ManualChargeForm.tsx`, `AdjustAmountDialog.tsx`, `ExemptionDialog.tsx` (React Hook Form + Zod)
-- [ ] T031 [US1] `src/features/finance/pages/FinancePanelPage.tsx`: directorate panel (list + filters + actions + "rodar geração agora"), wired into the `/app/financeiro` route
-- [ ] T032 [US1] Integrate `DelinquencyBadge` into the athlete profile in `src/features/roster/` (read-only, never gates navigation)
+- [X] T031 [US1] `src/features/finance/pages/FinancePanelPage.tsx`: directorate panel (list + filters + actions + "rodar geração agora"), wired into the `/app/financeiro` route
+- [X] T032 [US1] Integrate `DelinquencyBadge` into the athlete profile in `src/features/roster/` (read-only, never gates navigation)
 - [ ] T033 [US1] `src/features/finance/pages/MyChargesPage.tsx` (or profile section): athlete view of own charges only
 
 **Checkpoint**: US1 fully functional and independently testable — this is the shippable MVP.
