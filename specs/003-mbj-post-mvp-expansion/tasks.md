@@ -153,8 +153,8 @@ reviewed data exactly, idempotent on retry. (quickstart Cenários 3 & 4)
 - [X] T049 [P] [US3] pgTAP `supabase/tests/003_live_idempotency.test.sql`: repeated `log_live_event` with the same `client_event_id` inserts once (`on conflict do nothing`), returns `deduped=true`; out-of-order undo/log reconcile by `client_event_id`
 - [X] T050 [P] [US3] pgTAP `supabase/tests/003_live_authz.test.sql`: only `setup.recorder_user_id` (while `RECORDING`) or `COACH`/`PRESIDENT` may log/undo; authorization ends on status change or re-assignment (SC-013); `finalize_sumula` by a non-committee recorder → `FORBIDDEN`. **Stale-recorder case**: Recorder A assigned via `enable_live_recording`; `assign_field_recorder` re-points the setup to Recorder B; a subsequent `log_live_event` (and `undo_live_event`) by Recorder A returns `RECORDER_ONLY`; Recorder B's `log_live_event` still succeeds.
 - [X] T051 [P] [US3] pgTAP `supabase/tests/003_finalize_sumula.test.sql`: `finalize_sumula` is atomic + idempotent (`command_results`), derives scores from non-undone events, writes one `match_consolidations` revision + `match_goals` + `match_cards` + `match_substitutions` + `match_goalkeeper_assignments` matching the payload exactly (SC-004), sets `status=FINALIZED`, opens voting, blocks with `PENDING_OFFLINE_EVENTS`
-- [ ] T052 [P] [US3] Unit `tests/unit/match-clock.test.ts`: `src/features/live-match/lib/match-clock.ts` start / elapsed-minute / pause-resume for half-time
-- [ ] T053 [P] [US3] Unit `tests/unit/offline-queue.test.ts`: `src/features/live-match/lib/offline-queue.ts` IndexedDB store add / dedupe by `client_event_id` / drain in `created_at` order / empty-state
+- [X] T052 [P] [US3] Unit `tests/unit/match-clock.test.ts`: `src/features/live-match/lib/match-clock.ts` start / elapsed-minute / pause-resume for half-time
+- [X] T053 [P] [US3] Unit `tests/unit/offline-queue.test.ts`: `src/features/live-match/lib/offline-queue.ts` IndexedDB store add / dedupe by `client_event_id` / drain in `created_at` order / empty-state
 - [ ] T054 [P] [US3] E2E `tests/e2e/live-match-recording.spec.ts`: quickstart Cenário 3 (live, undo, offline buffer + gate, recorder cannot finalize)
 - [ ] T055 [P] [US3] E2E `tests/e2e/live-match-finalize.spec.ts`: quickstart Cenário 4 (review edit, committee finalize, 0 % divergence, idempotent retry, goalkeeper-substitution voids clean sheet)
 
@@ -168,10 +168,10 @@ reviewed data exactly, idempotent on retry. (quickstart Cenários 3 & 4)
 - [X] T061 [US3] Migration `supabase/migrations/20260908150600_live_event_commands.sql`: RPCs `log_live_event`, `undo_live_event`, `amend_live_event` (review only), `end_live_recording`, `cancel_live_recording` per `contracts/live-match.md`
 - [X] T062 [US3] Migration `supabase/migrations/20260908150700_finalize_sumula.sql`: RPC `finalize_sumula(match_id, reviewed_payload, idempotency_key)` — `COACH`/`PRESIDENT` + AAL2; derive scores from non-undone events; call `private.write_consolidation(...)`; insert `match_cards`/`match_substitutions`/`match_goalkeeper_assignments`; call `private.evaluate_trophies(active_season, affected_athletes)`; `setup.status='FINALIZED'`; audit `SUMULA_FINALIZED`; `command_results`
 - [X] T063 [US3] Run `npm run db:types`
-- [ ] T064 [P] [US3] `src/features/live-match/lib/match-clock.ts`
-- [ ] T065 [P] [US3] `src/features/live-match/lib/offline-queue.ts` (IndexedDB single store `pending_events`, `online` listener drain, pending count)
-- [ ] T066 [P] [US3] `src/features/live-match/api/*.ts` (RPC wrappers incl. `client_event_id` generation)
-- [ ] T067 [P] [US3] `src/features/live-match/queries/*.ts` incl. `useLiveSumulaFeed` (Supabase Realtime Postgres Changes subscription, ignores `undone`)
+- [X] T064 [P] [US3] `src/features/live-match/lib/match-clock.ts`
+- [X] T065 [P] [US3] `src/features/live-match/lib/offline-queue.ts` (IndexedDB single store `pending_events`, `online` listener drain, pending count)
+- [X] T066 [P] [US3] `src/features/live-match/api/*.ts` (RPC wrappers incl. `client_event_id` generation)
+- [X] T067 [P] [US3] `src/features/live-match/queries/*.ts` incl. `useLiveSumulaFeed` (Supabase Realtime Postgres Changes subscription, ignores `undone`)
 - [ ] T068 [US3] `src/features/live-match/components/`: `Stopwatch.tsx`, `QuickActions.tsx` (GOAL/ASSIST/YELLOW/RED/SUBSTITUTION with current minute + athlete picker), `UndoButton.tsx` (floating, 30 s window)
 - [ ] T069 [US3] `src/features/live-match/components/ReviewScreen.tsx`: editable minute / author / assist author; "Confirmar e Finalizar Súmula" disabled while offline queue non-empty or user lacks committee/admin role
 - [ ] T070 [US3] `src/features/live-match/components/SpectatorFeed.tsx`: real-time event list for athletes/viewers (< 2 s), undone events hidden
