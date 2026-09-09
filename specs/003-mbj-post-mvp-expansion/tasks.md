@@ -115,8 +115,8 @@ unavailable", no error; close → `Σ shares == 600,00` and further changes retu
 
 - [X] T034 [P] [US2] pgTAP `supabase/tests/003_social_split.test.sql`: `close_social_event` distributes cents deterministically so `Σ shares == total_cost` exactly across several counts (15, 16, 7, prime counts); zero confirmed → `VALIDATION_ERROR`
 - [X] T035 [P] [US2] pgTAP `supabase/tests/003_social_rls.test.sql`: `guests_count` `0..20` check; athlete manages only own presence; `set_event_presence` on a `CLOSED` event → `EVENT_CLOSED`; frozen values immutable after close
-- [ ] T036 [P] [US2] Unit `tests/unit/social-split.test.ts`: display-split mirror in `src/features/social-events/lib/split.ts` matches the SQL rule (incl. `peopleCount = 0`)
-- [ ] T037 [P] [US2] E2E `tests/e2e/social-events.spec.ts`: quickstart Cenário 2
+- [X] T036 [P] [US2] Unit `tests/unit/social-split.test.ts`: display-split mirror in `src/features/social-events/lib/split.ts` matches the SQL rule (incl. `peopleCount = 0`)
+- [X] T037 [P] [US2] E2E `tests/e2e/social-events.spec.ts`: quickstart Cenário 2
 
 ### Implementation for User Story 2
 
@@ -126,10 +126,10 @@ unavailable", no error; close → `Σ shares == 600,00` and further changes retu
 - [X] T041 [US2] Migration `supabase/migrations/20260908140400_social_close.sql`: RPC `close_social_event` — transactional, computes `peopleCount`, deterministic cent distribution (base + 1 cent to first `remainder` shares ordered by `athlete_id`), writes `frozen_cost_per_person`/`frozen_people_count`/`closed_by`/`closed_at`, `status='CLOSED'`; **no `EVENT_FEE` charge** (FR-017)
 - [X] T042 [P] [US2] Migration `supabase/migrations/20260908140500_social_views.sql`: functions `social_event_split(event_id)` and `social_event_participants(event_id)` (derived while OPEN, frozen when CLOSED)
 - [X] T043 [US2] Run `npm run db:types`
-- [ ] T044 [P] [US2] `src/features/social-events/lib/split.ts`: display mirror of the split rule
-- [ ] T045 [P] [US2] `src/features/social-events/api/*.ts` + `src/features/social-events/queries/*.ts`
-- [ ] T046 [US2] `src/features/social-events/components/`: `EventForm.tsx`, `PresenceControl.tsx` (confirm/decline + guests stepper capped at 20), `SplitSummary.tsx`, `CloseEventDialog.tsx`
-- [ ] T047 [US2] `src/features/social-events/pages/`: `SocialEventsListPage.tsx` + `SocialEventDetailPage.tsx`, wired into `/app/resenhas`
+- [X] T044 [P] [US2] `src/features/social-events/lib/split.ts`: display mirror of the split rule
+- [X] T045 [P] [US2] `src/features/social-events/api/*.ts` + `src/features/social-events/queries/*.ts`
+- [X] T046 [US2] `src/features/social-events/components/`: `EventForm.tsx`, `PresenceControl.tsx` (confirm/decline + guests stepper capped at 20), `SplitSummary.tsx`, `CloseEventDialog.tsx`
+- [X] T047 [US2] `src/features/social-events/pages/`: `SocialEventsListPage.tsx` + `SocialEventDetailPage.tsx`, wired into `/app/resenhas`
 
 **Checkpoint**: US1 and US2 both work independently.
 

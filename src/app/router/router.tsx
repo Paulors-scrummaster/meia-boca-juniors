@@ -15,6 +15,8 @@ import {
 import { RoleAdministrationPage } from '@/features/auth/components/RoleManager';
 import { FinancePanelPage } from '@/features/finance/pages/FinancePanelPage';
 import { MyChargesPage } from '@/features/finance/pages/MyChargesPage';
+import { SocialEventDetailPage } from '@/features/social-events/pages/SocialEventDetailPage';
+import { SocialEventsListPage } from '@/features/social-events/pages/SocialEventsListPage';
 import { CallUpManager } from '@/features/attendance/components/CallUpManager';
 import { PresenceResponsePanel } from '@/features/attendance/components/PresenceResponsePanel';
 import { AttendanceDashboardPage } from '@/features/attendance/pages/AttendanceDashboardPage';
@@ -172,6 +174,21 @@ function NewMatchRoutePage() {
   return <MatchForm />;
 }
 
+function SocialEventsListRoutePage() {
+  const { isAal2, roles } = useAuth();
+  return <SocialEventsListPage canManage={isAal2 && roles.includes('PRESIDENT')} />;
+}
+
+function SocialEventDetailRoutePage() {
+  const { isAal2, roles } = useAuth();
+  return (
+    <SocialEventDetailPage
+      canManage={isAal2 && roles.includes('PRESIDENT')}
+      isAthlete={roles.includes('ATHLETE')}
+    />
+  );
+}
+
 function EditMatchRoutePage() {
   const { matchId = '' } = useParams();
   const service = createMatchesService();
@@ -253,15 +270,8 @@ const featureRoutes: RouteObject[] = [
                   />
                 ),
               },
-              {
-                path: 'resenhas',
-                element: (
-                  <Placeholder
-                    title="Resenhas"
-                    description="Churrascos e resenhas pós-jogo, com confirmação de presença e rateio. Em construção."
-                  />
-                ),
-              },
+              { path: 'resenhas', element: <SocialEventsListRoutePage /> },
+              { path: 'resenhas/:eventId', element: <SocialEventDetailRoutePage /> },
               { path: 'notices', element: <NoticesRoutePage /> },
               { path: 'notification-preferences', element: <PushPermissionCard /> },
               {
