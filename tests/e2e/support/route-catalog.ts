@@ -39,6 +39,23 @@ const athlete = {
   updated_at: '2026-08-25T00:00:00.000Z',
 };
 
+/** Linha da RPC `athlete_card` para o cartão de atributos (US4). */
+const athleteCard = {
+  athlete_id: ATHLETE_ID,
+  defending: 60,
+  dribbling: 72,
+  incomplete: false,
+  overall: 70,
+  pace: 80,
+  passing: 68,
+  photo_path: null,
+  physical: 66,
+  primary_position: 'Meio-campo',
+  shirt_name: 'Teste',
+  shirt_number: 10,
+  shooting: 74,
+};
+
 const match = {
   away_score: null,
   competition: 'Amistoso',
@@ -69,13 +86,17 @@ export const AUTHENTICATED_ROUTES: CatalogEntry[] = [
     path: '/app/roster',
     label: 'Elenco',
     role: 'ATHLETE',
-    data: { '/rest/v1/athletes': [athlete] },
+    data: { '/rest/v1/athletes': [athlete], '/rest/v1/rpc/athlete_card': [athleteCard] },
   },
   {
     path: `/app/roster/${ATHLETE_ID}`,
     label: 'Perfil do atleta',
     role: 'ATHLETE',
-    data: { '/rest/v1/athletes': athlete },
+    data: {
+      '/rest/v1/athletes': athlete,
+      '/rest/v1/athlete_trophies': [],
+      '/rest/v1/rpc/athlete_card': [athleteCard],
+    },
   },
   {
     path: '/app/matches',

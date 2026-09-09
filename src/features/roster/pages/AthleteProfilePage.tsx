@@ -5,6 +5,9 @@ import type { AuthService } from '@/features/auth/api/auth.service';
 import { InvitationManager } from '@/features/auth/components/InvitationManager';
 import { DelinquencyBadge } from '@/features/finance/components/DelinquencyBadge';
 import { useDelinquencyBadge } from '@/features/finance/queries/charges.queries';
+import type { GamificationService } from '@/features/gamification/api/gamification.service';
+import { AthleteCardPanel } from '@/features/gamification/components/AthleteCardPanel';
+import { AthleteTrophyGallery } from '@/features/gamification/components/AthleteTrophyGallery';
 import type { RosterService } from '@/features/roster/api/roster.service';
 import { AthleteAvatar } from '@/features/roster/components/AthleteAvatar';
 import { useAthlete } from '@/features/roster/queries/roster.queries';
@@ -17,6 +20,7 @@ interface AthleteProfilePageProps {
   athleteId?: string;
   authService?: AuthService;
   canManage?: boolean;
+  gamificationService?: GamificationService;
   service?: RosterService;
 }
 
@@ -24,6 +28,7 @@ export function AthleteProfilePage({
   athleteId,
   authService,
   canManage = false,
+  gamificationService,
   service,
 }: AthleteProfilePageProps) {
   const params = useParams();
@@ -96,6 +101,17 @@ export function AthleteProfilePage({
           {...(authService ? { service: authService } : {})}
         />
       ) : null}
+
+      <AthleteCardPanel
+        athleteId={athlete.id}
+        avatarUrl={athlete.avatar_url}
+        {...(gamificationService ? { service: gamificationService } : {})}
+      />
+
+      <AthleteTrophyGallery
+        athleteId={athlete.id}
+        {...(gamificationService ? { service: gamificationService } : {})}
+      />
 
       <section aria-labelledby="history-title" className="rounded-3xl border bg-card p-6">
         <div className="flex items-center gap-3">

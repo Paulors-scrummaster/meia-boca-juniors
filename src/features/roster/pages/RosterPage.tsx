@@ -2,8 +2,9 @@ import { Search, UserPlus } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
+import type { GamificationService } from '@/features/gamification/api/gamification.service';
+import { RosterCardTile } from '@/features/gamification/components/RosterCardTile';
 import type { RosterService } from '@/features/roster/api/roster.service';
-import { AthleteAvatar } from '@/features/roster/components/AthleteAvatar';
 import { useRoster } from '@/features/roster/queries/roster.queries';
 import { EmptyState, ErrorState, LoadingState } from '@/shared/components/feedback';
 import { mapToAppError } from '@/shared/lib/app-error';
@@ -11,10 +12,11 @@ import { domainLabels } from '@/shared/lib/domain-labels';
 
 interface RosterPageProps {
   canManage?: boolean;
+  gamificationService?: GamificationService;
   service?: RosterService;
 }
 
-export function RosterPage({ canManage = false, service }: RosterPageProps) {
+export function RosterPage({ canManage = false, gamificationService, service }: RosterPageProps) {
   const query = useRoster(service);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('ALL');
@@ -108,19 +110,26 @@ export function RosterPage({ canManage = false, service }: RosterPageProps) {
               className="rounded-2xl border bg-card p-5 shadow-sm transition-colors hover:border-primary focus-within:border-primary"
               key={athlete.id}
             >
-              <div className="flex items-start gap-4">
-                <AthleteAvatar name={athlete.full_name} url={athlete.avatar_url} />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-black">{athlete.full_name}</p>
-                  <p className="text-sm text-muted-foreground">
-                    #{athlete.shirt_number} · {athlete.primary_position}
-                  </p>
-                  <span className="mt-2 inline-flex rounded-full bg-muted px-3 py-1 text-xs font-bold">
-                    {domainLabels.athleteStatus[athlete.status]}
-                  </span>
-                </div>
+              <div className="mx-auto w-full max-w-[12rem]">
+                <RosterCardTile
+                  athleteId={athlete.id}
+                  avatarUrl={athlete.avatar_url}
+                  fallbackName={athlete.shirt_name}
+                  fallbackPosition={athlete.primary_position}
+                  fallbackShirtNumber={athlete.shirt_number}
+                  {...(gamificationService ? { service: gamificationService } : {})}
+                />
               </div>
-              <div className="mt-5 flex flex-wrap gap-2">
+              <div className="mt-4 min-w-0">
+                <p className="truncate font-black">{athlete.full_name}</p>
+                <p className="text-sm text-muted-foreground">
+                  #{athlete.shirt_number} · {athlete.primary_position}
+                </p>
+                <span className="mt-2 inline-flex rounded-full bg-muted px-3 py-1 text-xs font-bold">
+                  {domainLabels.athleteStatus[athlete.status]}
+                </span>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
                 <Link
                   aria-label={`Ver perfil de ${athlete.full_name}`}
                   className="min-h-11 flex-1 rounded-lg border px-3 py-2 text-center font-semibold text-primary"
