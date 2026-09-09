@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import { PresenceResponsePanel } from '@/features/attendance/components/PresenceResponsePanel';
 import { useAttendanceRealtime } from '@/features/attendance/hooks/use-attendance-realtime';
+import { RaioXCard } from '@/features/gamification/components/RaioXCard';
 import { LiveRecordingToggle } from '@/features/live-match/components/LiveRecordingToggle';
 import {
   createMatchesService,
@@ -86,6 +87,7 @@ export function MatchDetailPage({
           </div>
         ) : null}
       </article>
+      {match.status === 'SCHEDULED' ? <RaioXCard opponentName={match.opponent_name} /> : null}
       {canManage && match.status === 'SCHEDULED' ? (
         <LiveRecordingToggle matchId={match.id} />
       ) : null}

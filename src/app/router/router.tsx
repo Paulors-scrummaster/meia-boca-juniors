@@ -15,6 +15,8 @@ import {
 import { RoleAdministrationPage } from '@/features/auth/components/RoleManager';
 import { FinancePanelPage } from '@/features/finance/pages/FinancePanelPage';
 import { MyChargesPage } from '@/features/finance/pages/MyChargesPage';
+import { HistoryAchievementsPage } from '@/features/gamification/pages/HistoryAchievementsPage';
+import { SeasonAdminPage } from '@/features/gamification/pages/SeasonAdminPage';
 import { SocialEventDetailPage } from '@/features/social-events/pages/SocialEventDetailPage';
 import { SocialEventsListPage } from '@/features/social-events/pages/SocialEventsListPage';
 import { CallUpManager } from '@/features/attendance/components/CallUpManager';
@@ -274,15 +276,7 @@ const featureRoutes: RouteObject[] = [
               { path: 'matches/:matchId', element: <MatchDetailRoutePage /> },
               { path: 'matches/:matchId/lineup', element: <PublishedLineupRoutePage /> },
               { path: 'statistics', element: <SeasonRankingsPage /> },
-              {
-                path: 'historico',
-                element: (
-                  <Placeholder
-                    title="Histórico & Conquistas"
-                    description="Retrospecto do clube e galeria de troféus. Em construção."
-                  />
-                ),
-              },
+              { path: 'historico', element: <HistoryAchievementsPage /> },
               { path: 'resenhas', element: <SocialEventsListRoutePage /> },
               { path: 'resenhas/:eventId', element: <SocialEventDetailRoutePage /> },
               { path: 'partidas/:matchId/sumula', element: <LiveSumulaRoutePage /> },
@@ -312,15 +306,7 @@ const featureRoutes: RouteObject[] = [
                   {
                     element: <Aal2RouteGuard />,
                     children: [
-                      {
-                        path: 'staff',
-                        element: (
-                          <Placeholder
-                            title="Comissão técnica"
-                            description="Seu acesso à comissão técnica está protegido por verificação em duas etapas."
-                          />
-                        ),
-                      },
+                      { path: 'staff', element: <SeasonAdminPage /> },
                       { path: 'staff/matches/new', element: <NewMatchRoutePage /> },
                       { path: 'staff/matches/:matchId/edit', element: <EditMatchRoutePage /> },
                       {
