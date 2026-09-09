@@ -2595,6 +2595,10 @@ export type Database = {
         }
         Returns: Json
       }
+      amend_live_event: {
+        Args: { event_id: string; idempotency_key: string; patch: Json }
+        Returns: Json
+      }
       anonymize_athlete: {
         Args: { athlete_uuid: string; request_trace_id: string }
         Returns: {
@@ -2618,6 +2622,14 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      assign_field_recorder: {
+        Args: {
+          idempotency_key: string
+          match_id: string
+          recorder_user_id: string
+        }
+        Returns: Json
+      }
       athlete_delinquency_badge: {
         Args: { athlete_uuid: string }
         Returns: string
@@ -2628,6 +2640,10 @@ export type Database = {
           command_idempotency_key: string
           reason_input: string
         }
+        Returns: Json
+      }
+      cancel_live_recording: {
+        Args: { idempotency_key: string; match_id: string; reason: string }
         Returns: Json
       }
       cancel_match: {
@@ -2794,6 +2810,19 @@ export type Database = {
         }
         Returns: Json
       }
+      enable_live_recording: {
+        Args: {
+          idempotency_key: string
+          match_id: string
+          recorder_user_id: string
+          starting_goalkeeper_athlete_id: string
+        }
+        Returns: Json
+      }
+      end_live_recording: {
+        Args: { idempotency_key: string; match_id: string }
+        Returns: Json
+      }
       get_user_roles: { Args: { target_user_id: string }; Returns: Json }
       grant_dues_exemption: {
         Args: {
@@ -2801,6 +2830,19 @@ export type Database = {
           command_idempotency_key: string
           period_input: string
           reason_input: string
+        }
+        Returns: Json
+      }
+      log_live_event: {
+        Args: {
+          athlete_id: string
+          client_event_id: string
+          event_type: string
+          idempotency_key: string
+          match_id: string
+          minute: number
+          target_athlete_id: string
+          team_side: string
         }
         Returns: Json
       }
@@ -2978,6 +3020,10 @@ export type Database = {
           people_count: number
           split_unavailable: boolean
         }[]
+      }
+      undo_live_event: {
+        Args: { idempotency_key: string; match_id: string }
+        Returns: Json
       }
       update_athlete: {
         Args: {
