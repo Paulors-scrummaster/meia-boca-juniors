@@ -2823,6 +2823,14 @@ export type Database = {
         Args: { idempotency_key: string; match_id: string }
         Returns: Json
       }
+      finalize_sumula: {
+        Args: {
+          idempotency_key: string
+          match_id: string
+          reviewed_payload: Json
+        }
+        Returns: Json
+      }
       get_user_roles: { Args: { target_user_id: string }; Returns: Json }
       grant_dues_exemption: {
         Args: {
