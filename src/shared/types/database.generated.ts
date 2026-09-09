@@ -52,6 +52,95 @@ export type Database = {
         }
         Relationships: []
       }
+      athlete_card_attributes: {
+        Row: {
+          athlete_id: string
+          defending: number | null
+          dribbling: number | null
+          overall: number | null
+          pace: number | null
+          passing: number | null
+          physical: number | null
+          shooting: number | null
+          updated_at: string
+          updated_by: string
+        }
+        Insert: {
+          athlete_id: string
+          defending?: number | null
+          dribbling?: number | null
+          overall?: number | null
+          pace?: number | null
+          passing?: number | null
+          physical?: number | null
+          shooting?: number | null
+          updated_at?: string
+          updated_by: string
+        }
+        Update: {
+          athlete_id?: string
+          defending?: number | null
+          dribbling?: number | null
+          overall?: number | null
+          pace?: number | null
+          passing?: number | null
+          physical?: number | null
+          shooting?: number | null
+          updated_at?: string
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "athlete_card_attributes_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: true
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "athlete_card_attributes_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: true
+            referencedRelation: "finance_overview"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "athlete_card_attributes_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: true
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["candidate_athlete_id"]
+          },
+          {
+            foreignKeyName: "athlete_card_attributes_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: true
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voter_athlete_id"]
+          },
+          {
+            foreignKeyName: "athlete_card_attributes_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: true
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "athlete_card_attributes_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: true
+            referencedRelation: "season_scoring_leaders"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "athlete_card_attributes_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       athlete_charges: {
         Row: {
           amount: number
@@ -138,6 +227,13 @@ export type Database = {
             referencedColumns: ["athlete_id"]
           },
           {
+            foreignKeyName: "athlete_charges_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
+            referencedColumns: ["athlete_id"]
+          },
+          {
             foreignKeyName: "athlete_charges_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -149,6 +245,13 @@ export type Database = {
             columns: ["season_id"]
             isOneToOne: false
             referencedRelation: "season_rankings_view"
+            referencedColumns: ["season_id"]
+          },
+          {
+            foreignKeyName: "athlete_charges_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
             referencedColumns: ["season_id"]
           },
           {
@@ -245,6 +348,13 @@ export type Database = {
             referencedColumns: ["athlete_id"]
           },
           {
+            foreignKeyName: "athlete_invites_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
+            referencedColumns: ["athlete_id"]
+          },
+          {
             foreignKeyName: "athlete_invites_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -257,6 +367,104 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      athlete_trophies: {
+        Row: {
+          athlete_id: string
+          awarded_at: string
+          id: string
+          season_id: string
+          trigger_context: Json
+          trophy_code: string
+        }
+        Insert: {
+          athlete_id: string
+          awarded_at?: string
+          id?: string
+          season_id: string
+          trigger_context: Json
+          trophy_code: string
+        }
+        Update: {
+          athlete_id?: string
+          awarded_at?: string
+          id?: string
+          season_id?: string
+          trigger_context?: Json
+          trophy_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "athlete_trophies_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "athletes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "athlete_trophies_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "finance_overview"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "athlete_trophies_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["candidate_athlete_id"]
+          },
+          {
+            foreignKeyName: "athlete_trophies_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "open_mvp_voting_view"
+            referencedColumns: ["voter_athlete_id"]
+          },
+          {
+            foreignKeyName: "athlete_trophies_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "athlete_trophies_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "athlete_trophies_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "season_rankings_view"
+            referencedColumns: ["season_id"]
+          },
+          {
+            foreignKeyName: "athlete_trophies_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
+            referencedColumns: ["season_id"]
+          },
+          {
+            foreignKeyName: "athlete_trophies_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "athlete_trophies_trophy_code_fkey"
+            columns: ["trophy_code"]
+            isOneToOne: false
+            referencedRelation: "trophy_catalog"
+            referencedColumns: ["code"]
           },
         ]
       }
@@ -419,6 +627,13 @@ export type Database = {
             referencedColumns: ["athlete_id"]
           },
           {
+            foreignKeyName: "dues_exemptions_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
+            referencedColumns: ["athlete_id"]
+          },
+          {
             foreignKeyName: "dues_exemptions_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -518,6 +733,13 @@ export type Database = {
             columns: ["athlete_id"]
             isOneToOne: false
             referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "lineup_players_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
             referencedColumns: ["athlete_id"]
           },
           {
@@ -695,6 +917,13 @@ export type Database = {
             referencedColumns: ["athlete_id"]
           },
           {
+            foreignKeyName: "live_match_events_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
+            referencedColumns: ["athlete_id"]
+          },
+          {
             foreignKeyName: "live_match_events_match_id_fkey"
             columns: ["match_id"]
             isOneToOne: false
@@ -755,6 +984,13 @@ export type Database = {
             columns: ["target_athlete_id"]
             isOneToOne: false
             referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "live_match_events_target_athlete_id_fkey"
+            columns: ["target_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
             referencedColumns: ["athlete_id"]
           },
         ]
@@ -861,6 +1097,13 @@ export type Database = {
             referencedRelation: "season_rankings_view"
             referencedColumns: ["athlete_id"]
           },
+          {
+            foreignKeyName: "live_match_setups_starting_goalkeeper_athlete_id_fkey"
+            columns: ["starting_goalkeeper_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
+            referencedColumns: ["athlete_id"]
+          },
         ]
       }
       match_cards: {
@@ -919,6 +1162,13 @@ export type Database = {
             columns: ["athlete_id"]
             isOneToOne: false
             referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "match_cards_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
             referencedColumns: ["athlete_id"]
           },
           {
@@ -1084,6 +1334,13 @@ export type Database = {
             referencedColumns: ["athlete_id"]
           },
           {
+            foreignKeyName: "match_goalkeeper_assignments_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
+            referencedColumns: ["athlete_id"]
+          },
+          {
             foreignKeyName: "match_goalkeeper_assignments_consolidation_id_fkey"
             columns: ["consolidation_id"]
             isOneToOne: false
@@ -1160,6 +1417,13 @@ export type Database = {
             referencedColumns: ["athlete_id"]
           },
           {
+            foreignKeyName: "match_goals_assistant_athlete_id_fkey"
+            columns: ["assistant_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
+            referencedColumns: ["athlete_id"]
+          },
+          {
             foreignKeyName: "match_goals_consolidation_id_fkey"
             columns: ["consolidation_id"]
             isOneToOne: false
@@ -1206,6 +1470,13 @@ export type Database = {
             columns: ["scorer_athlete_id"]
             isOneToOne: false
             referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "match_goals_scorer_athlete_id_fkey"
+            columns: ["scorer_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
             referencedColumns: ["athlete_id"]
           },
         ]
@@ -1290,6 +1561,13 @@ export type Database = {
             columns: ["athlete_id"]
             isOneToOne: false
             referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
             referencedColumns: ["athlete_id"]
           },
           {
@@ -1388,6 +1666,13 @@ export type Database = {
             referencedColumns: ["athlete_id"]
           },
           {
+            foreignKeyName: "match_substitutions_in_athlete_id_fkey"
+            columns: ["in_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
+            referencedColumns: ["athlete_id"]
+          },
+          {
             foreignKeyName: "match_substitutions_out_athlete_id_fkey"
             columns: ["out_athlete_id"]
             isOneToOne: false
@@ -1420,6 +1705,13 @@ export type Database = {
             columns: ["out_athlete_id"]
             isOneToOne: false
             referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "match_substitutions_out_athlete_id_fkey"
+            columns: ["out_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
             referencedColumns: ["athlete_id"]
           },
         ]
@@ -1499,6 +1791,13 @@ export type Database = {
             foreignKeyName: "matches_season_id_fkey"
             columns: ["season_id"]
             isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
+            referencedColumns: ["season_id"]
+          },
+          {
+            foreignKeyName: "matches_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
             referencedRelation: "seasons"
             referencedColumns: ["id"]
           },
@@ -1567,6 +1866,13 @@ export type Database = {
             columns: ["athlete_id"]
             isOneToOne: false
             referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "mvp_awards_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
             referencedColumns: ["athlete_id"]
           },
           {
@@ -1644,6 +1950,13 @@ export type Database = {
             referencedColumns: ["athlete_id"]
           },
           {
+            foreignKeyName: "mvp_votes_voted_athlete_id_fkey"
+            columns: ["voted_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
+            referencedColumns: ["athlete_id"]
+          },
+          {
             foreignKeyName: "mvp_votes_voter_athlete_id_fkey"
             columns: ["voter_athlete_id"]
             isOneToOne: false
@@ -1676,6 +1989,13 @@ export type Database = {
             columns: ["voter_athlete_id"]
             isOneToOne: false
             referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "mvp_votes_voter_athlete_id_fkey"
+            columns: ["voter_athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
             referencedColumns: ["athlete_id"]
           },
           {
@@ -2084,6 +2404,13 @@ export type Database = {
             referencedColumns: ["athlete_id"]
           },
           {
+            foreignKeyName: "social_event_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
+            referencedColumns: ["athlete_id"]
+          },
+          {
             foreignKeyName: "social_event_presences_social_event_id_fkey"
             columns: ["social_event_id"]
             isOneToOne: false
@@ -2155,6 +2482,33 @@ export type Database = {
           },
         ]
       }
+      trophy_catalog: {
+        Row: {
+          code: string
+          description_pt: string
+          display_order: number
+          scope: Database["public"]["Enums"]["trophy_scope"]
+          threshold: number
+          title_pt: string
+        }
+        Insert: {
+          code: string
+          description_pt: string
+          display_order: number
+          scope: Database["public"]["Enums"]["trophy_scope"]
+          threshold: number
+          title_pt: string
+        }
+        Update: {
+          code?: string
+          description_pt?: string
+          display_order?: number
+          scope?: Database["public"]["Enums"]["trophy_scope"]
+          threshold?: number
+          title_pt?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           assigned_at: string
@@ -2193,6 +2547,18 @@ export type Database = {
       }
     }
     Views: {
+      club_all_time_record: {
+        Row: {
+          draws: number | null
+          goal_diff: number | null
+          goals_against: number | null
+          goals_for: number | null
+          losses: number | null
+          matches_played: number | null
+          wins: number | null
+        }
+        Relationships: []
+      }
       finance_overview: {
         Row: {
           athlete_id: string | null
@@ -2232,6 +2598,13 @@ export type Database = {
             columns: ["season_id"]
             isOneToOne: false
             referencedRelation: "season_rankings_view"
+            referencedColumns: ["season_id"]
+          },
+          {
+            foreignKeyName: "matches_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
             referencedColumns: ["season_id"]
           },
           {
@@ -2380,6 +2753,13 @@ export type Database = {
             referencedColumns: ["athlete_id"]
           },
           {
+            foreignKeyName: "lineup_players_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
+            referencedColumns: ["athlete_id"]
+          },
+          {
             foreignKeyName: "lineups_formation_code_fkey"
             columns: ["formation_code"]
             isOneToOne: false
@@ -2459,6 +2839,13 @@ export type Database = {
             referencedColumns: ["athlete_id"]
           },
           {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
+            referencedColumns: ["athlete_id"]
+          },
+          {
             foreignKeyName: "match_presences_match_id_fkey"
             columns: ["match_id"]
             isOneToOne: false
@@ -2488,6 +2875,20 @@ export type Database = {
           goals: number | null
           mvp_awards: number | null
           presences: number | null
+          season_id: string | null
+          shirt_name: string | null
+          shirt_number: number | null
+          year: number | null
+        }
+        Relationships: []
+      }
+      season_scoring_leaders: {
+        Row: {
+          assists: number | null
+          athlete_id: string | null
+          clean_sheets: number | null
+          goals: number | null
+          matches_played: number | null
           season_id: string | null
           shirt_name: string | null
           shirt_number: number | null
@@ -2544,6 +2945,13 @@ export type Database = {
             columns: ["athlete_id"]
             isOneToOne: false
             referencedRelation: "season_rankings_view"
+            referencedColumns: ["athlete_id"]
+          },
+          {
+            foreignKeyName: "match_presences_athlete_id_fkey"
+            columns: ["athlete_id"]
+            isOneToOne: false
+            referencedRelation: "season_scoring_leaders"
             referencedColumns: ["athlete_id"]
           },
           {
@@ -2630,9 +3038,38 @@ export type Database = {
         }
         Returns: Json
       }
+      athlete_card: {
+        Args: { athlete_uuid: string }
+        Returns: {
+          athlete_id: string
+          defending: number
+          dribbling: number
+          incomplete: boolean
+          overall: number
+          pace: number
+          passing: number
+          photo_path: string
+          physical: number
+          primary_position: string
+          shirt_name: string
+          shirt_number: number
+          shooting: number
+        }[]
+      }
       athlete_delinquency_badge: {
         Args: { athlete_uuid: string }
         Returns: string
+      }
+      athlete_trophy_gallery: {
+        Args: { athlete_uuid: string }
+        Returns: {
+          awarded_at: string
+          description_pt: string
+          season_id: string
+          season_year: number
+          title_pt: string
+          trophy_code: string
+        }[]
       }
       cancel_charge: {
         Args: {
@@ -2841,6 +3278,17 @@ export type Database = {
         }
         Returns: Json
       }
+      head_to_head_record: {
+        Args: { opponent_name_input: string }
+        Returns: {
+          draws: number
+          goal_diff: number
+          has_history: boolean
+          losses: number
+          matches_played: number
+          wins: number
+        }[]
+      }
       log_live_event: {
         Args: {
           athlete_id: string
@@ -2943,6 +3391,30 @@ export type Database = {
       }
       run_monthly_dues_generation: {
         Args: { command_idempotency_key: string; period_input: string }
+        Returns: Json
+      }
+      season_trophy_progress: {
+        Args: { athlete_uuid: string; season_uuid: string }
+        Returns: {
+          achieved: boolean
+          current_value: number
+          scope: Database["public"]["Enums"]["trophy_scope"]
+          threshold: number
+          title_pt: string
+          trophy_code: string
+        }[]
+      }
+      set_athlete_attributes: {
+        Args: {
+          athlete_uuid: string
+          command_idempotency_key: string
+          defending_input: number
+          dribbling_input: number
+          pace_input: number
+          passing_input: number
+          physical_input: number
+          shooting_input: number
+        }
         Returns: Json
       }
       set_athlete_status: {
@@ -3114,6 +3586,7 @@ export type Database = {
       season_status: "ACTIVE" | "CLOSED"
       social_event_status: "OPEN" | "CLOSED"
       team_side: "MBJ" | "OPPONENT"
+      trophy_scope: "SEASON_CUMULATIVE" | "SINGLE_MATCH"
       voting_round_status: "OPEN" | "CLOSED" | "INVALIDATED"
     }
     CompositeTypes: {
@@ -3285,6 +3758,7 @@ export const Constants = {
       season_status: ["ACTIVE", "CLOSED"],
       social_event_status: ["OPEN", "CLOSED"],
       team_side: ["MBJ", "OPPONENT"],
+      trophy_scope: ["SEASON_CUMULATIVE", "SINGLE_MATCH"],
       voting_round_status: ["OPEN", "CLOSED", "INVALIDATED"],
     },
   },
