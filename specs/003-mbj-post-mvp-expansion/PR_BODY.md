@@ -9,8 +9,10 @@ head-to-head card, a "Histórico & Conquistas" tab, and weekly/pre-match highlig
 notifications). Everything reuses the MVP's athletes, roles, matches, presences and
 `public.seasons`; no new global roles, no payment processing.
 
-108/109 tasks complete. The only open item is **T103** — a verified Supabase production
-backup, which is a human release-gate action (see *Deployment / Release Gate*).
+109/109 tasks complete. T103 (verified Supabase **production** backup, release-gate)
+executed 2026-09-09 — run `34408565465`, `status: VERIFIED` (see *Deployment / Release
+Gate*). Merging this PR does not apply the migrations; `supabase db push` is the separate
+step that MUST run immediately after the verified backup.
 
 ## Delivered
 
@@ -235,14 +237,20 @@ tests pass.
 
 ## Deployment / Release Gate
 
-> ⚠️ **T103 PENDING** — before applying these migrations to production, run and confirm a
-> Supabase **production** backup with status **`VERIFIED`** (trigger
-> `mbj-backup-pre-migration`, wait for `VERIFIED`, record Request ID + Manifest SHA-256),
-> then `supabase db push`. Procedure in `docs/deployment.md` §"Feature 003 — Ordem de
-> migração e backup".
+> ✅ **T103 DONE** — pre-migration Supabase **production** backup executed 2026-09-09 via
+> the documented n8n contingency (`ops/n8n/README.md` §"Contingência local": manual
+> `workflow_dispatch` of `backup.yml` on `main`). GitHub run `34408565465` (`success`);
+> sanitized result `status: VERIFIED` — Request ID `cb36b7b8-…-301454`, Backup ID
+> `9d29448348f547a193650a142e3c04b7`, Manifest SHA-256
+> `40ec51f5163069f1e5a01f700f2583dbca320b75bfd385b63d7c5d32b5a3ed3a`, object
+> `backups/2026/09/9d29448348f547a193650a142e3c04b7.age`, verifiedAt
+> `2026-09-09T21:50:26Z`. All 7 `contracts/backup-automation.md` checks pass. Evidence:
+> `docs/operations.md` §"T103".
 
-T103 is **not** checked. This feature is ready for review; it is **not** cleared for
-deploy/merge until the pre-migration backup reports `VERIFIED`.
+**The migrations still MUST NOT be applied to production until immediately after this
+backup**, per `docs/deployment.md` §"Feature 003 — Ordem de migração e backup". Merge of
+this PR does not itself apply migrations — the `database-release` pipeline / `supabase db
+push` is the separate, gated step.
 
 ## Rollback / Recovery
 
@@ -261,14 +269,15 @@ Per `docs/deployment.md` / `docs/operations.md`:
 
 ## Checklist
 
-- [x] implementação concluída (108/109 tasks)
+- [x] implementação concluída (109/109 tasks)
 - [x] testes técnicos verdes (unit / db / e2e / lint / typecheck / build / db:types)
 - [x] documentação atualizada (`docs/operations.md`, `docs/deployment.md`, PR review note)
 - [x] revisão de segurança/RLS (`pr-review-notes.md`)
 - [x] a11y/theme review (`post-mvp-accessibility.spec.ts`, `theme-consistency.spec.ts`)
-- [ ] production backup VERIFIED (T103)
-- [ ] review/approval
+- [x] production backup VERIFIED (T103) — run `34408565465`, `status: VERIFIED`
+- [x] review/approval — manual human review completed (8 checkpoints, all APROVADO)
 - [ ] merge
+- [ ] deployment (`supabase db push` immediately after the verified backup)
 - [ ] deployment
 
 ---

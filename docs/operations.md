@@ -269,3 +269,35 @@ por `pre-match-highlights:<match_id>`.
 **Render das notificações novas:** `supabase/functions/dispatch-notifications` ganhou
 defaults para `WEEKLY_HIGHLIGHTS` e `PRE_MATCH_HIGHLIGHTS`; falha do provedor é no-op
 graciosa (FR-026, SC-007).
+
+## T103 — Backup pré-migração verificado (feature 003)
+
+Portão de release da feature `003-mbj-post-mvp-expansion` (PR #209): backup verificado
+do Supabase **production** antes de aplicar as 31 migrações.
+
+Via primária (webhook n8n `mbj-backup-pre-migration`) indisponível nesta sessão — token
+de header é config de instância, nunca versionado. Usada a **contingência documentada**
+(`ops/n8n/README.md` §"Contingência local"): disparo manual de `backup.yml` em `main`
+via `workflow_dispatch`, com validação do artefato sanitizado de um dia.
+
+| Campo | Valor |
+| --- | --- |
+| GitHub Actions run | `34408565465` (`Verified Supabase backup`, `main`, `workflow_dispatch`, `success`, 5m59s) |
+| Request ID | `cb36b7b8-7894-4f55-b0ee-0eacdc301454` |
+| Backup ID | `9d29448348f547a193650a142e3c04b7` |
+| Manifest SHA-256 | `40ec51f5163069f1e5a01f700f2583dbca320b75bfd385b63d7c5d32b5a3ed3a` |
+| Objeto privado (R2) | `backups/2026/09/9d29448348f547a193650a142e3c04b7.age` |
+| Verificado em | `2026-09-09T21:50:26Z` |
+| `status` | **`VERIFIED`** |
+
+As 7 verificações de `specs/001-mbj-mvp-core/contracts/backup-automation.md` passam:
+`contractVersion` suportado; `requestId` == request gerado; `runId` == run correlacionado
+concluído (`success`); `manifestSha256` é hex de 64 minúsculas; `encryptedObjectKey` sob
+o prefixo allowlisted `backups/`; `verifiedAt` é UTC da janela da execução; `status` é
+exatamente `VERIFIED`.
+
+O artefato sanitizado (`backup-result-<request_id>/backup-result.json`, retenção 1 dia)
+não contém dump, manifesto, objeto Storage, signed URL, log, credencial ou dado pessoal.
+Nenhuma migração foi aplicada nesta etapa; a aplicação em produção (`supabase db push`)
+deve ocorrer **imediatamente após** este backup, conforme `docs/deployment.md`
+§"Feature 003 — Ordem de migração e backup".
