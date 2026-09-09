@@ -50,18 +50,41 @@ function safeProviderError(error: unknown): { code: string; permanent: boolean }
   return { code: 'PROVIDER_ERROR', permanent: false };
 }
 
+/**
+ * Textos e rota padrão por tipo de notificação — usados quando o payload não traz
+ * `title`/`body`/`route` (os destaques do US4 sempre trazem, mas o fallback
+ * mantém a push legível se algum campo faltar). Tipos sem entrada caem no
+ * genérico.
+ */
+const KIND_DEFAULTS: Record<string, { body: string; route: string; title: string }> = {
+  PRE_MATCH_HIGHLIGHTS: {
+    body: 'Estatísticas do MBJ e o retrospecto contra o próximo adversário.',
+    route: '/app',
+    title: 'Pré-jogo',
+  },
+  WEEKLY_HIGHLIGHTS: {
+    body: 'Confira os craques da semana no Meia Boca Juniors.',
+    route: '/app/historico',
+    title: 'Destaques da semana',
+  },
+};
+
 function displayMessage(delivery: ClaimedNotification): PushMessage {
+  const defaults = KIND_DEFAULTS[delivery.kind];
   const title =
-    typeof delivery.payload.title === 'string' ? delivery.payload.title : 'Meia Boca Juniors';
+    typeof delivery.payload.title === 'string'
+      ? delivery.payload.title
+      : (defaults?.title ?? 'Meia Boca Juniors');
   const body =
     typeof delivery.payload.body === 'string'
       ? delivery.payload.body
-      : 'Você tem uma nova atualização.';
-  const route =
+      : (defaults?.body ?? 'Você tem uma nova atualização.');
+  const routeIsValid =
     typeof delivery.payload.route === 'string' &&
-    /^\/app(?:\/[a-z0-9-]+)*(?:\/[0-9a-f-]+)?$/i.test(delivery.payload.route)
-      ? delivery.payload.route
-      : '/app';
+    /^\/app(?:\/[a-z0-9-]+)*(?:\/[0-9a-f-]+)?$/i.test(delivery.payload.route);
+  const route = routeIsValid
+    ? (delivery.payload.route as string)
+    : (defaults?.route ?? '/app');
   return {
     body: body.slice(0, 240),
     externalId: delivery.externalId,

@@ -61,6 +61,8 @@ export const domainLabels = {
     LINEUP_PUBLISHED: 'Escalação publicada',
     VOTING_OPENED: 'Votação aberta',
     NOTICE_PUBLISHED: 'Aviso publicado',
+    WEEKLY_HIGHLIGHTS: 'Destaques da semana',
+    PRE_MATCH_HIGHLIGHTS: 'Pré-jogo',
   } satisfies Record<Enums['notification_kind'], string>,
 } as const;
 

@@ -3576,6 +3576,8 @@ export type Database = {
         | "LINEUP_PUBLISHED"
         | "VOTING_OPENED"
         | "NOTICE_PUBLISHED"
+        | "WEEKLY_HIGHLIGHTS"
+        | "PRE_MATCH_HIGHLIGHTS"
       notification_status:
         | "PENDING"
         | "PROCESSING"
@@ -3746,6 +3748,8 @@ export const Constants = {
         "LINEUP_PUBLISHED",
         "VOTING_OPENED",
         "NOTICE_PUBLISHED",
+        "WEEKLY_HIGHLIGHTS",
+        "PRE_MATCH_HIGHLIGHTS",
       ],
       notification_status: [
         "PENDING",
