@@ -19,8 +19,8 @@ values
   ('10000000-0000-4000-8000-000000000005')
 on conflict (id) do nothing;
 
-insert into public.seasons (id, year, is_active)
-values ('30000000-0000-4000-8000-000000000001', 2026, true)
+insert into public.seasons (id, year, is_active, starts_on, status)
+values ('30000000-0000-4000-8000-000000000001', 2026, true, '2026-01-01', 'ACTIVE')
 on conflict (id) do nothing;
 
 insert into public.matches (

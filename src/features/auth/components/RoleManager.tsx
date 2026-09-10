@@ -1,5 +1,6 @@
 import { Search, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import { type AuthService } from '@/features/auth/api/auth.service';
 import { useEffectiveRoles, useSetRole } from '@/features/auth/queries/roles.queries';
@@ -81,12 +82,17 @@ export function RoleManager({ service, userId }: RoleManagerProps) {
   );
 }
 
+const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 export function RoleAdministrationPage() {
-  const [draftId, setDraftId] = useState('');
-  const [selectedId, setSelectedId] = useState('');
-  const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-    draftId,
-  );
+  const [searchParams] = useSearchParams();
+  // Chegando pela ficha do atleta (link "Gerenciar papéis"), o identificador já vem
+  // pronto na URL — ninguém precisa descobrir ou digitar o UUID manualmente.
+  const linkedUserId = searchParams.get('userId') ?? '';
+  const initialId = UUID_PATTERN.test(linkedUserId) ? linkedUserId : '';
+  const [draftId, setDraftId] = useState(initialId);
+  const [selectedId, setSelectedId] = useState(initialId);
+  const isUuid = UUID_PATTERN.test(draftId);
 
   return (
     <div className="space-y-6">

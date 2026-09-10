@@ -236,3 +236,68 @@ Antes das variáveis: `athlete-invitations` respondia HTTP 500 (falha de boot) e
 - `OPTIONS` com origem fora da allowlist: **403**;
 - `POST` sem `Authorization`: **401** com corpo `{"error":{"code":"UNAUTHENTICATED",…}}`, confirmando
   que o corpo da função executa e a autorização responde.
+
+## Feature 003 (Post-MVP) — Jobs agendados via `pg_cron`
+
+Três novos jobs criados por migração, todos `security definer` com `search_path = ''`
+e `grant execute` restrito a `service_role`. Nenhum recebe entrada externa; todos são
+idempotentes por chave de deduplicação / verificação de estado, e uma falha do
+provedor de push (`INTEGRATION_UNAVAILABLE`) nunca aborta o job.
+
+| Job (`cron.job.jobname`)         | Agenda (UTC) | Equivalente São Paulo | Função                                                      | Migração                             |
+| -------------------------------- | ------------ | --------------------- | ----------------------------------------------------------- | ------------------------------------ |
+| `mbj-generate-monthly-dues`      | `0 9 1 * *`  | dia 1, 06:00          | `private.generate_monthly_dues(null)`                       | `20260908130600_finance_cron.sql`    |
+| `mbj-mark-overdue-charges`       | `0 6 * * *`  | diário, 03:00         | `private.mark_overdue_charges()`                            | `20260908130600_finance_cron.sql`    |
+| `mbj-generate-weekly-highlights` | `0 11 * * 1` | segunda, 08:00        | `private.generate_weekly_highlights(statement_timestamp())` | `20260908160700_highlights_cron.sql` |
+
+- **`mbj-generate-monthly-dues`** — gera a mensalidade do mês para todo atleta `ACTIVE`
+  sem cobrança já existente naquele período (INSERT baseado em conjunto, uma passada;
+  SC-001). Sem valor padrão configurado, não gera nada e não falha.
+- **`mbj-mark-overdue-charges`** — vira `PENDING → OVERDUE` toda cobrança vencida; nunca
+  toca `PAID`/`CANCELLED`. Também um UPDATE baseado em conjunto.
+- **`mbj-generate-weekly-highlights`** — resume os craques dos últimos 7 dias sobre
+  consolidações `VALID` e enfileira uma notificação `WEEKLY_HIGHLIGHTS`
+  (`route=/app/historico`), determinística sobre dados idênticos e idempotente pela
+  `week_key` ISO. Categoria empatada/vazia é omitida.
+
+**Sem novo scheduler para o pré-jogo.** `private.generate_pre_match_highlights(match_id)`
+(payload `PRE_MATCH_HIGHLIGHTS`, `route=/app/partidas/:matchId`) é chamado de dentro da
+rotina MVP de lembretes `private.generate_attendance_reminders` (~24 h antes do
+apito), com `exception when others then null` para não afetar os lembretes. Idempotente
+por `pre-match-highlights:<match_id>`.
+
+**Render das notificações novas:** `supabase/functions/dispatch-notifications` ganhou
+defaults para `WEEKLY_HIGHLIGHTS` e `PRE_MATCH_HIGHLIGHTS`; falha do provedor é no-op
+graciosa (FR-026, SC-007).
+
+## T103 — Backup pré-migração verificado (feature 003)
+
+Portão de release da feature `003-mbj-post-mvp-expansion` (PR #209): backup verificado
+do Supabase **production** antes de aplicar as 31 migrações.
+
+Via primária (webhook n8n `mbj-backup-pre-migration`) indisponível nesta sessão — token
+de header é config de instância, nunca versionado. Usada a **contingência documentada**
+(`ops/n8n/README.md` §"Contingência local"): disparo manual de `backup.yml` em `main`
+via `workflow_dispatch`, com validação do artefato sanitizado de um dia.
+
+| Campo               | Valor                                                                                     |
+| ------------------- | ----------------------------------------------------------------------------------------- |
+| GitHub Actions run  | `34408565465` (`Verified Supabase backup`, `main`, `workflow_dispatch`, `success`, 5m59s) |
+| Request ID          | `cb36b7b8-7894-4f55-b0ee-0eacdc301454`                                                    |
+| Backup ID           | `9d29448348f547a193650a142e3c04b7`                                                        |
+| Manifest SHA-256    | `40ec51f5163069f1e5a01f700f2583dbca320b75bfd385b63d7c5d32b5a3ed3a`                        |
+| Objeto privado (R2) | `backups/2026/09/9d29448348f547a193650a142e3c04b7.age`                                    |
+| Verificado em       | `2026-09-09T21:50:26Z`                                                                    |
+| `status`            | **`VERIFIED`**                                                                            |
+
+As 7 verificações de `specs/001-mbj-mvp-core/contracts/backup-automation.md` passam:
+`contractVersion` suportado; `requestId` == request gerado; `runId` == run correlacionado
+concluído (`success`); `manifestSha256` é hex de 64 minúsculas; `encryptedObjectKey` sob
+o prefixo allowlisted `backups/`; `verifiedAt` é UTC da janela da execução; `status` é
+exatamente `VERIFIED`.
+
+O artefato sanitizado (`backup-result-<request_id>/backup-result.json`, retenção 1 dia)
+não contém dump, manifesto, objeto Storage, signed URL, log, credencial ou dado pessoal.
+Nenhuma migração foi aplicada nesta etapa; a aplicação em produção (`supabase db push`)
+deve ocorrer **imediatamente após** este backup, conforme `docs/deployment.md`
+§"Feature 003 — Ordem de migração e backup".

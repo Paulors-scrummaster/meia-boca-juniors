@@ -1,17 +1,26 @@
 <!--
 Sync Impact Report
-- Version change: template (unratified) -> 1.0.0
+- Version change: 1.0.0 -> 1.1.0
+- Rationale: MINOR. Principle III materially expanded — a new explicitly PERMITTED boundary
+  ("Internal Financial Bookkeeping") is added and the blanket "Payments, billing ... MUST NOT be
+  implemented" prohibition is narrowed to "External payment processing ... MUST NOT be implemented".
+  No principle removed or incompatibly redefined.
 - Modified principles:
-  - Placeholder Principle 1 -> I. Server-Enforced Security
-  - Placeholder Principle 2 -> II. Domain Integrity and Historical Preservation
-  - Placeholder Principle 3 -> III. MVP Simplicity and Controlled Scope
-  - Placeholder Principle 4 -> IV. Automated Quality Gates
-  - Placeholder Principle 5 -> V. Resilience, Privacy, and Operability
-- Added sections:
-  - Product and Technical Constraints
-  - Development Workflow and Delivery Gates
+  - III. MVP Simplicity and Controlled Scope (prohibition narrowed; "Internal Financial Bookkeeping
+    (permitted boundary)" paragraph added)
+- Added sections: none (new paragraph within Principle III)
 - Removed sections: none
-- Follow-up TODOs: none
+- Supersession note: This amendment resolves the conflict that required treating the Financial
+  module of feature 003-mbj-post-mvp-expansion as a permanent deviation from Principle III. With
+  v1.1.0 that module is compliant by amendment; the Principle III deviation entry in
+  specs/003-mbj-post-mvp-expansion/plan.md may be removed. The Principle V (offline writes)
+  deviation for the same feature is unchanged and still stands.
+- Follow-up TODOs:
+  - DONE(TECH_STACK_S14): TECH_STACK.md section 14 ("Pagamentos e recorrência") updated 2026-09-08
+    to mirror the permitted/prohibited "Internal Financial Bookkeeping" boundary below, keeping the
+    subordinate guide consistent with the constitution (Governance requirement).
+- Prior report (template -> 1.0.0): initial ratification of Principles I-V, "Product and Technical
+  Constraints", and "Development Workflow and Delivery Gates". No follow-up TODOs at that time.
 -->
 # Meia Boca Juniors Constitution
 
@@ -39,15 +48,33 @@ eligibility, lineup eligibility, and official statistics MUST NOT depend exclusi
 logic. This preserves trustworthy club records even under concurrent or direct API requests.
 
 ### III. MVP Simplicity and Controlled Scope
-The MVP MUST remain a single-tenant, modular monolith dedicated to the Meia Boca Juniors and delivered
-as a responsive, mobile-first React PWA; native Android/iOS applications and a shared multi-tenant
-database are out of scope. The approved stack in `TECH_STACK.md` is binding. New infrastructure,
-libraries, abstractions, feature flags, background services, or external integrations MUST have a
-demonstrated MVP requirement and a simpler option comparison before adoption. Payments, billing,
-transactional email, behavioral analytics, marketing, product AI, multiple languages, and SaaS
-capabilities MUST NOT be implemented in this phase. White-Label readiness MUST be limited to
-centralized visual and institutional configuration with independent multi-instance deployments.
-This protects the R$ 0 incremental-cost target and keeps the solo learning project deliverable.
+The application MUST remain a single-tenant, modular monolith dedicated to the Meia Boca Juniors and
+delivered as a responsive, mobile-first React PWA; native Android/iOS applications and a shared
+multi-tenant database are out of scope. The approved stack in `TECH_STACK.md` is binding. New
+infrastructure, libraries, abstractions, feature flags, background services, or external integrations
+MUST have a demonstrated requirement and a simpler option comparison before adoption. External
+payment processing, behavioral analytics, marketing, product AI, multiple languages, and SaaS
+capabilities MUST NOT be implemented. White-Label readiness MUST be limited to centralized visual and
+institutional configuration with independent multi-instance deployments. This protects the R$ 0
+incremental-cost target and keeps the solo learning project deliverable.
+
+**Internal Financial Bookkeeping (permitted boundary).** The application MAY record and manage the
+club's internal financial control without becoming a payment platform. Governing rule: the
+application MAY record who owes, how much, when it fell due, and whether it has been manually marked
+as paid; it MUST NOT process the financial transaction itself. The following are explicitly
+PERMITTED: internal generation and control of membership dues; charge records; the charge states
+PENDING, PAID, OVERDUE, and CANCELLED; manual settlement ("baixa"); reversal of a settlement; charge
+cancellation; exemptions; delinquency control and badges; internal cost-sharing splits ("rateios");
+financial history and audit trail; and the internal scheduled jobs (cron) those functions require.
+The following remain PROHIBITED unless a future constitutional amendment lifts the restriction:
+payment gateways; PIX; card processing; bank-slip ("boleto") issued by an external provider;
+checkout flows; stored monetary balances or wallets; real movement of money; any external
+billing/payment integration; billing or collection transactional email that would require a new
+provider; and any feature that would make the MBJ application a processor or intermediary of
+payments. Every bookkeeping write MUST satisfy Principles I and II — server-enforced authorization
+and RLS, an audit entry recording actor, timestamp, action, and affected resource, and atomic
+execution of multi-step operations. This boundary supersedes any narrower reading of `TECH_STACK.md`
+section 14; that section MUST be updated to match.
 
 ### IV. Automated Quality Gates
 Every change MUST preserve strict TypeScript correctness and pass formatting, lint, typecheck,
@@ -128,4 +155,4 @@ the applicable principles. Deviations MUST be visible, narrowly scoped, approved
 owner, and accompanied by a remediation or migration plan. Unjustified complexity or a control that
 cannot be verified MUST be rejected.
 
-**Version**: 1.0.0 | **Ratified**: 2026-08-25 | **Last Amended**: 2026-08-25
+**Version**: 1.1.0 | **Ratified**: 2026-08-25 | **Last Amended**: 2026-09-08

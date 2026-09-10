@@ -81,6 +81,14 @@ interface ClubConfig {
     pwaIconMaskable512: string;
   };
   theme: Readonly<Record<SemanticThemeToken, string>>;
+  typography: {
+    /**
+     * Pilha da fonte de display (nameplate do cartão — FR-019f). Espelho
+     * White-Label do token `--font-display` declarado em `src/index.css`; a
+     * paridade é garantida por `club.config.test.ts`.
+     */
+    display: string;
+  };
   approvedFormations: readonly ApprovedFormation[];
 }
 
@@ -143,6 +151,10 @@ export const clubConfig = {
     pitch: '160 61% 15%',
     'pitch-foreground': '0 0% 100%',
     'pitch-line': '159 11% 75%',
+  },
+  typography: {
+    display:
+      "'Rajdhani', Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
   },
   approvedFormations: APPROVED_FORMATIONS,
 } as const satisfies ClubConfig;

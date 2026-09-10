@@ -1,8 +1,13 @@
-import { ArrowLeft, History, Pencil } from 'lucide-react';
+import { ArrowLeft, History, Pencil, ShieldCheck } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 
 import type { AuthService } from '@/features/auth/api/auth.service';
 import { InvitationManager } from '@/features/auth/components/InvitationManager';
+import { DelinquencyBadge } from '@/features/finance/components/DelinquencyBadge';
+import { useDelinquencyBadge } from '@/features/finance/queries/charges.queries';
+import type { GamificationService } from '@/features/gamification/api/gamification.service';
+import { AthleteCardPanel } from '@/features/gamification/components/AthleteCardPanel';
+import { AthleteTrophyGallery } from '@/features/gamification/components/AthleteTrophyGallery';
 import type { RosterService } from '@/features/roster/api/roster.service';
 import { AthleteAvatar } from '@/features/roster/components/AthleteAvatar';
 import { useAthlete } from '@/features/roster/queries/roster.queries';
@@ -15,6 +20,7 @@ interface AthleteProfilePageProps {
   athleteId?: string;
   authService?: AuthService;
   canManage?: boolean;
+  gamificationService?: GamificationService;
   service?: RosterService;
 }
 
@@ -22,11 +28,13 @@ export function AthleteProfilePage({
   athleteId,
   authService,
   canManage = false,
+  gamificationService,
   service,
 }: AthleteProfilePageProps) {
   const params = useParams();
   const id = athleteId ?? params.athleteId ?? '';
   const query = useAthlete(id, service);
+  const delinquency = useDelinquencyBadge(id);
   if (query.isPending) return <LoadingState label="Carregando ficha esportiva" />;
   if (query.isError)
     return (
@@ -54,8 +62,11 @@ export function AthleteProfilePage({
             url={athlete.avatar_url}
           />
           <div className="flex-1">
-            <span className="rounded-full bg-muted px-3 py-1 text-xs font-bold">
-              {domainLabels.athleteStatus[athlete.status]}
+            <span className="inline-flex flex-wrap items-center gap-2">
+              <span className="rounded-full bg-muted px-3 py-1 text-xs font-bold">
+                {domainLabels.athleteStatus[athlete.status]}
+              </span>
+              <DelinquencyBadge value={delinquency.data} />
             </span>
             <h1 className="mt-3 text-3xl font-black">{athlete.full_name}</h1>
             <p className="mt-1 text-lg text-muted-foreground">
@@ -64,12 +75,22 @@ export function AthleteProfilePage({
             <p className="mt-1 font-semibold">{athlete.primary_position}</p>
           </div>
           {canManage && !athlete.anonymized_at ? (
-            <Link
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-5 font-bold text-primary-foreground"
-              to={`/app/admin/roster/${athlete.id}/edit`}
-            >
-              <Pencil aria-hidden="true" className="h-5 w-5" /> Editar perfil
-            </Link>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Link
+                className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-5 font-bold text-primary-foreground"
+                to={`/app/admin/roster/${athlete.id}/edit`}
+              >
+                <Pencil aria-hidden="true" className="h-5 w-5" /> Editar perfil
+              </Link>
+              {athlete.user_id ? (
+                <Link
+                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border px-5 font-bold"
+                  to={`/app/admin?userId=${athlete.user_id}`}
+                >
+                  <ShieldCheck aria-hidden="true" className="h-5 w-5" /> Gerenciar papéis
+                </Link>
+              ) : null}
+            </div>
           ) : null}
         </div>
       </section>
@@ -80,6 +101,17 @@ export function AthleteProfilePage({
           {...(authService ? { service: authService } : {})}
         />
       ) : null}
+
+      <AthleteCardPanel
+        athleteId={athlete.id}
+        avatarUrl={athlete.avatar_url}
+        {...(gamificationService ? { service: gamificationService } : {})}
+      />
+
+      <AthleteTrophyGallery
+        athleteId={athlete.id}
+        {...(gamificationService ? { service: gamificationService } : {})}
+      />
 
       <section aria-labelledby="history-title" className="rounded-3xl border bg-card p-6">
         <div className="flex items-center gap-3">

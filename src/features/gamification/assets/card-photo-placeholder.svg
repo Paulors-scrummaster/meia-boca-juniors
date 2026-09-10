@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none" aria-hidden="true">
+  <!--
+    Silhueta neutra — último elo da cadeia de fallback da foto do atleta
+    (recorte → athletes.photo_path → esta silhueta). `currentColor` + opacidade;
+    fundo transparente.
+  -->
+  <g fill="currentColor" opacity="0.35">
+    <circle cx="100" cy="74" r="40" />
+    <path d="M28 200 C28 150 60 122 100 122 C140 122 172 150 172 200 Z" />
+  </g>
+</svg>

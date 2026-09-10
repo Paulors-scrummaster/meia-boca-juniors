@@ -176,3 +176,108 @@ test('cria, edita, inativa, preserva histórico e reutiliza número', async ({ p
   await page.getByRole('button', { name: 'Salvar atleta' }).click();
   await expect(page.getByText('Número Reutilizado')).toBeVisible();
 });
+
+test('gerencia papéis a partir da ficha do atleta, sem exigir o identificador técnico', async ({
+  page,
+}) => {
+  const linkedAthleteId = '00000000-0000-4000-8000-000000006301';
+  const linkedUserId = '00000000-0000-4000-8000-000000006302';
+  const unlinkedAthleteId = '00000000-0000-4000-8000-000000006303';
+  let roles = ['ATHLETE'];
+
+  const athletes: Array<Record<string, unknown>> = [
+    {
+      anonymized_at: null,
+      created_at: '2026-08-25T00:00:00.000Z',
+      full_name: 'Atleta Com Conta',
+      id: linkedAthleteId,
+      inactivated_at: null,
+      photo_path: null,
+      primary_position: 'Atacante',
+      shirt_name: 'ComConta',
+      shirt_number: 11,
+      status: 'ACTIVE',
+      updated_at: '2026-08-25T00:00:00.000Z',
+      user_id: linkedUserId,
+    },
+    {
+      anonymized_at: null,
+      created_at: '2026-08-25T00:00:00.000Z',
+      full_name: 'Atleta Sem Conta',
+      id: unlinkedAthleteId,
+      inactivated_at: null,
+      photo_path: null,
+      primary_position: 'Zagueiro',
+      shirt_name: 'SemConta',
+      shirt_number: 4,
+      status: 'ACTIVE',
+      updated_at: '2026-08-25T00:00:00.000Z',
+      user_id: null,
+    },
+  ];
+
+  await page.route('http://127.0.0.1:54321/**', async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    if (request.method() === 'OPTIONS') return json(route, null, 204);
+    if (url.pathname === '/auth/v1/token')
+      return json(route, {
+        access_token: jwt(),
+        expires_at: 2_000_000_000,
+        expires_in: 3600,
+        refresh_token: 'refresh',
+        token_type: 'bearer',
+        user: user(),
+      });
+    if (url.pathname === '/auth/v1/user') return json(route, user());
+    if (url.pathname === '/rest/v1/profiles')
+      return json(route, {
+        account_status: 'ACTIVE',
+        id: presidentId,
+        must_change_password: false,
+      });
+    if (url.pathname === '/rest/v1/user_roles') return json(route, [{ role: 'PRESIDENT' }]);
+    if (url.pathname === '/rest/v1/athletes') {
+      const idFilter = url.searchParams.get('id');
+      if (idFilter?.startsWith('eq.'))
+        return json(route, athletes.find((item) => item.id === idFilter.slice(3)) ?? null);
+      return json(route, athletes);
+    }
+    if (url.pathname === '/rest/v1/rpc/get_user_roles') {
+      const input = request.postDataJSON();
+      expect(input.target_user_id).toBe(linkedUserId);
+      return json(route, { roles });
+    }
+    if (url.pathname === '/rest/v1/rpc/set_user_role') {
+      const input = request.postDataJSON();
+      roles = input.should_assign
+        ? [...roles, input.target_role]
+        : roles.filter((role) => role !== input.target_role);
+      return json(route, { roles });
+    }
+    return json(route, { message: `Mock ausente: ${request.method()} ${url.pathname}` }, 500);
+  });
+
+  await page.goto('/login');
+  await page.getByLabel('E-mail').fill('presidente@mbj.test');
+  await page.getByLabel('Senha').fill('senha-local');
+  await page.getByRole('button', { name: 'Entrar' }).click();
+
+  // Atleta sem conta vinculada: nada de "Gerenciar papéis" — não há usuário para
+  // gerenciar ainda.
+  await page.goto(`/app/roster/${unlinkedAthleteId}`);
+  await expect(page.getByRole('link', { name: 'Gerenciar papéis' })).toHaveCount(0);
+
+  // Atleta com conta: o link leva direto para a administração de papéis, com o
+  // identificador já resolvido pela própria aplicação (FR-014-like UX fix).
+  await page.goto(`/app/roster/${linkedAthleteId}`);
+  await page.getByRole('link', { name: 'Gerenciar papéis' }).click();
+  await expect(page).toHaveURL(`/app/admin?userId=${linkedUserId}`);
+  await expect(page.getByRole('heading', { name: 'Papéis de acesso' })).toBeVisible();
+  // Nenhum campo de identificador foi preenchido manualmente para chegar aqui.
+  await expect(page.getByLabel('Identificador do usuário')).toHaveValue(linkedUserId);
+
+  await page.getByRole('checkbox', { name: 'Técnico' }).click();
+  await expect(page.getByText('Papéis atualizados com sucesso.')).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: 'Técnico' })).toBeChecked();
+});

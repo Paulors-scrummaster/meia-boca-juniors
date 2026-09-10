@@ -782,27 +782,58 @@
 
 ## 14. Pagamentos e recorrência
 
-### Gateway de pagamento
+> Alinhado à **Constitution v1.1.0** (2026-09-08), Princípio III — limite "Internal Financial
+> Bookkeeping". Regra de arquitetura: o aplicativo PODE registrar quem deve, quanto deve, quando
+> venceu e se foi marcado como pago; NÃO PODE processar a transação financeira em si.
 
-- **Decisão:** não aplicável ao MVP.
+### Escrituração financeira interna — PERMITIDO
+
+- **Decisão:** permitido, dentro do limite constitucional. Abrange: geração e controle interno de
+  mensalidades; registros de cobranças (charges); estados `PENDING` / `PAID` / `OVERDUE` /
+  `CANCELLED`; baixa manual; reversão de baixa; cancelamento; isenções; controle de inadimplência
+  (badge visual, sem bloqueio de acesso); rateios internos; histórico e auditoria financeira; e os
+  cron jobs internos necessários a essas funções. Custo incremental de infraestrutura R$ 0.
+
+### Gateway de pagamento / PIX / cartão / boleto externo / checkout — PROIBIDO
+
+- **Decisão:** proibido salvo futura alteração constitucional. Não haverá gateway de pagamento,
+  integração PIX, processamento de cartão, boleto emitido por provedor externo, nem fluxo de
+  checkout.
+
+### Carteira, saldo e movimentação de dinheiro — PROIBIDO
+
+- **Decisão:** proibido. Sem carteira/saldo financeiro no app e sem qualquer movimentação real de
+  dinheiro; toda a liquidação ocorre fora do aplicativo e é apenas **registrada** por baixa manual.
+
+### Integração externa de billing/payment e e-mail transacional de cobrança — PROIBIDO
+
+- **Decisão:** proibido. Nenhuma integração externa de billing/payment; nenhum e-mail transacional
+  de cobrança que exija um novo provedor. Qualquer funcionalidade que transforme o MBJ em
+  processador ou intermediador de pagamentos está fora de escopo.
 
 ### Cobrança recorrente
 
-- **Decisão:** não aplicável ao MVP.
+- **Decisão:** permitida apenas como **geração interna** de mensalidades (cron interno que cria
+  charges `PENDING`); sem cobrança automática de terceiros.
 
 ### Falha de cobrança
 
-- **Decisão:** não aplicável ao MVP.
+- **Decisão:** não aplicável — não há processamento de pagamento que possa falhar. A "falha" possível
+  é inadimplência, tratada por status `OVERDUE` e badge visual.
 
 ### Testes de pagamento
 
-- **Decisão:** não aplicável ao MVP.
+- **Decisão:** não aplicável. Os testes cobrem a máquina de estados das charges, geração mensal
+  idempotente, RLS e auditoria — nunca transações financeiras reais.
 
 ### Reembolsos e chargebacks
 
-- **Decisão:** não aplicável ao MVP.
+- **Decisão:** não aplicável. O equivalente interno é `reverse_charge_settlement` (estorno de uma
+  baixa lançada por engano) e `cancel_charge` (cancelamento), ambos auditados.
 
-> 💡 Motivo da seção: o aplicativo é de uso interno do time e não processará dinheiro.
+> 💡 Motivo da seção: o aplicativo é de uso interno do time. Ele **escritura** a situação financeira
+> do elenco (quem deve, quanto, vencimento, pago/não pago), mas **não processa dinheiro** — a
+> Constituição v1.1.0 delimita exatamente essa fronteira.
 
 ---
 

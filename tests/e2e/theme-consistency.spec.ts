@@ -114,6 +114,108 @@ test.describe('camada 2b — luminância e contraste do hero da Landing Page', (
 });
 
 /**
+ * Feature 003 · T097 — as telas novas de US1–US4 entram no mesmo portão de paleta
+ * (SC-003a) e ganham uma checagem leve de pt-BR (FR-041): rótulos conhecidos
+ * visíveis e nenhuma string de fallback (chave crua de i18n, `[object Object]`).
+ *
+ * Lista local — não infla o `ROUTE_CATALOG` da feature 002 (cujo total 28 é
+ * asseverado em dois specs), mas reusa exatamente os mesmos helpers de paleta.
+ */
+const POST_MVP_MATCH_ID = '00000000-0000-4000-8000-0000000e5001';
+
+const postMvpMatch = {
+  competition_name: 'Liga de Teste',
+  confirmation_deadline: '2026-10-01T18:00:00.000Z',
+  current_consolidation_id: null,
+  id: POST_MVP_MATCH_ID,
+  location_name: 'Campo Fictício',
+  match_date: '2026-10-02T18:00:00.000Z',
+  opponent_name: 'Adversário Teste',
+  schedule_revision: 1,
+  season_id: '00000000-0000-4000-8000-0000000e5901',
+  status: 'SCHEDULED',
+};
+
+const POST_MVP_SCREENS = [
+  {
+    data: {
+      '/rest/v1/athlete_trophies': [],
+      '/rest/v1/club_all_time_record': {
+        draws: 1,
+        goal_diff: 6,
+        goals_against: 4,
+        goals_for: 10,
+        losses: 1,
+        matches_played: 6,
+        wins: 4,
+      },
+    },
+    label: 'Histórico & Conquistas',
+    path: '/app/historico',
+    ptLabels: ['Histórico & Conquistas', 'Retrospecto do clube', 'Galeria de troféus'],
+    role: 'ATHLETE' as const,
+  },
+  {
+    data: { '/rest/v1/social_events': [] },
+    label: 'Resenhas',
+    path: '/app/resenhas',
+    ptLabels: ['Resenhas', 'Nenhum evento'],
+    role: 'ATHLETE' as const,
+  },
+  {
+    data: {
+      '/rest/v1/athlete_charges': [],
+      '/rest/v1/finance_overview': [],
+    },
+    label: 'Financeiro',
+    path: '/app/financeiro',
+    ptLabels: ['Financeiro', 'Controle de mensalidades'],
+    role: 'PRESIDENT' as const,
+  },
+  {
+    data: {
+      '/rest/v1/athletes': [],
+      '/rest/v1/live_match_events': [],
+      '/rest/v1/live_match_setups': [],
+      '/rest/v1/matches': postMvpMatch,
+    },
+    label: 'Súmula ao vivo',
+    path: `/app/partidas/${POST_MVP_MATCH_ID}/sumula`,
+    ptLabels: ['Súmula'],
+    role: 'COACH' as const,
+  },
+];
+
+test.describe('conformidade de paleta e pt-BR — telas novas de US1–US4 (T097, FR-041)', () => {
+  for (const { data, label, path, ptLabels, role } of POST_MVP_SCREENS) {
+    test(`${label} (${path}) não usa cor fora dos tokens e renderiza em pt-BR`, async ({
+      page,
+    }) => {
+      await mockAuthenticatedSession(page, role, { routes: data });
+      await page.goto(path);
+      await page.waitForLoadState('networkidle');
+
+      const tokens = await readThemeTokens(page);
+      const allowed = buildAllowedColors(tokens);
+      const violations = await findPaletteViolations(page, allowed, [QR_CODE_EXEMPTION]);
+      expect(violations, JSON.stringify(violations, null, 2)).toEqual([]);
+
+      // Escopo no conteúdo principal: os rótulos também aparecem nos links de
+      // navegação, ocultos na gaveta mobile.
+      const main = page.getByRole('main');
+      for (const labelText of ptLabels) {
+        await expect(main.getByText(labelText, { exact: false }).first()).toBeVisible();
+      }
+
+      const bodyText = await main.innerText();
+      for (const fallback of ['[object Object]', '{{', 'undefined', 'NaN']) {
+        expect(bodyText, `fallback "${fallback}" visível em ${path}`).not.toContain(fallback);
+      }
+    });
+  }
+});
+
+/**
  * FR-042 / SC-014 / GL-17: pares não textuais sujeitos a 3:1 — limites de controle,
  * indicadores de foco e objetos gráficos informativos. Valores de referência
  * calculados em `spec.md` (seção "Contraste de elementos não textuais").

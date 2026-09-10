@@ -8,9 +8,10 @@ import { AuthenticatedLayout } from '@/app/layouts/AuthenticatedLayout';
 import { createAppQueryClient } from '@/app/providers/QueryProvider';
 import type { NotificationsService } from '@/features/notifications/api/notifications.service';
 
-// PRESIDENT + ATHLETE cobre, em conjunto, os 10 itens do conjunto normativo
-// (data-model.md §3.2): os 6 comuns, os 2 exclusivos de ATHLETE, o de COACH/PRESIDENT
-// e o exclusivo de PRESIDENT.
+// PRESIDENT + ATHLETE cobre, em conjunto, o conjunto normativo (data-model.md §3.2)
+// estendido pela feature 003: os 8 comuns (6 do MVP + "Histórico & Conquistas" e
+// "Resenhas"), os 2 exclusivos de ATHLETE, o de COACH/PRESIDENT e os 2 exclusivos
+// de PRESIDENT ("Financeiro" e "Administração").
 const context = {
   error: null,
   isAal2: true,
@@ -70,7 +71,7 @@ describe('AuthenticatedLayout', () => {
     ).toBeInTheDocument();
   });
 
-  it('lista os 10 itens do conjunto normativo pela união dos papéis efetivos', () => {
+  it('lista os itens do conjunto normativo pela união dos papéis efetivos', () => {
     renderLayout();
     const nav = getSidebar().getByRole('navigation', { name: 'Navegação principal' });
     const labels = [
@@ -78,11 +79,15 @@ describe('AuthenticatedLayout', () => {
       'Elenco',
       'Partidas',
       'Estatísticas',
+      'Histórico & Conquistas',
+      'Resenhas',
       'Mural',
       'Notificações',
       'Área do atleta',
       'Craque do Jogo',
+      'Minhas mensalidades',
       'Comissão técnica',
+      'Financeiro',
       'Administração',
     ];
     for (const label of labels) {

@@ -3,12 +3,16 @@ import {
   Bell,
   Briefcase,
   Goal,
+  History,
   Home,
+  Landmark,
   Megaphone,
+  PartyPopper,
   Settings,
   Trophy,
   UserCircle,
   Users,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
@@ -26,15 +30,24 @@ interface NavigationItem {
 }
 
 /**
- * Conjunto normativo (data-model.md §3.2). Fechado: nenhum item novo, nenhum destino
- * existente sem item (V-10, V-11). As condições de `visibleFor` são idênticas às
- * vigentes antes da feature (V-12) — apenas reorganizadas em declaração única.
+ * Conjunto normativo (data-model.md §3.2). A feature 002 fechou este conjunto; a
+ * feature 003 (Post-MVP Modules Expansion) o estende com destinos novos —
+ * "Resenhas", "Financeiro" e "Histórico & Conquistas" — mantendo as mesmas
+ * condições de `visibleFor` do modelo de papéis existente.
  */
 const NAVIGATION_ITEMS: readonly NavigationItem[] = [
   { end: true, icon: Home, label: 'Início', to: '/app', visibleFor: 'all' },
   { end: false, icon: Users, label: 'Elenco', to: '/app/roster', visibleFor: 'all' },
   { end: false, icon: Goal, label: 'Partidas', to: '/app/matches', visibleFor: 'all' },
   { end: false, icon: BarChart3, label: 'Estatísticas', to: '/app/statistics', visibleFor: 'all' },
+  {
+    end: false,
+    icon: History,
+    label: 'Histórico & Conquistas',
+    to: '/app/historico',
+    visibleFor: 'all',
+  },
+  { end: false, icon: PartyPopper, label: 'Resenhas', to: '/app/resenhas', visibleFor: 'all' },
   { end: false, icon: Megaphone, label: 'Mural', to: '/app/notices', visibleFor: 'all' },
   {
     end: false,
@@ -59,10 +72,24 @@ const NAVIGATION_ITEMS: readonly NavigationItem[] = [
   },
   {
     end: false,
+    icon: Wallet,
+    label: 'Minhas mensalidades',
+    to: '/app/athlete/financeiro',
+    visibleFor: ['ATHLETE'],
+  },
+  {
+    end: false,
     icon: Briefcase,
     label: 'Comissão técnica',
     to: '/app/staff',
     visibleFor: ['COACH', 'PRESIDENT'],
+  },
+  {
+    end: false,
+    icon: Landmark,
+    label: 'Financeiro',
+    to: '/app/financeiro',
+    visibleFor: ['PRESIDENT'],
   },
   {
     end: false,

@@ -13,6 +13,12 @@ import {
   RoleRouteGuard,
 } from '@/app/router/guards';
 import { RoleAdministrationPage } from '@/features/auth/components/RoleManager';
+import { FinancePanelPage } from '@/features/finance/pages/FinancePanelPage';
+import { MyChargesPage } from '@/features/finance/pages/MyChargesPage';
+import { HistoryAchievementsPage } from '@/features/gamification/pages/HistoryAchievementsPage';
+import { SeasonAdminPage } from '@/features/gamification/pages/SeasonAdminPage';
+import { SocialEventDetailPage } from '@/features/social-events/pages/SocialEventDetailPage';
+import { SocialEventsListPage } from '@/features/social-events/pages/SocialEventsListPage';
 import { CallUpManager } from '@/features/attendance/components/CallUpManager';
 import { PresenceResponsePanel } from '@/features/attendance/components/PresenceResponsePanel';
 import { AttendanceDashboardPage } from '@/features/attendance/pages/AttendanceDashboardPage';
@@ -25,6 +31,7 @@ import { createMatchesService, matchKeys } from '@/features/matches/api/matches.
 import { MatchForm } from '@/features/matches/components/MatchForm';
 import { MatchDetailPage } from '@/features/matches/pages/MatchDetailPage';
 import { MatchesPage } from '@/features/matches/pages/MatchesPage';
+import { LiveRecordingPage } from '@/features/live-match/pages/LiveRecordingPage';
 import { LineupEditorPage } from '@/features/lineups/pages/LineupEditorPage';
 import { PublishedLineupPage } from '@/features/lineups/pages/PublishedLineupPage';
 import { MvpVotingPage } from '@/features/mvp-voting/pages/MvpVotingPage';
@@ -170,6 +177,33 @@ function NewMatchRoutePage() {
   return <MatchForm />;
 }
 
+function SocialEventsListRoutePage() {
+  const { isAal2, roles } = useAuth();
+  return <SocialEventsListPage canManage={isAal2 && roles.includes('PRESIDENT')} />;
+}
+
+function SocialEventDetailRoutePage() {
+  const { isAal2, roles } = useAuth();
+  return (
+    <SocialEventDetailPage
+      canManage={isAal2 && roles.includes('PRESIDENT')}
+      isAthlete={roles.includes('ATHLETE')}
+    />
+  );
+}
+
+function LiveSumulaRoutePage() {
+  const { isAal2, roles, user } = useAuth();
+  const { matchId = '' } = useParams();
+  return (
+    <LiveRecordingPage
+      canManage={isAal2 && roles.some((role) => role === 'COACH' || role === 'PRESIDENT')}
+      currentUserId={user?.id ?? ''}
+      matchId={matchId}
+    />
+  );
+}
+
 function EditMatchRoutePage() {
   const { matchId = '' } = useParams();
   const service = createMatchesService();
@@ -242,6 +276,10 @@ const featureRoutes: RouteObject[] = [
               { path: 'matches/:matchId', element: <MatchDetailRoutePage /> },
               { path: 'matches/:matchId/lineup', element: <PublishedLineupRoutePage /> },
               { path: 'statistics', element: <SeasonRankingsPage /> },
+              { path: 'historico', element: <HistoryAchievementsPage /> },
+              { path: 'resenhas', element: <SocialEventsListRoutePage /> },
+              { path: 'resenhas/:eventId', element: <SocialEventDetailRoutePage /> },
+              { path: 'partidas/:matchId/sumula', element: <LiveSumulaRoutePage /> },
               { path: 'notices', element: <NoticesRoutePage /> },
               { path: 'notification-preferences', element: <PushPermissionCard /> },
               {
@@ -259,6 +297,7 @@ const featureRoutes: RouteObject[] = [
                   },
                   { path: 'matches/:matchId/attendance', element: <AthleteAttendanceRoutePage /> },
                   { path: 'mvp-voting', element: <MvpVotingPage /> },
+                  { path: 'financeiro', element: <MyChargesPage /> },
                 ],
               },
               {
@@ -267,15 +306,7 @@ const featureRoutes: RouteObject[] = [
                   {
                     element: <Aal2RouteGuard />,
                     children: [
-                      {
-                        path: 'staff',
-                        element: (
-                          <Placeholder
-                            title="Comissão técnica"
-                            description="Seu acesso à comissão técnica está protegido por verificação em duas etapas."
-                          />
-                        ),
-                      },
+                      { path: 'staff', element: <SeasonAdminPage /> },
                       { path: 'staff/matches/new', element: <NewMatchRoutePage /> },
                       { path: 'staff/matches/:matchId/edit', element: <EditMatchRoutePage /> },
                       {
@@ -297,6 +328,7 @@ const featureRoutes: RouteObject[] = [
                     element: <Aal2RouteGuard />,
                     children: [
                       { path: 'admin', element: <RoleAdministrationPage /> },
+                      { path: 'financeiro', element: <FinancePanelPage /> },
                       { path: 'admin/roster/new', element: <CreateAthletePage /> },
                       { path: 'admin/roster/:athleteId/edit', element: <EditAthletePage /> },
                       {

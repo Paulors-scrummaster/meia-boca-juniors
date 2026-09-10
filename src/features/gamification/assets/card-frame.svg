@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" fill="none" aria-hidden="true">
+  <!--
+    Moldura ornamental do cartão MBJ. Original: nenhum contorno/silhueta proprietária
+    de EA/FIFA é reproduzido. Todo traço herda `currentColor` (o componente aplica o
+    token dourado — `--secondary`/`--accent`); a base navy vem do contêiner do cartão.
+    Proporção retrato ~2:3. Define também o recorte da foto (`mbjCardPhotoClip`).
+  -->
+  <defs>
+    <clipPath id="mbjCardPhotoClip">
+      <path d="M40 96 H360 V150 C360 300 300 372 200 400 C100 372 40 300 40 150 Z" />
+    </clipPath>
+    <linearGradient id="mbjFrameSheen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="currentColor" stop-opacity="0.95" />
+      <stop offset="0.5" stop-color="currentColor" stop-opacity="0.55" />
+      <stop offset="1" stop-color="currentColor" stop-opacity="0.95" />
+    </linearGradient>
+  </defs>
+
+  <!-- Contorno externo: topo em ponta curva + aba inferior para a faixa de atributos -->
+  <path
+    d="M200 8 C150 8 96 20 40 40 C36 150 34 300 44 392 C60 486 120 556 200 592
+       C280 556 340 486 356 392 C366 300 364 150 360 40 C304 20 250 8 200 8 Z"
+    stroke="url(#mbjFrameSheen)" stroke-width="6" />
+
+  <!-- Filete interno -->
+  <path
+    d="M200 26 C158 26 110 37 56 55 C52 156 51 296 60 382 C74 468 128 532 200 566
+       C272 532 326 468 340 382 C349 296 348 156 344 55 C290 37 242 26 200 26 Z"
+    stroke="currentColor" stroke-width="2" stroke-opacity="0.5" />
+
+  <!-- Chanfro ornamental do topo -->
+  <path d="M150 34 L200 14 L250 34" stroke="currentColor" stroke-width="3" stroke-opacity="0.85" />
+  <circle cx="200" cy="20" r="4" fill="currentColor" />
+
+  <!-- Flourishes de canto -->
+  <path d="M58 74 L92 74 M58 74 L58 108" stroke="currentColor" stroke-width="3" stroke-opacity="0.8" />
+  <path d="M342 74 L308 74 M342 74 L342 108" stroke="currentColor" stroke-width="3" stroke-opacity="0.8" />
+
+  <!-- Aba inferior: régua acima da faixa de atributos -->
+  <path d="M64 470 H336" stroke="currentColor" stroke-width="3" stroke-opacity="0.85" />
+  <path d="M96 486 H304" stroke="currentColor" stroke-width="1.5" stroke-opacity="0.45" />
+</svg>
