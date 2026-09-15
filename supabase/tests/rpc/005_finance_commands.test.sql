@@ -1,6 +1,6 @@
 begin;
 
-select plan(34);
+select plan(35);
 
 -- Contrato -------------------------------------------------------------------
 select has_table('public', 'dues_settings', 'dues_settings table exists');
@@ -98,7 +98,9 @@ select is(
   'PENDING', 'a manual charge starts PENDING'
 );
 
--- Máquina de estados (a cobrança automática de 2026-09 do atleta ...003).
+-- Máquina de estados. O trecho PAID -> reverse depende de due_date vs. current_date,
+-- então usa a cobrança manual (due_date = current_date + 5, sempre no futuro) em vez da
+-- automática de 2026-09, cujo due_date fixo (10º dia do período) envelhece com o tempo real.
 set local role authenticated;
 select set_config('request.jwt.claim.sub', '10000000-0000-4000-8000-000000000001', true);
 select set_config('request.jwt.claims', '{"sub":"10000000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}', true);
@@ -116,26 +118,32 @@ select throws_ok(
   'P0001', 'CHARGE_LOCKED', 'a PAID charge cannot be settled again'
 );
 select is(
+  (public.settle_charge(
+    (select id from public.athlete_charges where athlete_id = '20000000-0000-4000-8000-000000000003' and type = 'MANUAL_OVERRIDE'),
+    'PIX conferido', gen_random_uuid()) ->> 'status'),
+  'PAID', 'settle moves the future-due manual charge PENDING -> PAID'
+);
+select is(
   (public.reverse_charge_settlement(
-    (select id from public.athlete_charges where athlete_id = '20000000-0000-4000-8000-000000000003' and type = 'MONTHLY_AUTOMATIC' and period = '2026-09'),
+    (select id from public.athlete_charges where athlete_id = '20000000-0000-4000-8000-000000000003' and type = 'MANUAL_OVERRIDE'),
     'engano', gen_random_uuid()) ->> 'status'),
   'PENDING', 'reverse restores PENDING when the due date has not passed'
 );
 select is(
   (public.cancel_charge(
-    (select id from public.athlete_charges where athlete_id = '20000000-0000-4000-8000-000000000003' and type = 'MONTHLY_AUTOMATIC' and period = '2026-09'),
+    (select id from public.athlete_charges where athlete_id = '20000000-0000-4000-8000-000000000003' and type = 'MANUAL_OVERRIDE'),
     'acordo verbal', gen_random_uuid()) ->> 'status'),
   'CANCELLED', 'cancel voids the charge'
 );
 select throws_ok(
   $$select public.cancel_charge(
-      (select id from public.athlete_charges where athlete_id = '20000000-0000-4000-8000-000000000003' and type = 'MONTHLY_AUTOMATIC' and period = '2026-09'),
+      (select id from public.athlete_charges where athlete_id = '20000000-0000-4000-8000-000000000003' and type = 'MANUAL_OVERRIDE'),
       'x', gen_random_uuid())$$,
   'P0001', 'CHARGE_LOCKED', 'a CANCELLED charge is a final state'
 );
 select throws_ok(
   $$select public.adjust_charge_amount(
-      (select id from public.athlete_charges where athlete_id = '20000000-0000-4000-8000-000000000003' and type = 'MONTHLY_AUTOMATIC' and period = '2026-09'),
+      (select id from public.athlete_charges where athlete_id = '20000000-0000-4000-8000-000000000003' and type = 'MANUAL_OVERRIDE'),
       99, 'x', gen_random_uuid())$$,
   'P0001', 'CHARGE_LOCKED', 'a CANCELLED charge cannot be adjusted'
 );
@@ -143,7 +151,7 @@ reset role;
 
 select is(
   (select settled_by from public.athlete_charges
-   where athlete_id = '20000000-0000-4000-8000-000000000003' and type = 'MONTHLY_AUTOMATIC' and period = '2026-09'),
+   where athlete_id = '20000000-0000-4000-8000-000000000003' and type = 'MANUAL_OVERRIDE'),
   null::uuid, 'reversing then cancelling clears the settlement metadata'
 );
 select ok(
