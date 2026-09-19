@@ -254,7 +254,10 @@ describe('identity Edge Function contracts', () => {
   it('createAuthAdmin.generateLink surfaces a clear conflict instead of a generic outage when an invite email already has an account', async () => {
     const generateLinkMock = vi.fn().mockResolvedValue({
       data: { properties: undefined, user: null },
-      error: { code: 'email_exists', message: 'A user with this email address has already been registered' },
+      error: {
+        code: 'email_exists',
+        message: 'A user with this email address has already been registered',
+      },
     });
     const fakeClient = {
       auth: { admin: { generateLink: generateLinkMock } },
