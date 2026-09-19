@@ -20,7 +20,7 @@ import {
 import { createAcceptanceRepository, createAcceptInvitationHandler } from './accept.ts';
 
 type InvitationOperation = 'CREATE' | 'RESEND' | 'REVOKE';
-type LinkType = 'invite';
+type LinkType = 'invite' | 'recovery';
 
 interface GeneratedLink {
   actionLink: string;
@@ -162,9 +162,13 @@ export function createAthleteInvitationsHandler(
 
       if (selectedOperation === 'RESEND') {
         const invitation = await dependencies.repository.findActive(athleteId);
+        // The invite's auth user already exists (created by the original CREATE), and
+        // GoTrue's 'invite' link type only works for emails with no account yet — it
+        // fails with "email_exists" otherwise. 'recovery' targets the same existing
+        // user, doesn't create a duplicate account, and lets them (re)set a password.
         const generated = await dependencies.authAdmin.generateLink(
           invitation.emailNormalized,
-          'invite',
+          'recovery',
         );
         await dependencies.repository.recordResend?.({
           actorUserId: context.userId,
@@ -205,7 +209,7 @@ export function createAthleteInvitationsHandler(
   };
 }
 
-function createAuthAdmin(client: SupabaseClient): InvitationAuthAdmin {
+export function createAuthAdmin(client: SupabaseClient): InvitationAuthAdmin {
   return {
     async disableUser(authUserId) {
       const { error } = await client.auth.admin.updateUserById(authUserId, {
@@ -215,6 +219,11 @@ function createAuthAdmin(client: SupabaseClient): InvitationAuthAdmin {
     },
     async generateLink(email, type) {
       const { data, error } = await client.auth.admin.generateLink({ email, type });
+      if (type === 'invite' && error?.code === 'email_exists') {
+        throw new EdgeFunctionError('CONFLICT', error, {
+          email: 'Este e-mail já tem convite ou conta. Use "Gerar novo link" no convite existente.',
+        });
+      }
       if (error || !data.properties?.action_link || !data.user?.id) {
         throw new EdgeFunctionError('INTEGRATION_UNAVAILABLE', error);
       }

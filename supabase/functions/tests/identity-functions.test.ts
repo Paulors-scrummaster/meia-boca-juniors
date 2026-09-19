@@ -1,6 +1,8 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from 'vitest';
 
+import type { SupabaseClient } from '@supabase/supabase-js';
+
 import {
   EdgeFunctionError,
   type IdentitySecurity,
@@ -9,7 +11,7 @@ import {
 } from '../_shared/security';
 import { createAdminResetPasswordHandler } from '../admin-reset-password/index';
 import { createAcceptInvitationHandler } from '../athlete-invitations/accept';
-import { createAthleteInvitationsHandler } from '../athlete-invitations/index';
+import { createAthleteInvitationsHandler, createAuthAdmin } from '../athlete-invitations/index';
 
 const traceId = '00000000-0000-4000-8000-000000009999';
 const actorUserId = '00000000-0000-4000-8000-000000009001';
@@ -144,7 +146,7 @@ describe('identity Edge Function contracts', () => {
     });
   });
 
-  it('renews an unconfirmed invite link and revokes idempotently without product e-mail', async () => {
+  it('renews an unconfirmed invite via a recovery link (not invite) and revokes idempotently', async () => {
     const findActive = vi.fn().mockResolvedValue({
       authUserId: 'auth-user-id',
       emailNormalized: 'jogador@example.test',
@@ -180,7 +182,7 @@ describe('identity Edge Function contracts', () => {
       }),
     );
 
-    expect(generateLink).toHaveBeenCalledWith('jogador@example.test', 'invite');
+    expect(generateLink).toHaveBeenCalledWith('jogador@example.test', 'recovery');
     expect((await responseBody(resend)).data).toEqual({
       deliveryLink:
         'https://auth.example.test/fresh?redirect_to=https%3A%2F%2Ffeature-mbj-mvp-core.meia-boca-juniors.pages.dev%2Fconvite%3FinvitationId%3Dinvite-id',
@@ -192,6 +194,77 @@ describe('identity Edge Function contracts', () => {
     expect((await responseBody(revokeResponse)).data).toEqual({
       invitationId: 'invite-id',
       logicalStatus: 'REVOKED',
+    });
+  });
+
+  it('denies invite management to a non-President role before calling Auth Admin', async () => {
+    const generateLink = vi.fn();
+    const handler = createAthleteInvitationsHandler({
+      activationOrigin,
+      authAdmin: { disableUser: vi.fn(), generateLink },
+      repository: { create: vi.fn(), findActive: vi.fn(), revoke: vi.fn() },
+      security: security({
+        authorize: vi.fn().mockRejectedValue(new EdgeFunctionError('FORBIDDEN')),
+      }),
+    });
+
+    const response = await handler(
+      new Request('http://localhost/manage', {
+        body: JSON.stringify({
+          athleteId: '00000000-0000-4000-8000-000000009101',
+          email: 'jogador@example.test',
+          idempotencyKey: '00000000-0000-4000-8000-000000009203',
+          operation: 'CREATE',
+        }),
+        method: 'POST',
+      }),
+    );
+
+    expect(response.status).toBe(403);
+    expect(generateLink).not.toHaveBeenCalled();
+  });
+
+  it('createAuthAdmin.generateLink returns the link for a successful GoTrue call', async () => {
+    const generateLinkMock = vi.fn().mockResolvedValue({
+      data: {
+        properties: { action_link: 'https://auth.example.test/verify?type=recovery' },
+        user: { id: 'auth-user-id' },
+      },
+      error: null,
+    });
+    const fakeClient = {
+      auth: { admin: { generateLink: generateLinkMock } },
+    } as unknown as SupabaseClient;
+
+    const result = await createAuthAdmin(fakeClient).generateLink(
+      'jogador@example.test',
+      'recovery',
+    );
+
+    expect(generateLinkMock).toHaveBeenCalledWith({
+      email: 'jogador@example.test',
+      type: 'recovery',
+    });
+    expect(result).toEqual({
+      actionLink: 'https://auth.example.test/verify?type=recovery',
+      authUserId: 'auth-user-id',
+    });
+  });
+
+  it('createAuthAdmin.generateLink surfaces a clear conflict instead of a generic outage when an invite email already has an account', async () => {
+    const generateLinkMock = vi.fn().mockResolvedValue({
+      data: { properties: undefined, user: null },
+      error: { code: 'email_exists', message: 'A user with this email address has already been registered' },
+    });
+    const fakeClient = {
+      auth: { admin: { generateLink: generateLinkMock } },
+    } as unknown as SupabaseClient;
+
+    await expect(
+      createAuthAdmin(fakeClient).generateLink('jogador@example.test', 'invite'),
+    ).rejects.toMatchObject({
+      code: 'CONFLICT',
+      fieldErrors: { email: expect.stringContaining('Gerar novo link') },
     });
   });
 
