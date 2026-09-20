@@ -2,9 +2,27 @@ const allowedMimeTypes = new Set(['image/jpeg', 'image/png', 'image/webp']);
 const maxOutputBytes = 1_048_576;
 const maxOutputDimension = 1024;
 
-export interface SquareCrop {
+/**
+ * Proporção retrato do recorte (largura/altura). O cartão do atleta reserva um
+ * espaço bem mais alto que largo para a foto — um recorte quadrado sobrava
+ * espaço vazio e, pior, cortava cabeça/pés na maioria das fotos verticais
+ * comuns (retrato de celular). 3:4 é um meio-termo: reduz o corte necessário
+ * sem virar uma tira estreita demais para fotos horizontais.
+ */
+const PHOTO_CROP_ASPECT_RATIO = 3 / 4;
+
+/**
+ * Fração do espaço vertical sobrando que fica ACIMA do recorte quando a
+ * origem é mais alta que o alvo. Time de futebol costuma fotografar com a
+ * pessoa perto do topo do quadro e sobra de chão embaixo; 0.35 (menos que a
+ * metade) preserva mais cabeça do que um corte central puro (0.5).
+ */
+const TOP_BIAS_FRACTION = 0.35;
+
+export interface PhotoCrop {
   height: number;
-  outputSize: number;
+  outputHeight: number;
+  outputWidth: number;
   width: number;
   x: number;
   y: number;
@@ -19,7 +37,7 @@ export interface DecodedAvatarImage {
 
 export interface AvatarImageAdapter {
   decode(file: File): Promise<DecodedAvatarImage>;
-  renderSquare(image: DecodedAvatarImage, crop: SquareCrop, quality: number): Promise<Blob>;
+  renderCrop(image: DecodedAvatarImage, crop: PhotoCrop, quality: number): Promise<Blob>;
 }
 
 export function validateAvatarFile(file: File): void {
@@ -29,20 +47,32 @@ export function validateAvatarFile(file: File): void {
   if (file.size === 0) throw new Error('A imagem selecionada está vazia.');
 }
 
-export function calculateSquareCrop(
+export function calculatePhotoCrop(
   width: number,
   height: number,
   outputLimit = maxOutputDimension,
-): SquareCrop {
+): PhotoCrop {
   if (width <= 0 || height <= 0) throw new Error('Não foi possível ler as dimensões da imagem.');
-  const side = Math.min(width, height);
-  return {
-    height: side,
-    outputSize: Math.min(side, outputLimit),
-    width: side,
-    x: Math.round((width - side) / 2),
-    y: Math.round((height - side) / 2),
-  };
+
+  const sourceAspectRatio = width / height;
+  let cropWidth: number;
+  let cropHeight: number;
+  if (sourceAspectRatio > PHOTO_CROP_ASPECT_RATIO) {
+    cropHeight = height;
+    cropWidth = Math.round(height * PHOTO_CROP_ASPECT_RATIO);
+  } else {
+    cropWidth = width;
+    cropHeight = Math.round(width / PHOTO_CROP_ASPECT_RATIO);
+  }
+
+  const x = Math.round((width - cropWidth) / 2);
+  const verticalSlack = height - cropHeight;
+  const y = verticalSlack > 0 ? Math.round(verticalSlack * TOP_BIAS_FRACTION) : 0;
+
+  const outputHeight = Math.min(cropHeight, outputLimit);
+  const outputWidth = Math.round(outputHeight * PHOTO_CROP_ASPECT_RATIO);
+
+  return { height: cropHeight, outputHeight, outputWidth, width: cropWidth, x, y };
 }
 
 const browserAdapter: AvatarImageAdapter = {
@@ -55,10 +85,10 @@ const browserAdapter: AvatarImageAdapter = {
       width: bitmap.width,
     };
   },
-  async renderSquare(image, crop, quality) {
+  async renderCrop(image, crop, quality) {
     const canvas = document.createElement('canvas');
-    canvas.width = crop.outputSize;
-    canvas.height = crop.outputSize;
+    canvas.width = crop.outputWidth;
+    canvas.height = crop.outputHeight;
     const context = canvas.getContext('2d');
     if (!context) throw new Error('O navegador não conseguiu preparar a imagem.');
     context.drawImage(
@@ -69,8 +99,8 @@ const browserAdapter: AvatarImageAdapter = {
       crop.height,
       0,
       0,
-      crop.outputSize,
-      crop.outputSize,
+      crop.outputWidth,
+      crop.outputHeight,
     );
     return new Promise<Blob>((resolve, reject) => {
       canvas.toBlob(
@@ -90,16 +120,17 @@ export async function optimizeAvatar(
   const image = await adapter.decode(file);
 
   try {
-    let crop = calculateSquareCrop(image.width, image.height);
+    let crop = calculatePhotoCrop(image.width, image.height);
     const qualities = [0.82, 0.68, 0.54, 0.4];
 
     while (true) {
       for (const quality of qualities) {
-        const output = await adapter.renderSquare(image, crop, quality);
+        const output = await adapter.renderCrop(image, crop, quality);
         if (output.size <= maxOutputBytes) return output;
       }
-      if (crop.outputSize <= 256) break;
-      crop = { ...crop, outputSize: Math.max(256, Math.floor(crop.outputSize * 0.8)) };
+      if (crop.outputHeight <= 256) break;
+      const outputHeight = Math.max(256, Math.floor(crop.outputHeight * 0.8));
+      crop = { ...crop, outputHeight, outputWidth: Math.round(outputHeight * PHOTO_CROP_ASPECT_RATIO) };
     }
   } finally {
     image.close();

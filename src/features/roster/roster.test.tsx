@@ -10,7 +10,7 @@ import { AthleteForm } from '@/features/roster/components/AthleteForm';
 import * as avatarOptimization from '@/features/roster/lib/optimize-avatar';
 import { athleteInitials } from '@/features/roster/lib/athlete-initials';
 import {
-  calculateSquareCrop,
+  calculatePhotoCrop,
   optimizeAvatar,
   validateAvatarFile,
   type AvatarImageAdapter,
@@ -62,21 +62,22 @@ describe('roster', () => {
     expect(athleteInitials('')).toBe('MB');
   });
 
-  it('valida o tipo da imagem e calcula recorte quadrado central com limite de 1024px', () => {
+  it('valida o tipo da imagem e calcula recorte retrato 3:4 com limite de 1024px', () => {
     expect(() => validateAvatarFile(new File(['x'], 'foto.gif', { type: 'image/gif' }))).toThrow(
       'Envie uma imagem JPEG, PNG ou WebP.',
     );
-    expect(calculateSquareCrop(1600, 900, 1024)).toEqual({
+    expect(calculatePhotoCrop(1600, 900, 1024)).toEqual({
       height: 900,
-      outputSize: 900,
-      width: 900,
-      x: 350,
+      outputHeight: 900,
+      outputWidth: 675,
+      width: 675,
+      x: 463,
       y: 0,
     });
   });
 
-  it('recorta, converte para WebP e reduz a saída até no máximo 1 MB', async () => {
-    const renderSquare = vi
+  it('recorta em retrato, converte para WebP e reduz a saída até no máximo 1 MB', async () => {
+    const renderCrop = vi
       .fn()
       .mockResolvedValueOnce(new Blob([new Uint8Array(1_100_000)], { type: 'image/webp' }))
       .mockResolvedValueOnce(new Blob([new Uint8Array(900_000)], { type: 'image/webp' }));
@@ -87,7 +88,7 @@ describe('roster', () => {
         source: {} as CanvasImageSource,
         width: 1800,
       }),
-      renderSquare,
+      renderCrop,
     };
 
     const output = await optimizeAvatar(
@@ -97,17 +98,17 @@ describe('roster', () => {
 
     expect(output.type).toBe('image/webp');
     expect(output.size).toBeLessThanOrEqual(1_048_576);
-    expect(renderSquare).toHaveBeenNthCalledWith(
+    expect(renderCrop).toHaveBeenNthCalledWith(
       1,
       expect.anything(),
-      { height: 1200, outputSize: 1024, width: 1200, x: 300, y: 0 },
+      { height: 1200, outputHeight: 1024, outputWidth: 768, width: 900, x: 450, y: 0 },
       0.82,
     );
-    expect(renderSquare).toHaveBeenCalledTimes(2);
+    expect(renderCrop).toHaveBeenCalledTimes(2);
   });
 
-  it('otimiza imagens quadradas menores que 256 px sem rejeitá-las', async () => {
-    const renderSquare = vi
+  it('otimiza imagens menores que 256 px de altura sem rejeitá-las', async () => {
+    const renderCrop = vi
       .fn()
       .mockResolvedValue(new Blob([new Uint8Array(5_000)], { type: 'image/webp' }));
     const adapter: AvatarImageAdapter = {
@@ -117,7 +118,7 @@ describe('roster', () => {
         source: {} as CanvasImageSource,
         width: 192,
       }),
-      renderSquare,
+      renderCrop,
     };
 
     const output = await optimizeAvatar(
@@ -127,9 +128,9 @@ describe('roster', () => {
 
     expect(output.type).toBe('image/webp');
     expect(output.size).toBe(5_000);
-    expect(renderSquare).toHaveBeenCalledWith(
+    expect(renderCrop).toHaveBeenCalledWith(
       expect.anything(),
-      { height: 192, outputSize: 192, width: 192, x: 0, y: 0 },
+      { height: 192, outputHeight: 192, outputWidth: 144, width: 144, x: 24, y: 0 },
       0.82,
     );
   });
