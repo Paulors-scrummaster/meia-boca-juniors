@@ -130,7 +130,11 @@ export async function optimizeAvatar(
       }
       if (crop.outputHeight <= 256) break;
       const outputHeight = Math.max(256, Math.floor(crop.outputHeight * 0.8));
-      crop = { ...crop, outputHeight, outputWidth: Math.round(outputHeight * PHOTO_CROP_ASPECT_RATIO) };
+      crop = {
+        ...crop,
+        outputHeight,
+        outputWidth: Math.round(outputHeight * PHOTO_CROP_ASPECT_RATIO),
+      };
     }
   } finally {
     image.close();
