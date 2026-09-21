@@ -10,13 +10,13 @@ interface CardNameplateProps {
 export function CardNameplate({ className = '', name }: CardNameplateProps) {
   return (
     <div
-      className={`flex flex-col items-center gap-[0.6cqw] rounded-[1.5cqw] border border-secondary/30 bg-background/35 py-[1.5cqw] text-secondary ${className}`}
+      className={`flex flex-col items-center gap-[0.6cqw] rounded-[1.5cqw] border border-secondary/40 py-[1.5cqw] text-secondary ${className}`}
     >
-      <span className="h-px w-3/4 bg-secondary/70" />
+      <span className="h-px w-3/4 bg-secondary" />
       <span className="font-display text-[9cqw] font-bold uppercase leading-none tracking-wide">
         {name}
       </span>
-      <span className="h-px w-3/4 bg-secondary/70" />
+      <span className="h-px w-3/4 bg-secondary" />
     </div>
   );
 }
