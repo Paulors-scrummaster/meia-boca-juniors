@@ -11,11 +11,13 @@ interface CardAttributesProps {
 
 export function CardAttributes({ attributes, className = '' }: CardAttributesProps) {
   return (
-    <div className={`grid grid-cols-6 text-secondary ${className}`}>
+    <div
+      className={`grid grid-cols-6 rounded-[1.5cqw] border border-secondary/30 bg-background/35 py-[2cqw] text-secondary ${className}`}
+    >
       {ATTRIBUTE_COLUMNS.map(({ key, sigla }, index) => (
         <div
-          className={`flex flex-col items-center gap-[0.6cqw] px-[0.5cqw] ${
-            index > 0 ? 'border-l border-secondary/40' : ''
+          className={`flex flex-col items-center gap-[0.8cqw] px-[0.5cqw] ${
+            index > 0 ? 'border-l border-secondary/30' : ''
           }`}
           key={key}
         >

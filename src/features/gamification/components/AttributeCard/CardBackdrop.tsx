@@ -53,20 +53,20 @@ export function CardBackdrop({ className = '' }: CardBackdropProps) {
       >
         <defs>
           <radialGradient id="mbjCardGlow" cx="0.5" cy="0.4" r="0.62">
-            <stop offset="0" stopColor="currentColor" stopOpacity="0.5" />
-            <stop offset="0.45" stopColor="currentColor" stopOpacity="0.16" />
+            <stop offset="0" stopColor="currentColor" stopOpacity="0.38" />
+            <stop offset="0.45" stopColor="currentColor" stopOpacity="0.1" />
             <stop offset="1" stopColor="currentColor" stopOpacity="0" />
           </radialGradient>
         </defs>
         <rect fill="url(#mbjCardGlow)" height="600" width="400" x="0" y="0" />
-        <g fill="currentColor" opacity="0.09" transform="translate(200 236)">
+        <g fill="currentColor" opacity="0.05" transform="translate(200 236)">
           {RAY_ANGLES.map((angle) => (
             <polygon key={angle} points="0,0 -14,-360 14,-360" transform={`rotate(${angle})`} />
           ))}
         </g>
         <g fill="currentColor">
           {PARTICLES.map((p) => (
-            <circle key={`${p.cx}-${p.cy}`} cx={p.cx} cy={p.cy} opacity={p.o} r={p.r} />
+            <circle key={`${p.cx}-${p.cy}`} cx={p.cx} cy={p.cy} opacity={p.o * 0.7} r={p.r} />
           ))}
         </g>
       </svg>

@@ -34,13 +34,20 @@ export function CardFrame({ className = '', variant = 'detailed' }: CardFramePro
       <path
         d="M200 8 C150 8 96 20 40 40 C36 150 34 300 44 392 C60 486 120 556 200 592 C280 556 340 486 356 392 C366 300 364 150 360 40 C304 20 250 8 200 8 Z"
         stroke="url(#mbjFrameSheen)"
-        strokeWidth="6"
+        strokeWidth="8"
+      />
+      <path
+        className="text-accent"
+        d="M200 18 C154 18 103 29 50 48 C46 154 45 300 54 388 C69 478 126 545 200 580 C274 545 331 478 346 388 C355 300 354 154 350 48 C297 29 246 18 200 18 Z"
+        stroke="currentColor"
+        strokeOpacity="0.9"
+        strokeWidth="2.5"
       />
       <path
         d="M200 26 C158 26 110 37 56 55 C52 156 51 296 60 382 C74 468 128 532 200 566 C272 532 326 468 340 382 C349 296 348 156 344 55 C290 37 242 26 200 26 Z"
         stroke="currentColor"
-        strokeOpacity="0.5"
-        strokeWidth="2"
+        strokeOpacity="0.4"
+        strokeWidth="1.5"
       />
       <path
         d="M150 34 L200 14 L250 34"
@@ -48,7 +55,14 @@ export function CardFrame({ className = '', variant = 'detailed' }: CardFramePro
         strokeOpacity="0.85"
         strokeWidth="3"
       />
+      <path
+        d="M172 584 L200 600 L228 584"
+        stroke="currentColor"
+        strokeOpacity="0.85"
+        strokeWidth="3"
+      />
       <circle cx="200" cy="20" fill="currentColor" r="4" />
+      <circle className="text-accent" cx="200" cy="598" fill="currentColor" r="3.5" />
 
       {variant === 'detailed' ? (
         <>

@@ -77,8 +77,8 @@ export function AttributeCard({
           </div>
         </div>
       ) : (
-        <div className="absolute inset-0 flex flex-col px-[8cqw] pb-[6cqw] pt-[9cqw]">
-          <div className="flex flex-1 gap-[2cqw]">
+        <div className="absolute inset-0 flex flex-col px-[9cqw] pb-[7cqw] pt-[10cqw]">
+          <div className="flex flex-1 gap-[3cqw]">
             <CardInfoRail
               className="w-[22%] pt-[4cqw]"
               overall={card.overall}
@@ -91,8 +91,8 @@ export function AttributeCard({
               name={card.shirtName}
             />
           </div>
-          <CardNameplate className="mt-[2cqw]" name={card.shirtName} />
-          <CardAttributes attributes={attributes} className="mt-[3cqw]" />
+          <CardNameplate className="mt-[3.5cqw]" name={card.shirtName} />
+          <CardAttributes attributes={attributes} className="mt-[2.5cqw]" />
         </div>
       )}
     </article>
