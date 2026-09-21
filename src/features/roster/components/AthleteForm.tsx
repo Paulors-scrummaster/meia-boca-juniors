@@ -233,7 +233,9 @@ export function AthleteForm({
             type="file"
           />
           <span className="mt-1 block text-sm text-muted-foreground">
-            A imagem final será quadrada, WebP, até 1024 px e 1 MB.
+            A imagem final será em retrato, WebP, até 1024 px e 1 MB. Envie uma foto simples do
+            atleta, de corpo inteiro ou da cintura pra cima — não use um cartão pronto (com nota,
+            posição ou escudo já desenhados), pois o app já adiciona essas informações.
           </span>
         </label>
 
