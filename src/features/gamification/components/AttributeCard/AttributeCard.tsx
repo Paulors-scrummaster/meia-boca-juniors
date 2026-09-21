@@ -1,16 +1,15 @@
 // Feature 003 · US4 · T089a/T089b — orquestrador do cartão do atleta.
-// `variant="detailed"` (perfil): moldura + fundo + coluna de info + foto herói +
-// nameplate + faixa de atributos. `variant="compact"` (grades/listas): moldura e
-// fundo simplificados, preserva foto + selo de `overall` + nome + posição + a
-// identidade dourado-sobre-navy; omite bandeira e a faixa completa de atributos.
+// `variant="detailed"` (perfil): moldura + fundo + foto/imagem do jogador, em tela
+// cheia. O clube já mantém um cartão pronto (nota, posição, bandeira, nome) por
+// atleta como a própria foto — repetir esses dados por cima duplicava tudo, então
+// a variante detalhada não desenha mais nada além da moldura ao redor da imagem.
+// `variant="compact"` (grades/listas) continua mostrando selo de `overall` + nome +
+// posição, que ali servem pra diferenciar jogadores numa grade — não é redundante.
 // O `overall` vem verbatim da query `athlete_card` — nunca recalculado no cliente.
 
 import type { AthleteCard } from '../../api/gamification.service';
-import { CardAttributes } from './CardAttributes';
 import { CardBackdrop } from './CardBackdrop';
 import { CardFrame } from './CardFrame';
-import { CardInfoRail } from './CardInfoRail';
-import { CardNameplate } from './CardNameplate';
 import { CardPhoto } from './CardPhoto';
 import { abbreviatePosition, CARD_ASPECT_RATIO } from './attributeCard.constants';
 
@@ -35,14 +34,6 @@ export function AttributeCard({
 }: AttributeCardProps) {
   const isIncomplete = card.incomplete || card.overall === null;
   const positionAbbr = abbreviatePosition(card.primaryPosition);
-  const attributes = {
-    pace: card.pace,
-    shooting: card.shooting,
-    passing: card.passing,
-    dribbling: card.dribbling,
-    defending: card.defending,
-    physical: card.physical,
-  };
 
   return (
     <article
@@ -77,22 +68,13 @@ export function AttributeCard({
           </div>
         </div>
       ) : (
-        <div className="absolute inset-0 flex flex-col px-[9cqw] pb-[7cqw] pt-[10cqw]">
-          <div className="flex flex-1 gap-[3cqw]">
-            <CardInfoRail
-              className="w-[22%] pt-[4cqw]"
-              overall={card.overall}
-              positionAbbr={positionAbbr}
-            />
-            <CardPhoto
-              avatarUrl={avatarUrl ?? null}
-              className="flex-1"
-              cutoutUrl={cutoutUrl ?? null}
-              name={card.shirtName}
-            />
-          </div>
-          <CardNameplate className="mt-[3.5cqw]" name={card.shirtName} />
-          <CardAttributes attributes={attributes} className="mt-[2.5cqw]" />
+        <div className="absolute inset-0 flex flex-col px-[6cqw] pb-[6cqw] pt-[8cqw]">
+          <CardPhoto
+            avatarUrl={avatarUrl ?? null}
+            className="flex-1"
+            cutoutUrl={cutoutUrl ?? null}
+            name={card.shirtName}
+          />
         </div>
       )}
     </article>

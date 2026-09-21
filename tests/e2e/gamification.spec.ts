@@ -180,9 +180,7 @@ async function installMocks(page: Parameters<typeof mockAuthenticatedSession>[0]
   });
 }
 
-test('cartão detalhado: moldura, coluna de info, foto, nameplate e tira de atributos', async ({
-  page,
-}) => {
+test('cartão detalhado: moldura e foto do jogador, sem sobrepor dados', async ({ page }) => {
   await installMocks(page);
   await page.goto(`/app/roster/${COMPLETE_ID}`);
 
@@ -192,19 +190,13 @@ test('cartão detalhado: moldura, coluna de info, foto, nameplate e tira de atri
 
   // moldura + fundo desenhados em SVG
   expect(await card.locator('svg').count()).toBeGreaterThan(0);
-  // coluna de informação
-  await expect(card.getByText('70', { exact: true })).toBeVisible(); // overall = round(média dos seis)
-  await expect(card.getByText('ATA', { exact: true })).toBeVisible(); // sigla de posição pt-BR
-  await expect(card.getByRole('img', { name: 'Bandeira do Brasil' })).toBeVisible();
-  await expect(card.getByRole('img', { name: 'Escudo do MBJ' })).toBeVisible();
-  // nameplate
-  await expect(card.getByText('Fera', { exact: true })).toBeVisible();
-  // tira RIT/FIN/PAS/CON/DEF/FÍS com valores
+  // a variante detalhada não desenha mais overall/posição/bandeira/escudo/nome/
+  // atributos por cima da foto — o clube já mantém isso na própria imagem do atleta
+  await expect(card.getByRole('img', { name: 'Bandeira do Brasil' })).toHaveCount(0);
+  await expect(card.getByRole('img', { name: 'Escudo do MBJ' })).toHaveCount(0);
   for (const sigla of ['RIT', 'FIN', 'PAS', 'CON', 'DEF', 'FÍS']) {
-    await expect(card.getByText(sigla, { exact: true })).toBeVisible();
+    await expect(card.getByText(sigla, { exact: true })).toHaveCount(0);
   }
-  await expect(card.getByText('80', { exact: true })).toBeVisible();
-  await expect(card.getByText('74', { exact: true })).toBeVisible();
 
   // SC-009: nenhuma marca EA/FIFA e nenhum JPEG de referência no DOM
   const html = await page.content();
@@ -212,7 +204,7 @@ test('cartão detalhado: moldura, coluna de info, foto, nameplate e tira de atri
   expect(html).not.toMatch(/exemplo[ -]card|card[ -]ea|\.jpe?g/i);
 });
 
-test('estado incompleto: "—" por atributo e sem overall (detalhado e compacto)', async ({
+test('estado incompleto: cartão detalhado sinaliza o estado; grade compacta some com o overall', async ({
   page,
 }) => {
   await installMocks(page);
@@ -220,8 +212,6 @@ test('estado incompleto: "—" por atributo e sem overall (detalhado e compacto)
   await page.goto(`/app/roster/${INCOMPLETE_ID}`);
   const card = page.getByRole('article');
   await expect(card).toHaveAttribute('data-incomplete', 'true');
-  await expect(card.getByText('—')).not.toHaveCount(0);
-  await expect(card.getByText('70')).toHaveCount(0);
 
   // grade do elenco: o incompleto perde o selo de overall, o completo mantém
   await page.goto('/app/roster');

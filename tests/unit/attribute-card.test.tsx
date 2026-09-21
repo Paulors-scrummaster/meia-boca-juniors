@@ -84,20 +84,21 @@ describe('abreviação de posição pt-BR (FR-019c)', () => {
 });
 
 describe('render do cartão', () => {
-  it('exibe o overall exatamente como veio da query, sem recalcular', () => {
-    render(<AttributeCard card={makeCard({ overall: 74 })} />);
+  it('exibe o overall exatamente como veio da query, sem recalcular (variante compacta)', () => {
+    render(<AttributeCard card={makeCard({ overall: 74 })} variant="compact" />);
     expect(screen.getByText('74')).toBeInTheDocument();
     // média real dos seis valores seria 76 — não deve aparecer
     expect(screen.queryByText('76')).not.toBeInTheDocument();
   });
 
-  it('mostra as siglas e os seis valores na variante detalhada', () => {
+  it('na variante detalhada não sobrepõe overall/posição/atributos à foto', () => {
     render(<AttributeCard card={makeCard()} />);
     for (const sigla of ['RIT', 'FIN', 'PAS', 'CON', 'DEF', 'FÍS']) {
-      expect(screen.getByText(sigla)).toBeInTheDocument();
+      expect(screen.queryByText(sigla)).not.toBeInTheDocument();
     }
-    expect(screen.getByText('88')).toBeInTheDocument();
-    expect(screen.getByText('91')).toBeInTheDocument();
+    // o clube já mantém essa informação na própria imagem do atleta
+    expect(screen.queryByText('88')).not.toBeInTheDocument();
+    expect(screen.queryByText('91')).not.toBeInTheDocument();
   });
 
   it('entra em estado incompleto quando algum atributo é nulo', () => {
@@ -105,7 +106,6 @@ describe('render do cartão', () => {
       <AttributeCard card={makeCard({ overall: null, incomplete: true, pace: null })} />,
     );
     expect(container.querySelector('article')?.dataset.incomplete).toBe('true');
-    expect(screen.getAllByText('—').length).toBeGreaterThan(0);
   });
 
   it('na variante compacta sem overall, não renderiza o selo', () => {
