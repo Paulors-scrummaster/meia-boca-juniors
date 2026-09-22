@@ -38,7 +38,13 @@ function Silhouette({ label }: { label: string }) {
   );
 }
 
-export function CardPhoto({ avatarUrl, className = '', cutoutUrl, fit = 'bottom', name }: CardPhotoProps) {
+export function CardPhoto({
+  avatarUrl,
+  className = '',
+  cutoutUrl,
+  fit = 'bottom',
+  name,
+}: CardPhotoProps) {
   const [failed, setFailed] = useState<Set<string>>(() => new Set());
   const candidate = [cutoutUrl, avatarUrl].find((url) => url && !failed.has(url)) ?? null;
 
