@@ -12,6 +12,12 @@ interface CardPhotoProps {
   avatarUrl?: string | null;
   name: string;
   className?: string;
+  /**
+   * `bottom` (padrão): ancora um retrato/recorte na base do contêiner, como um
+   * herói saindo do cartão. `contain` centraliza a imagem inteira — usado quando
+   * a foto já é um cartão pronto por si só (US4 detalhado), sem cortar nada.
+   */
+  fit?: 'bottom' | 'contain';
 }
 
 function Silhouette({ label }: { label: string }) {
@@ -32,16 +38,18 @@ function Silhouette({ label }: { label: string }) {
   );
 }
 
-export function CardPhoto({ avatarUrl, className = '', cutoutUrl, name }: CardPhotoProps) {
+export function CardPhoto({ avatarUrl, className = '', cutoutUrl, fit = 'bottom', name }: CardPhotoProps) {
   const [failed, setFailed] = useState<Set<string>>(() => new Set());
   const candidate = [cutoutUrl, avatarUrl].find((url) => url && !failed.has(url)) ?? null;
 
   return (
-    <div className={`relative flex items-end justify-center overflow-hidden ${className}`}>
+    <div
+      className={`relative flex justify-center overflow-hidden ${fit === 'bottom' ? 'items-end' : 'items-center'} ${className}`}
+    >
       {candidate ? (
         <img
           alt={`Foto de ${name}`}
-          className="h-full w-full object-contain object-bottom"
+          className={`h-full w-full object-contain ${fit === 'bottom' ? 'object-bottom' : 'object-center'}`}
           onError={() => setFailed((prev) => new Set(prev).add(candidate))}
           src={candidate}
         />

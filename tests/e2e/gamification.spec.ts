@@ -180,7 +180,7 @@ async function installMocks(page: Parameters<typeof mockAuthenticatedSession>[0]
   });
 }
 
-test('cartão detalhado: moldura e foto do jogador, sem sobrepor dados', async ({ page }) => {
+test('cartão detalhado: borda simples e foto do jogador, sem sobrepor dados', async ({ page }) => {
   await installMocks(page);
   await page.goto(`/app/roster/${COMPLETE_ID}`);
 
@@ -188,8 +188,10 @@ test('cartão detalhado: moldura e foto do jogador, sem sobrepor dados', async (
   await expect(card).toHaveAttribute('data-variant', 'detailed');
   await expect(card).not.toHaveAttribute('data-incomplete', 'true');
 
-  // moldura + fundo desenhados em SVG
-  expect(await card.locator('svg').count()).toBeGreaterThan(0);
+  // sem moldura/fundo em SVG na variante detalhada — a foto do atleta já é um
+  // cartão pronto por si só, e a moldura em escudo do app não combinava com ele.
+  // O único SVG restante é a silhueta de placeholder (sem foto cadastrada aqui).
+  expect(await card.locator('svg').count()).toBe(1);
   // a variante detalhada não desenha mais overall/posição/bandeira/escudo/nome/
   // atributos por cima da foto — o clube já mantém isso na própria imagem do atleta
   await expect(card.getByRole('img', { name: 'Bandeira do Brasil' })).toHaveCount(0);

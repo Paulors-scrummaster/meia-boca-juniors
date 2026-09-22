@@ -1,10 +1,11 @@
 // Feature 003 · US4 · T089a/T089b — orquestrador do cartão do atleta.
-// `variant="detailed"` (perfil): moldura + fundo + foto/imagem do jogador, em tela
-// cheia. O clube já mantém um cartão pronto (nota, posição, bandeira, nome) por
-// atleta como a própria foto — repetir esses dados por cima duplicava tudo, então
-// a variante detalhada não desenha mais nada além da moldura ao redor da imagem.
-// `variant="compact"` (grades/listas) continua mostrando selo de `overall` + nome +
-// posição, que ali servem pra diferenciar jogadores numa grade — não é redundante.
+// `variant="detailed"` (perfil): o clube já mantém um cartão pronto (nota, posição,
+// bandeira, nome, moldura, tudo) por atleta como a própria foto. A moldura em forma
+// de escudo do app não combina com esse cartão retangular pronto — dá choque de
+// forma (pontas do escudo cortando o retângulo) — então a variante detalhada não
+// desenha moldura/fundo próprios, só uma borda simples ao redor da imagem inteira.
+// `variant="compact"` (grades/listas) mantém moldura + fundo + selo de `overall` +
+// nome + posição, que ali servem pra diferenciar jogadores numa grade pequena.
 // O `overall` vem verbatim da query `athlete_card` — nunca recalculado no cliente.
 
 import type { AthleteCard } from '../../api/gamification.service';
@@ -42,37 +43,39 @@ export function AttributeCard({
       data-variant={variant}
       style={{ aspectRatio: CARD_ASPECT_RATIO }}
     >
-      <CardBackdrop />
-      <CardFrame variant={variant} />
-
       {variant === 'compact' ? (
-        <div className="absolute inset-0 flex flex-col items-center px-[9cqw] pb-[7cqw] pt-[10cqw]">
-          {isIncomplete ? null : (
-            <span className="font-display absolute left-[9cqw] top-[8cqw] grid h-[20cqw] w-[20cqw] place-items-center rounded-full border border-secondary bg-elevated text-[10cqw] font-bold leading-none">
-              {card.overall}
-            </span>
-          )}
-          <CardPhoto
-            avatarUrl={avatarUrl ?? null}
-            className="h-[60%] w-[78%]"
-            cutoutUrl={cutoutUrl ?? null}
-            name={card.shirtName}
-          />
-          <div className="mt-auto flex flex-col items-center gap-[1cqw]">
-            <span className="font-display text-[11cqw] font-bold uppercase leading-none tracking-wide">
-              {card.shirtName}
-            </span>
-            <span className="text-[6cqw] font-semibold leading-none tracking-wide opacity-80">
-              {positionAbbr}
-            </span>
+        <>
+          <CardBackdrop />
+          <CardFrame variant={variant} />
+          <div className="absolute inset-0 flex flex-col items-center px-[9cqw] pb-[7cqw] pt-[10cqw]">
+            {isIncomplete ? null : (
+              <span className="font-display absolute left-[9cqw] top-[8cqw] grid h-[20cqw] w-[20cqw] place-items-center rounded-full border border-secondary bg-elevated text-[10cqw] font-bold leading-none">
+                {card.overall}
+              </span>
+            )}
+            <CardPhoto
+              avatarUrl={avatarUrl ?? null}
+              className="h-[60%] w-[78%]"
+              cutoutUrl={cutoutUrl ?? null}
+              name={card.shirtName}
+            />
+            <div className="mt-auto flex flex-col items-center gap-[1cqw]">
+              <span className="font-display text-[11cqw] font-bold uppercase leading-none tracking-wide">
+                {card.shirtName}
+              </span>
+              <span className="text-[6cqw] font-semibold leading-none tracking-wide opacity-80">
+                {positionAbbr}
+              </span>
+            </div>
           </div>
-        </div>
+        </>
       ) : (
-        <div className="absolute inset-0 flex flex-col px-[6cqw] pb-[6cqw] pt-[8cqw]">
+        <div className="absolute inset-0 rounded-[3cqw] border border-secondary/40 bg-card">
           <CardPhoto
             avatarUrl={avatarUrl ?? null}
-            className="flex-1"
+            className="h-full w-full"
             cutoutUrl={cutoutUrl ?? null}
+            fit="contain"
             name={card.shirtName}
           />
         </div>
